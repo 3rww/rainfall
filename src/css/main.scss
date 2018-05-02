@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css?family=Fjalla+One');
+body {
+    padding: 0;
+    margin: 0;
+}
+
+html,
+body,
+#loadingScreen {
+    height: 100%;
+    width: 100%;
+    font-family: 'Fjalla One', sans-serif !important;
+}
+
+#map {
+    width: 100%;
+    height: 400px;
+}
+
+#loadingScreen {
+    z-index: 50000;
+    background-color: #212121;
+    color: #FCB318;
+}
+
+.searchicon {
+    padding-top: 6px;
+    padding-right: 7px;
+}
+
+#credits,
+#titleBlock,
+#msg-results,
+#msg-error,
+#msg-tracing,
+.legend-popover {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: rgba(25, 25, 25, 0.85);
+    box-shadow: 5px 5px 10px rgba(25, 25, 25, 0.9);
+    color: #fff;
+}
+
+@media (max-width: 768px) {
+    #titleBlock {
+        margin-top: 0px;
+        margin-right: -15px;
+        padding-left: 5px;
+        margin-left: -15px
+    }
+    .navbar-toggle {
+        margin-right: 5px;
+    }
+}
+
+#credits {
+    margin-right: 15px;
+}
+
+.credit-logos {
+    width: 150px;
+    padding-right: 5px;
+    padding-left: 5px;
+    /*width:100%;*/
+}
+
+@media (max-width: 768px) {
+    #credits {
+        margin-right: 0px;
+    }
+    .credit-logos {
+        /*width: 150px;*/
+        margin-top: 5px;
+        margin-bottom: 5px;
+        width: 100%;
+    }
+}
+
+.modal-content {
+    background-color: rgba(25, 25, 25, 0.85);
+    box-shadow: 5px 5px 10px rgba(25, 25, 25, 0.9);
+    color: #fff;
+}
+
+#aboutBlock {
+    margin-top: 20px;
+    margin-right: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    color: #fff;
+}
+
+.navbar-inverse {
+    background-color: rgba(34, 34, 34, 0) !important;
+    border-bottom-width: 0px !important;
+}
+
+.brand-logo {
+    width: 35px;
+    padding-bottom: 5px;
+}
+
+.brand-logo-sm {
+    width: 25px;
+    padding-bottom: 2px;
+    margin-right: 5px;
+    margin-left: 2px;
+}
+
+#msg-results,
+#msg-tracing {
+    color: #fff;
+}
+
+#msg-tracing {
+    text-shadow: 5px 5px 10px rgba(25, 25, 25, 0.9);
+}
+
+#traceLength,
+#traceLengthMi,
+#inchMiles {
+    /*color: #B0BB01;*/
+    color: #48CBDB;
+}
+
+#munihoods,
+.munihood {
+    color: #D36122;
+}
+
+#aboutButton,
+#resetButton,
+#resultsButton,
+#legendButton,
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+    color: #fff !important;
+    background-color: rgba(25, 25, 25, 0.85) !important;
+    border-color: rgba(20, 20, 20, 0.9) !important;
+    border-style: solid !important;
+    border-width: 1px !important;
+}
+
+.title {
+    color: #fff;
+    text-shadow: 5px 5px 10px rgba(25, 25, 25, 0.9);
+    margin-top: 10px;
+}
+
+.subtitle {
+    color: #fff;
+    font-size: 0.5em !important;
+    text-shadow: 5px 5px 10px rgba(25, 25, 25, 0.9);
+}
+
+#messageControl {
+    position: absolute;
+    width: 100%;
+    top: 60%;
+    transform: translateY(-60%);
+    /* using the CSS3 Transform technique */
+    /*margin: -10px 0 0 -110px;*/
+    padding-top: 10px;
+    margin-bottom: 10px;
+    z-index: 999;
+}
+
+@media (min-width: 768px) {
+    #messageControl {
+        width: 40%;
+        left: 30%;
+        top: 60%;
+    }
+}
+
+#msg-loading {
+    position: absolute;
+    width: 50%;
+    top: 50%;
+    left: 25%;
+    transform: translateY(-50%);
+    /* using the CSS3 Transform technique */
+    padding-top: 10px;
+    margin-bottom: 10px;
+    z-index: 30001;
+}
+
+.messages {
+    color: #fff;
+}

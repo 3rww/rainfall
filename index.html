@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <title>Make It Rain</title>
+    <link href="dist/css/bundle.core.css" type="text/css" rel="stylesheet" />
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>3RWW Rainfall</h1>
+                <hr>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-toggle="tooltip" data-placement="right" title="Animate last 12 hours of data, showing heaviest rainfall per 15-min interval as scaled symbol w/ cumulative rainfall as chlorpleth underlay">Last 12 Hours</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Cumulative Precipitation</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">12 hours</a>
+                            <a class="dropdown-item" href="#">24 hours</a>
+                            <a class="dropdown-item" href="#">Last 7 days</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Last month</a>
+                            <a class="dropdown-item" href="#">Last 3 months</a>
+                            <a class="dropdown-item" href="#">Last 6 months</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Last year-to-date</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="right" title="View cumulative rainfall over a custom date/time range">Custom</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <!-- <form class="form-inline">
+                        <select class="custom-select">
+                            <option selected>Choose a Historic Storm Event</option>
+                            <option value="1">Hurrican Ivan (Sept 2004)</option>
+                            <option value="2">Two</option>
+                            <option value="3">Three</option>
+                        </select>
+                    </form> -->
+                </ul>
+                <div class="form-group">
+                    <div id="event-list">
+                        <input class="search form-control" placeholder="Search" />
+                        <div class="btn-group" role="group" aria-label="Event sorting">
+                            <button type="button" class="btn btn-primary btn-sm sort" data-sort="date">Sort by Date</button>
+                            <button type="button" class="btn btn-primary btn-sm sort" data-sort="name">Sort by Name</button>
+                        </div>
+                        <div class="list">
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div id="chart"></div>
+            </div>
+        </div>
+
+
+        <script type="text/javascript" src="/dist/js/bundle.core.js" defer></script>
+
+</body>
+
+</html>
