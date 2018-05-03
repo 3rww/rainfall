@@ -11,7 +11,7 @@
     "dependencies": {
         "bootstrap": "4",
         "crossfilter2": "^1.4.6",
-        "d3": "^5",
+        "d3": "4",
         "dc": "^2.1.9",
         "font-awesome": "4.7",
         "gulp-sass": "^4.0.1",
@@ -21,7 +21,8 @@
         "leaflet-basemaps": "^0.2.3",
         "list.js": "^1.5.0",
         "moment": "^2.21.0",
-        "popper.js": "^1.14.3"
+        "popper.js": "^1.14.3",
+        "topojson-client": "3"
     },
     "devDependencies": {
         "babel-core": "^6.26.0",
@@ -45,6 +46,7 @@
         "gulp-sourcemaps": "^1.12.1",
         "gulp-uglify": "^3.0.0",
         "gulp-util": "^3.0.8",
+        "topojson-server": "^3.0.0",
         "vinyl-buffer": "^1.0.1",
         "vinyl-source-stream": "^2.0.0",
         "vueify": "^9.4.1",

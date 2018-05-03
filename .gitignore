@@ -1,4 +1,8 @@
-/_site
-/dist
+# workspace
 /.vscode
+
+# dependencies
 /node_modules
+
+# build
+/_site

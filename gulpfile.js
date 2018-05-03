@@ -213,7 +213,6 @@ gulp.task(
     // re-run these tasks if source directories change
     function() {
       gulp.watch("index.html");
-      gulp.watch("src/css/*.css", gulp.parallel("pack-css"));
       gulp.watch("src/css/*.scss", gulp.parallel("pack-css"));
       gulp.watch("src/js/*.js", gulp.parallel("pack-js"));
     }
