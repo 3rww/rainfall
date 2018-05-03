@@ -3,7 +3,7 @@ var List = require("list.js");
 var options = {
   valueNames: ["date", "name"],
   item:
-    '<div><p><span class="date"></span> <small class="name"></small></p></li>'
+    '<li class="list-group-item"><span class="date"></span> <span class="name small"></span></li>'
 };
 
 var values = [
