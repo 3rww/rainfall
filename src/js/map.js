@@ -21,6 +21,19 @@ function d31() {
     )
   );
 
+  const radigeography = d3
+    .scaleSqrt()
+    .domain([0, 4])
+    .range([0, 15]);
+
+  // add an svg element to the Leaflet Map's Overlay Pane
+  var svg_map = d3.select(map.getPanes().overlayPane).append("svg");
+
+  // define the transformation used for the geodata
+  var transform = d3.geoTransform({
+    point: projectPoint
+  });
+
   /**
    * Use Leaflet to implement a D3 geometric transformation.
    */
@@ -29,33 +42,88 @@ function d31() {
     this.stream.point(point.x, point.y);
   }
 
-  const radigeography = d3
-    .scaleSqrt()
-    .domain([0, 5])
-    .range([0, 15]);
+  /**
+   * similar to projectPoint this function converts lat/long to svg coordinates
+   * except that it accepts a point from our GeoJSON
+   */
+  function applyLatLngToLayer(d) {
+    var y = d.geometry.coordinates[1];
+    var x = d.geometry.coordinates[0];
+    if (y & x) {
+      var result = map.latLngToLayerPoint(new L.LatLng(y, x));
+      return result;
+    } else {
+      return null;
+    }
+  }
 
-  // add an svg element to the Leaflet Map's Overlay Pane
-  var svg_map = d3.select(map.getPanes().overlayPane).append("svg");
-  // append a g element to the svg element - this is where data will go
-  var g = svg_map.append("g").attr("class", "leaflet-zoom-hide");
-  // define the transformation used for the geodata
-  var transform = d3.geoTransform({
-    point: projectPoint
-  });
-  var gridAsPath = d3.geoPath().projection(transform);
+  function makeCentroid(path, d) {
+    var c = path.centroid(d);
+    // console.log(c);
+    return c;
+  }
 
   /**
    * add the grid to the map as a D3 element
    */
-  function addGrid(geojson) {
-    // define the path object
+  function addGrid(geojson, data) {
+    // sample from timeseries test data
+    var rainfallobj = [];
+    var d = data["2004-09-17T13:00:00"];
+    // console.log("adding...", geojson, d);
+    $.each(d, function(i, v) {
+      rainfallobj.push({
+        id: i,
+        rain: v
+      });
+    });
+    var rainfall = new Map(rainfallobj.map(d => [d.id, d.rain]));
+    // console.log(rainfall);
 
-    var feature = g
+    // d3geoPath
+    var gridAsPath = d3.geoPath().projection(transform);
+
+    // append a g element to the svg element - this is where data will go
+    var g = svg_map
+      .append("g")
+      .attr("id", "grid")
+      .attr("class", "leaflet-zoom-hide");
+    var gridcell = g
       .selectAll("path")
       .data(geojson.features)
       .enter()
       .append("path")
+      .attr("id", d => d.id)
       .attr("class", "mapgridcell");
+
+    var g2 = svg_map
+      .append("g")
+      .attr("id", "dots")
+      .attr("class", "leaflet-zoom-hide");
+    var circle = g2
+      .selectAll("circle")
+      .data(
+        geojson.features
+          .map(d => {
+            var x = ((d.rain = rainfall.get(d.id)), d);
+            if (!x.rain) {
+              x.rain = 0.000001;
+            }
+            // console.log(x);
+            return x;
+          })
+          .sort((a, b) => b.id - a.id)
+      )
+      .enter()
+      .append("circle")
+      .attr("id", d => d.id)
+      // .attr("transform", d => `translate(${gridAsPath.centroid(d)})`)
+      .attr("transform", d => `translate(${makeCentroid(gridAsPath, d)})`)
+      .attr("r", d => radigeography(d.rain))
+      .attr("fill", "blue")
+      .attr("fill-opacity", 0.2)
+      .append("title")
+      .text(d => `${d.rain} inches`);
 
     // add listeners
     // map.on("viewreset", reset);
@@ -73,6 +141,8 @@ function d31() {
       var bounds = gridAsPath.bounds(geojson);
       var topLeft = bounds[0];
       var bottomRight = bounds[1];
+      // var topLeft = [bounds[0][0] + 10, bounds[0][1] - 10];
+      // var bottomRight = [bounds[1][0] + 10, bounds[1][1] + 10];
 
       svg_map
         .attr("width", bottomRight[0] - topLeft[0])
@@ -80,12 +150,33 @@ function d31() {
         .style("left", topLeft[0] + "px")
         .style("top", topLeft[1] + "px");
 
-      g.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+      var gTranslate = "translate(" + -topLeft[0] + "," + -topLeft[1] + ")";
+      console.log(gTranslate);
+      g.attr("transform", gTranslate);
 
-      feature.attr("d", gridAsPath);
+      gridcell.attr("d", gridAsPath);
+
+      g2.attr("transform", gTranslate);
+      // g2.attr("transform", function(d) {
+      //   if (d) {
+      //     return (
+      //       "translate(" +
+      //       applyLatLngToLayer(d).x +
+      //       "," +
+      //       applyLatLngToLayer(d).y +
+      //       ")"
+      //     );
+      //   }
+      // });
+      g2
+        .selectAll("circle")
+        .attr("transform", d => `translate(${makeCentroid(gridAsPath, d)})`);
+
+      circle.attr("d", gridAsPath);
     }
   }
 
+  /**
   function addData(geojson, data) {
     // sample from timeseries test data
     var rainfallobj = [];
@@ -113,7 +204,7 @@ function d31() {
           .map(d => {
             var x = ((d.rain = rainfall.get(d.id)), d);
             if (!x.rain) {
-              x.rain = 0;
+              x.rain = 1;
             }
             // console.log(x);
             return x;
@@ -138,9 +229,7 @@ function d31() {
     // reset the view
     resetData();
 
-    /**
-     * Recalculate bounds for redrawing *grid* each time map changes
-     */
+    // Recalculate bounds for redrawing *grid* each time map changes
     function resetData() {
       var bounds = gridAsPath.bounds(geojson);
       var topLeft = bounds[0];
@@ -160,13 +249,15 @@ function d31() {
 
       g2.attr("d", gridAsPath);
     }
+
   }
+  */
 
   // get grid and add it
   d3.json("http://localhost:3000/data/grid.geojson", function(geojson) {
-    addGrid(geojson);
-    d3.json("http://localhost:3000/data/test.json", function(data) {
-      addData(geojson, data);
+    d3.json("http://localhost:3000/data/test2.json", function(data) {
+      addGrid(geojson, data);
+      // addData(geojson, data);
     });
   });
 }
