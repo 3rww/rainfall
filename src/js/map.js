@@ -1,5 +1,6 @@
 var $ = (jQuery = require("jquery"));
 var d3 = require("d3");
+var d3ScaleChromatic = require("d3-scale-chromatic");
 var _ = require("lodash");
 var L = require("leaflet");
 var moment = require("moment");
@@ -192,7 +193,6 @@ function d31() {
       .attr("stroke", "#ccc")
       .attr("stroke-width", 0.5)
       .attr("fill-opacity", 0)
-      // .attr("fill", d3.interpolateYlGnBu())
       .attr("id", d => d.properties.id)
       .attr("class", "mapgridcell")
 
@@ -249,11 +249,13 @@ function d31() {
   }
 
   function updateData(geojson, rainfall) {
+
     var data = geojson.features
       .map(d => {
         var x = ((d.properties.rain = rainfall.get(d.properties.id)), d);
-        if (!x.rain) {
-          x.rain = 0.000001;
+        // console.log(x)
+        if (!x.properties.rain) {
+          x.properties.rain = 0;
         }
         return x;
       })
@@ -262,11 +264,26 @@ function d31() {
     var t = d3.transition()
       .duration(25)
       .ease(d3.easeLinear);
+    var gridcell = g
+      .selectAll("path")
+      .data(data)
+      .attr("fill-opacity", 0.75)
+      .attr("fill", d => {
+        var v = tally.stretch(tally.accumulation[d.properties.id])
+        if (v == 0) {
+          return "#fff"
+        } else {
+          var c = d3ScaleChromatic.interpolateYlGnBu(v)
+          return c;
+        }
+      })
+    // .attr("id", d => d.properties.id)
+    // .attr("class", "mapgridcell")
 
     var circle = g2
       .selectAll("circle")
       .data(data)
-      .transition(t)
+      // .transition(t)
       .attr("transform", d => `translate(${makeCentroid(gridAsPath, d)})`)
       .attr("r", d => radigeography(d.properties.rain))
       .text(d => `${d.properties.rain} inches | ${d.properties.watershed} | ${d.properties.ww_basin} `);
@@ -300,13 +317,14 @@ function d31() {
           return
         };
         setTimeout(function () {
-          var next = data[Object.keys(data)[i]];
+          var t = Object.keys(data)[i]
+          var next = data[t];
           tally.accumulator(next);
           // console.log(now)
-          updateTimestamp(next);
+          updateTimestamp(t);
           updateData(geojson, transformRainfallResponse(next))
           doUpdate();
-        }, 100)
+        }, 125)
       }
 
       doUpdate();
