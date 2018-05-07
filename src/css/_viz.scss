@@ -5,25 +5,24 @@
 //   height: auto;
 //   margin: 0 auto;
 // }
-
 // .chart {
 //   height: 16rem;
 //   position: relative;
 // }
-
 // .chart > svg {
 //   width: 100%;
 //   height: 100%;
 // }
-
 .svg-container {
   display: inline-block;
   position: relative;
   width: 100%;
-  padding-bottom: 100%; /* aspect ratio */
+  padding-bottom: 100%;
+  /* aspect ratio */
   vertical-align: top;
   overflow: hidden;
 }
+
 .svg-content-responsive {
   display: inline-block;
   position: absolute;
@@ -31,14 +30,13 @@
   left: 0;
 }
 
-path {
-  fill: #000;
-  fill-opacity: 0;
-  stroke: $gray-900;
-  stroke-width: 0.5px;
-  stroke-opacity: 0.1;
-}
-
+// path {
+//   fill: #000;
+//   fill-opacity: 0;
+//   stroke: $gray-900;
+//   stroke-width: 0.5px;
+//   stroke-opacity: 0.1;
+// }
 // path:hover {
 //   fill: #3890e2;
 //   fill-opacity: 0.7;
