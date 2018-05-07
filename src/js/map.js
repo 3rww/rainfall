@@ -14,17 +14,17 @@ function d31() {
   }).addLayer(
     // new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
     new L.TileLayer(
-      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png",
-      {
-        attribution: "Voyager Basemap by <a href='https://carto.com'>CARTO</a>"
+      // "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png", {
+      "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png", {
+        attribution: "Basemap by <a href='https://carto.com'>CARTO</a>"
       }
     )
   );
 
   const radigeography = d3
     .scaleSqrt()
-    .domain([0, 4])
-    .range([0, 15]);
+    .domain([0, 2])
+    .range([0, 5]);
 
   // add an svg element to the Leaflet Map's Overlay Pane
   var svg_map = d3.select(map.getPanes().overlayPane).append("svg");
@@ -69,16 +69,17 @@ function d31() {
   function addGrid(geojson, data) {
     // sample from timeseries test data
     var rainfallobj = [];
-    var d = data["2004-09-17T13:00:00"];
+    var d = data;
     // console.log("adding...", geojson, d);
-    $.each(d, function(i, v) {
+    $.each(d, function (i, v) {
       rainfallobj.push({
         id: i,
         rain: v
       });
     });
+    console.log(rainfallobj);
     var rainfall = new Map(rainfallobj.map(d => [d.id, d.rain]));
-    // console.log(rainfall);
+    console.log(rainfall);
 
     // d3geoPath
     var gridAsPath = d3.geoPath().projection(transform);
@@ -88,42 +89,43 @@ function d31() {
       .append("g")
       .attr("id", "grid")
       .attr("class", "leaflet-zoom-hide");
+
     var gridcell = g
       .selectAll("path")
       .data(geojson.features)
       .enter()
       .append("path")
-      .attr("id", d => d.id)
+      .attr("id", d => d.properties.id)
       .attr("class", "mapgridcell");
 
     var g2 = svg_map
       .append("g")
       .attr("id", "dots")
       .attr("class", "leaflet-zoom-hide");
+
     var circle = g2
       .selectAll("circle")
       .data(
         geojson.features
-          .map(d => {
-            var x = ((d.rain = rainfall.get(d.id)), d);
-            if (!x.rain) {
-              x.rain = 0.000001;
-            }
-            // console.log(x);
-            return x;
-          })
-          .sort((a, b) => b.id - a.id)
+        .map(d => {
+          var x = ((d.properties.rain = rainfall.get(d.properties.id)), d);
+          if (!x.rain) {
+            x.rain = 0.000001;
+          }
+          return x;
+        })
+        .sort((a, b) => b.id - a.id)
       )
       .enter()
       .append("circle")
       .attr("id", d => d.id)
       // .attr("transform", d => `translate(${gridAsPath.centroid(d)})`)
       .attr("transform", d => `translate(${makeCentroid(gridAsPath, d)})`)
-      .attr("r", d => radigeography(d.rain))
-      .attr("fill", "blue")
-      .attr("fill-opacity", 0.2)
+      .attr("r", d => radigeography(d.properties.rain))
+      .attr("fill", "#3890e2")
+      .attr("fill-opacity", 0.8)
       .append("title")
-      .text(d => `${d.rain} inches`);
+      .text(d => `${d.properties.rain} inches | ${d.properties.watershed} | ${d.properties.ww_basin} `);
 
     // add listeners
     // map.on("viewreset", reset);
@@ -254,10 +256,10 @@ function d31() {
   */
 
   // get grid and add it
-  d3.json("http://localhost:3000/data/grid.geojson", function(geojson) {
-    d3.json("http://localhost:3000/data/test2.json", function(data) {
-      addGrid(geojson, data);
-      // addData(geojson, data);
+  d3.json("http://localhost:3000/data/grid.geojson", function (geojson) {
+    d3.json("http://localhost:3000/data/test4.json", function (data) {
+      // addGrid(geojson, data["2004-09-17T06:00:00"]);
+      addGrid(geojson, data["2016-08-28T19:00:00"]);
     });
   });
 }
