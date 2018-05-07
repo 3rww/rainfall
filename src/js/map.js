@@ -41,6 +41,7 @@ function d31() {
       this.total = {}
       // accumulation per cell
       this.accumulation = {}
+      this.domainMax = 0
 
       // stub out the accumulation property with all cell ids, each set to zero
       Object.keys(this.data[Object.keys(this.data)[0]]).map(x => {
@@ -48,8 +49,10 @@ function d31() {
         this.total[x] = 0
       })
 
-      // calculate total rainfal per cell basis
-      this._tally(this.data);
+      // calculate total rainfal per cell, and determine max rainfall anywhere
+      this._tally();
+      // implement a streth function from D3 using available data
+      this.stretch = d3.scaleLinear().domain([0, this.domainMax]).range([0, 1])
     }
     /**
      * helper method, applies mergeWith with an additive customizer function
@@ -66,10 +69,17 @@ function d31() {
      * all at once and ahead of time.
      * @param {*} data 
      */
-    _tally(data) {
-      return _.each(data, (v, k) =>
+    _tally() {
+      // accumulate total rainfall per cell from the data
+      _.each(this.data, (v, k) => {
         this._merger(this.total, v)
-      )
+      });
+      // set the upper bounds
+      _.each(this.total, (v, k) => {
+        if (v > this.domainMax) {
+          this.domainMax = v;
+        }
+      })
     }
     /**
      * Increment rainfall total by cell ID, passing in a new rainfall response object for a given time.
@@ -85,8 +95,6 @@ function d31() {
     .scaleSqrt()
     .domain([0, 2])
     .range([0, 15]);
-
-  const stretch = d3.scaleLinear()
 
   // add an svg element to the Leaflet Map's Overlay Pane
   var svg_map = d3.select(map.getPanes().overlayPane).append("svg");
@@ -152,7 +160,7 @@ function d31() {
         rain: v
       });
     });
-    console.log(rainfallobj);
+    // console.log(rainfallobj);
     var rainfall = new Map(rainfallobj.map(d => [d.id, d.rain]));
     // console.log(rainfall);
     return rainfall
@@ -184,9 +192,9 @@ function d31() {
       .attr("stroke", "#ccc")
       .attr("stroke-width", 0.5)
       .attr("fill-opacity", 0)
-      // .attr("fill", d3.interpolateYlGnBu(t)
+      // .attr("fill", d3.interpolateYlGnBu())
       .attr("id", d => d.properties.id)
-      .attr("class", "mapgridcell");
+      .attr("class", "mapgridcell")
 
     var circle = g2
       .selectAll("circle")
@@ -197,16 +205,15 @@ function d31() {
       .attr("transform", d => `translate(${makeCentroid(gridAsPath, d)})`)
       .attr("r", d => radigeography(d.properties.rain))
       .attr("stroke", "#3890e2")
-      .attr("stroke-width", 0.5)
-      .attr("fill-opacity", 0)
+      .attr("stroke-width", 3)
+      .attr("stroke-opacity", 0.3)
+      .attr("fill-opacity", 0.6)
+      .attr("fill", "#3890e2")
       .append("title")
       .text(d => `${d.properties.rain} inches | ${d.properties.watershed} | ${d.properties.ww_basin} `);
 
     // add listeners
-    // map.on("viewreset", reset);
     map.on("zoomend", reset);
-    // map.on("moveend", reset);
-
     // reset the view
     reset();
 
@@ -253,13 +260,13 @@ function d31() {
       .sort((a, b) => b.properties.id - a.properties.id)
 
     var t = d3.transition()
-      .duration(100)
+      .duration(25)
       .ease(d3.easeLinear);
 
     var circle = g2
       .selectAll("circle")
       .data(data)
-      // .transition(t)
+      .transition(t)
       .attr("transform", d => `translate(${makeCentroid(gridAsPath, d)})`)
       .attr("r", d => radigeography(d.properties.rain))
       .text(d => `${d.properties.rain} inches | ${d.properties.watershed} | ${d.properties.ww_basin} `);
@@ -267,20 +274,24 @@ function d31() {
     return "complete";
   }
 
-
+  var tally;
   // get grid and add it
   d3.json("http://localhost:3000/data/grid.geojson", function (geojson) {
     d3.json("http://localhost:3000/data/test7.json", function (data) {
       // addGrid(geojson, transformRainfallResponse(data["2016-08-28T19:00:00"]));
 
-      var tally = new rainfallTally(data);
+      // parse the response
+      tally = new rainfallTally(data);
       console.log(tally);
 
-      console.log("starting at", Object.keys(data)[0]);
+      // set up the viz and add in the first record
+      // console.log("starting at", Object.keys(data)[0]);
       updateTimestamp(Object.keys(data)[0]);
-      addGrid(geojson, transformRainfallResponse(
-        data[Object.keys(data)[0]]));
+      var first = data[Object.keys(data)[0]]
+      addGrid(geojson, transformRainfallResponse(first));
+      tally.accumulator(first);
 
+      // then, process the remaining records (with a timeout).
       var i = 0;
 
       function doUpdate() {
@@ -289,11 +300,11 @@ function d31() {
           return
         };
         setTimeout(function () {
-          var now = Object.keys(data)[i];
-          console.log(now)
-          $("#timestamp").html(now);
-          updateTimestamp(now);
-          updateData(geojson, transformRainfallResponse(data[now]))
+          var next = data[Object.keys(data)[i]];
+          tally.accumulator(next);
+          // console.log(now)
+          updateTimestamp(next);
+          updateData(geojson, transformRainfallResponse(next))
           doUpdate();
         }, 100)
       }
