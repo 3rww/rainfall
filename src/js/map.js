@@ -14,12 +14,27 @@ function d31() {
   var map = new L.Map("map", {
     center: [40.44, -79.98],
     zoom: 10
-  }).addLayer(
+  })
+  map.addLayer(
+    new L.TileLayer(
+      //  "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png", {
+      //  "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png", {
+      //   attribution: "Basemap by <a href='https://carto.com'>CARTO</a>"
+
+      // http://mapstack.stamen.com/edit.html#terrain-background[tint=$fff@100]/11/40.4710/-80.0711
+      "http://c.sm.mapstack.stamen.com/(terrain-background,$fff[@60],$ffffff[hsl-color])/{z}/{x}/{y}.png"
+    )
+  )
+  // create another overlay pane for the lines + labels
+  map.createPane("basemapOverlay");
+  map.addLayer(
     // new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
     new L.TileLayer(
-      // "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png", {
-      "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png", {
-        attribution: "Basemap by <a href='https://carto.com'>CARTO</a>"
+
+      // "http://a.sm.mapstack.stamen.com/toner-hybrid[@80]/{z}/{x}/{y}.png", {
+      "http://c.sm.mapstack.stamen.com/(streets-and-labels,$ffffff[hsl-color])[@50]/{z}/{x}/{y}.png", {
+        attribution: "Basemaps by <a href='http://mapstack.stamen.com'>STAMEN & Mapbox</a>",
+        pane: "basemapOverlay"
       }
     )
   );
@@ -53,7 +68,7 @@ function d31() {
       // calculate total rainfal per cell, and determine max rainfall anywhere
       this._tally();
       // implement a streth function from D3 using available data
-      this.stretch = d3.scaleLinear().domain([0, this.domainMax]).range([0, 1])
+      this.stretch = d3.scaleLinear().domain([0, this.domainMax]).range([0.15, 1])
     }
     /**
      * helper method, applies mergeWith with an additive customizer function
@@ -117,6 +132,8 @@ function d31() {
     .append("g")
     .attr("id", "dots")
     .attr("class", "leaflet-zoom-hide");
+
+  var tally;
 
   /**
    * Use Leaflet to implement a D3 geometric transformation.
@@ -190,7 +207,7 @@ function d31() {
       .data(data)
       .enter()
       .append("path")
-      .attr("stroke", "#ccc")
+      .attr("stroke", "#fff")
       .attr("stroke-width", 0.5)
       .attr("fill-opacity", 0)
       .attr("id", d => d.properties.id)
@@ -204,13 +221,18 @@ function d31() {
       .attr("id", d => d.properties.id)
       .attr("transform", d => `translate(${makeCentroid(gridAsPath, d)})`)
       .attr("r", d => radigeography(d.properties.rain))
-      .attr("stroke", "#3890e2")
-      .attr("stroke-width", 3)
-      .attr("stroke-opacity", 0.3)
-      .attr("fill-opacity", 0.6)
-      .attr("fill", "#3890e2")
-      .append("title")
-      .text(d => `${d.properties.rain} inches | ${d.properties.watershed} | ${d.properties.ww_basin} `);
+      // .attr("stroke", "#3890e2")
+      // .attr("stroke-width", 3)
+      // .attr("stroke-opacity", 0.3)
+      // .attr("fill-opacity", 0.6)
+      // .attr("fill", "#3890e2")
+      .attr("stroke", "black")
+      .attr("stroke-width", 0.8)
+      .attr("stroke-opacity", 0.5)
+      .attr("fill-opacity", 0)
+      .attr("fill", "white")
+    // .append("title")
+    // .text(d => `${d.properties.rain} inches | ${d.properties.watershed} | ${d.properties.ww_basin} `);
 
     // add listeners
     map.on("zoomend", reset);
@@ -264,16 +286,26 @@ function d31() {
     var t = d3.transition()
       .duration(25)
       .ease(d3.easeLinear);
+
     var gridcell = g
       .selectAll("path")
       .data(data)
-      .attr("fill-opacity", 0.75)
+      .attr("fill-opacity", d => {
+        if (tally.accumulation[d.properties.id] < 0.001) {
+          return 0;
+        } else {
+          return 0.85;
+        }
+      })
       .attr("fill", d => {
         var v = tally.stretch(tally.accumulation[d.properties.id])
         if (v == 0) {
           return "#fff"
         } else {
           var c = d3ScaleChromatic.interpolateYlGnBu(v)
+          // var c = d3ScaleChromatic.interpolateGnBu(v)
+          // var c = d3ScaleChromatic.interpolateBlues(v)
+          // var c = d3ScaleChromatic.interpolateCubehelixDefault(1 - v)
           return c;
         }
       })
@@ -288,49 +320,58 @@ function d31() {
       .attr("r", d => radigeography(d.properties.rain))
       .text(d => `${d.properties.rain} inches | ${d.properties.watershed} | ${d.properties.ww_basin} `);
 
-    return "complete";
+    return;
   }
 
-  var tally;
+  function run(geojson, data) {
+    // parse the response
+    tally = new rainfallTally(data);
+    console.log(tally);
+    $("#rainfall-max").html(tally.domainMax.toFixed(3));
+
+    // set up the viz and add in the first record
+    // console.log("starting at", Object.keys(data)[0]);
+    updateTimestamp(Object.keys(data)[0]);
+    var first = data[Object.keys(data)[0]]
+    addGrid(geojson, transformRainfallResponse(first));
+    tally.accumulator(first);
+
+    // then, process the remaining records (with a timeout).
+    var i = 0;
+
+    function doUpdate() {
+      i++;
+      if (i >= Object.keys(data).length) {
+        return
+      };
+      setTimeout(function () {
+        var t = Object.keys(data)[i]
+        var next = data[t];
+        tally.accumulator(next);
+        // console.log(now)
+        updateTimestamp(t);
+        updateData(geojson, transformRainfallResponse(next))
+        doUpdate();
+      }, 125)
+    }
+
+    doUpdate();
+
+    // then, clear the circles (?)
+
+  }
+
+
   // get grid and add it
   d3.json("http://localhost:3000/data/grid.geojson", function (geojson) {
     d3.json("http://localhost:3000/data/test7.json", function (data) {
-      // addGrid(geojson, transformRainfallResponse(data["2016-08-28T19:00:00"]));
 
-      // parse the response
-      tally = new rainfallTally(data);
-      console.log(tally);
-
-      // set up the viz and add in the first record
-      // console.log("starting at", Object.keys(data)[0]);
-      updateTimestamp(Object.keys(data)[0]);
-      var first = data[Object.keys(data)[0]]
-      addGrid(geojson, transformRainfallResponse(first));
-      tally.accumulator(first);
-
-      // then, process the remaining records (with a timeout).
-      var i = 0;
-
-      function doUpdate() {
-        i++;
-        if (i >= Object.keys(data).length) {
-          return
-        };
-        setTimeout(function () {
-          var t = Object.keys(data)[i]
-          var next = data[t];
-          tally.accumulator(next);
-          // console.log(now)
-          updateTimestamp(t);
-          updateData(geojson, transformRainfallResponse(next))
-          doUpdate();
-        }, 125)
-      }
-
-      doUpdate();
+      run(geojson, data);
 
     });
   });
+
+
 
 
 }

@@ -30,6 +30,10 @@
   left: 0;
 }
 
+.leaflet-basemapOverlay-pane {
+  z-index: 450 !important;
+}
+
 // path {
 //   fill: #000;
 //   fill-opacity: 0;
