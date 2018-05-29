@@ -11,7 +11,7 @@
     "dependencies": {
         "bootstrap": "4",
         "crossfilter2": "^1.4.6",
-        "d3": "4",
+        "d3": "^4.13.0",
         "d3-scale-chromatic": "^1.2.0",
         "dc": "^2.1.9",
         "font-awesome": "4.7",
@@ -34,6 +34,7 @@
         "browserify": "^15.2.0",
         "envify": "^4.1.0",
         "eslint": "^4.16.0",
+        "eslint-config-google": "^0.9.1",
         "eslint-config-standard": "^11.0.0-beta.0",
         "eslint-plugin-import": "^2.8.0",
         "eslint-plugin-node": "^5.2.1",
