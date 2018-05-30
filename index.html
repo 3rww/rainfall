@@ -110,8 +110,11 @@
                 </div>
 
                 <ul class="nav nav-pills flex-column">
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a id="reset-button" class="nav-link" href="#">Reset</a>
+                    </li> -->
+                    <li class="nav-item">
+                        <a id="replay-button" class="nav-link" href="#">Replay</a>
                     </li>
                 </ul>
 
@@ -120,16 +123,20 @@
             </div>
             <div id="map-container" class="col-md-8">
                 <div id="map"></div>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <p id="timestamp"></p>
-                        <div id="status-bar" class="progress">
+                <div class="row" style="height: 5px;">
+                    <div class="col-sm-12">
+                        <div id="status-bar" class="progress" style="height: 5px;">
                             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0"
                                 aria-valuemax="100" style="width: 100%"></div>
                         </div>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-sm-6">
-                        <p>Maximum rainfall:
+                        <p id="timestamp"></p>
+                    </div>
+                    <div class="col-sm-6 ">
+                        <p class="float-right">Maximum rainfall:
                             <span id="rainfall-max"></span> inches</p>
                         <p>
                             <img style="height: 30px; width:100%" class="img-responsive" src="https://raw.githubusercontent.com/d3/d3-scale-chromatic/master/img/YlGnBu.png"

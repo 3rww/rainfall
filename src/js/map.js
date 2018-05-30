@@ -5,7 +5,10 @@ var _ = require("lodash");
 var L = require("leaflet");
 var moment = require("moment");
 
-var store = {};
+var store = {
+  data: {},
+  current: ""
+};
 
 // var geojson;
 // get grid
@@ -343,7 +346,11 @@ function generateViz(rainfallApiData) {
     // parse the response
     tally = new rainfallTally(data);
     console.log(tally);
+
+    // set the max rainfall for the legend
     $("#rainfall-max").html(tally.domainMax.toFixed(3));
+
+    // set the progress bar
 
     // set up the viz and add in the first record
     // console.log("starting at", Object.keys(data)[0]);
@@ -356,8 +363,11 @@ function generateViz(rainfallApiData) {
     var i = 0;
 
     function doUpdate() {
+      var pct = (i / tally.times.length) * 100;
+      $(".progress-bar").width(`${pct}%`);
       i++;
       if (i >= Object.keys(data).length) {
+        $(".progress-bar").width('100%');
         return;
       }
       setTimeout(function () {
@@ -379,29 +389,59 @@ function generateViz(rainfallApiData) {
   // get grid and add it
   $.ajax("/data/grid.geojson", {
     success: function (geojson, status, jqXHR) {
-      console.log(geojson);
-      run(geojson, rainfallApiData);
+      var data;
+      // console.log(geojson, typeof (geojson));
+      if (typeof (geojson) === 'string') {
+        data = JSON.parse(geojson);
+      } else {
+        data = geojson
+      }
+      run(data, rainfallApiData);
     }
   })
 }
 
 function resetViz() {
+  $("#status-bar").hide();
   $(".leaflet-overlay-pane").empty();
   $("#timestamp").empty();
   $("#rainfall-max").empty();
+  console.log("viz reset")
 }
 
-function getData(dataURL, callback) {
-  console.log("Requesting data...");
+function replayViz(id) {
+  if (store.data) {
+    console.log("replaying viz");
+    $("#status-bar").show();
+    $(".leaflet-overlay-pane").empty();
+    $("#timestamp").empty();
+    $("#rainfall-max").empty();
+    generateViz(store.data[store.current]);
+  } else {
+    console.log("no viz loaded to replay");
+  }
+}
+
+function getData(dataURL, id, callback) {
   $("#status-bar").show();
-  $.ajax(dataURL, {
-    method: "POST",
-    success: function (data, status, jqXHR) {
-      console.log("...data received.");
-      $("#status-bar").hide();
-      callback(data);
-    }
-  });
+  if (store.data.hasOwnProperty(id)) {
+    console.log("Using data already acquired...");
+    $(".progress-bar").removeClass('progress-bar-animated').width(0).addClass('bg-success');
+    callback(store.data[id]);
+  } else {
+    console.log("Requesting data...");
+    $(".progress-bar").removeClass('bg-success').addClass('progress-bar-animated').width('100%');
+    $.ajax(dataURL, {
+      method: "POST",
+      success: function (data, status, jqXHR) {
+        console.log("...data received.");
+        $(".progress-bar").removeClass('progress-bar-animated').width(0).addClass('bg-success');
+        store.data[id] = data;
+        callback(store.data[id]);
+      }
+    });
+  }
+
 }
 
 function updateTimestamp(timestamp) {
@@ -412,12 +452,17 @@ function updateTimestamp(timestamp) {
 $(".event-list-item").on("click", function (e) {
   resetViz();
   console.log(e.currentTarget.dataset.id);
+  store.current = e.currentTarget.dataset.id
   var url =
     "http://3rww-rainfall-api.civicmapper.com/api/garrd/?interval=15-minute&basin=&ids=&keyed_by=time&zerofill=false&dates=" +
-    e.currentTarget.dataset.id;
-  getData(url, generateViz);
+    store.current;
+  getData(url, store.current, generateViz);
 });
 
 $("#reset-button").on("click", function (e) {
   resetViz();
+});
+
+$("#replay-button").on("click", function (e) {
+  replayViz();
 });
