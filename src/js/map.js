@@ -1,12 +1,11 @@
-var $ = (jQuery = require("jquery"));
+var $ = require("jquery");
 var d3 = require("d3");
 var d3ScaleChromatic = require("d3-scale-chromatic");
 var _ = require("lodash");
 var L = require("leaflet");
 var moment = require("moment");
-topojson = require("topojson-client");
 
-var store = {}
+var store = {};
 
 // var geojson;
 // get grid
@@ -16,7 +15,7 @@ var store = {}
 var map = new L.Map("map", {
   center: [40.44, -79.98],
   zoom: 11
-})
+});
 map.addLayer(
   new L.TileLayer(
     //  "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png", {
@@ -26,13 +25,12 @@ map.addLayer(
     // http://mapstack.stamen.com/edit.html#terrain-background[tint=$fff@100]/11/40.4710/-80.0711
     "http://c.sm.mapstack.stamen.com/(terrain-background,$fff[@60],$ffffff[hsl-color])/{z}/{x}/{y}.png"
   )
-)
+);
 // create another overlay pane for the lines + labels
 map.createPane("basemapOverlay");
 map.addLayer(
   // new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
   new L.TileLayer(
-
     // "http://a.sm.mapstack.stamen.com/toner-hybrid[@80]/{z}/{x}/{y}.png", {
     "http://c.sm.mapstack.stamen.com/(streets-and-labels,$ffffff[hsl-color])[@50]/{z}/{x}/{y}.png", {
       attribution: "Basemaps by <a href='http://mapstack.stamen.com'>STAMEN & Mapbox</a>",
@@ -45,14 +43,12 @@ map.addLayer(
 //   new L.geoJSON("https://opendata.arcgis.com/datasets/364f4c3613164f79a1d8c84aed6c03e0_0.geojson")
 // )
 
-var g, g2
-
+var g, g2;
 
 function generateViz(rainfallApiData) {
-
   /**
    * store rainfall tallies from the Rainfall API
-   * @param {*} data 
+   * @param {*} data
    */
   var rainfallTally = class {
     /**
@@ -63,56 +59,59 @@ function generateViz(rainfallApiData) {
       this.data = data;
       // populate a list of times
       this.times = Object.keys(this.data);
-      // total rainfall per cell      
-      this.total = {}
+      // total rainfall per cell
+      this.total = {};
       // accumulation per cell
-      this.accumulation = {}
-      this.domainMax = 0
+      this.accumulation = {};
+      this.domainMax = 0;
 
       // stub out the accumulation property with all cell ids, each set to zero
       Object.keys(this.data[Object.keys(this.data)[0]]).map(x => {
-        this.accumulation[x] = 0
-        this.total[x] = 0
-      })
+        this.accumulation[x] = 0;
+        this.total[x] = 0;
+      });
 
       // calculate total rainfall per cell, and determine max rainfall anywhere
       this._tally();
       // implement a streth function from D3 using available data
-      this.stretch = d3.scaleLinear().domain([0, this.domainMax]).range([0.15, 1])
+      this.stretch = d3
+        .scaleLinear()
+        .domain([0, this.domainMax])
+        .range([0.15, 1]);
     }
     /**
      * helper method, applies mergeWith with an additive customizer function
-     * @param {*} source 
-     * @param {*} plus 
+     * @param {*} source
+     * @param {*} plus
      */
     _merger(source, plus) {
       return _.mergeWith(source, plus, function (objValue, srcValue) {
         return objValue + srcValue;
-      })
+      });
     }
     /**
-     * calculate total accumulation per cell. Effectively, this does what accumulator does, except 
+     * calculate total accumulation per cell. Effectively, this does what accumulator does, except
      * all at once and ahead of time.
-     * @param {*} data 
+     * @param {*} data
      */
     _tally() {
       // accumulate total rainfall per cell from the data
       _.each(this.data, (v, k) => {
-        this._merger(this.total, v)
+        this._merger(this.total, v);
       });
       // set the upper bounds
       _.each(this.total, (v, k) => {
         if (v > this.domainMax) {
           this.domainMax = v;
         }
-      })
+      });
     }
     /**
      * Increment rainfall total by cell ID, passing in a new rainfall response object for a given time.
      * Updates the accumulation property
      */
     accumulator(addThis) {
-      return this._merger(this.accumulation, addThis)
+      return this._merger(this.accumulation, addThis);
     }
   };
 
@@ -193,14 +192,13 @@ function generateViz(rainfallApiData) {
     // console.log(rainfallobj);
     var rainfall = new Map(rainfallobj.map(d => [d.id, d.rain]));
     // console.log(rainfall);
-    return rainfall
+    return rainfall;
   }
 
   /**
    * add the grid to the map as a D3 element
    */
   function addGrid(geojson, rainfall) {
-
     // append a g element to the svg element - this is where data will go
     var data = geojson.features
       .map(d => {
@@ -211,7 +209,7 @@ function generateViz(rainfallApiData) {
         }
         return x;
       })
-      .sort((a, b) => b.properties.id - a.properties.id)
+      .sort((a, b) => b.properties.id - a.properties.id);
 
     var gridcell = g
       .selectAll("path")
@@ -222,7 +220,7 @@ function generateViz(rainfallApiData) {
       .attr("stroke-width", 0.5)
       .attr("fill-opacity", 0)
       .attr("id", d => d.properties.id)
-      .attr("class", "mapgridcell")
+      .attr("class", "mapgridcell");
 
     var circle = g2
       .selectAll("circle")
@@ -241,7 +239,7 @@ function generateViz(rainfallApiData) {
       .attr("stroke-width", 1)
       .attr("stroke-opacity", 0.75)
       .attr("fill-opacity", 0)
-      .attr("fill", "white")
+      .attr("fill", "white");
     // .append("title")
     // .text(d => `${d.properties.rain} inches | ${d.properties.watershed} | ${d.properties.ww_basin} `);
 
@@ -281,10 +279,7 @@ function generateViz(rainfallApiData) {
     }
   }
 
-
-
   function updateData(geojson, rainfall) {
-
     var data = geojson.features
       .map(d => {
         var x = ((d.properties.rain = rainfall.get(d.properties.id)), d);
@@ -294,12 +289,13 @@ function generateViz(rainfallApiData) {
         }
         return x;
       })
-      .sort((a, b) => b.properties.id - a.properties.id)
+      .sort((a, b) => b.properties.id - a.properties.id);
 
-    var transitionFx = d3.transition()
+    var transitionFx = d3
+      .transition()
       .duration(frameTransition)
       .ease(d3.easeLinear);
-    // .ease(d3.easeSinInOut)    
+    // .ease(d3.easeSinInOut)
 
     var gridcell = g
       .selectAll("path")
@@ -313,17 +309,17 @@ function generateViz(rainfallApiData) {
         }
       })
       .attr("fill", d => {
-        var v = tally.stretch(tally.accumulation[d.properties.id])
+        var v = tally.stretch(tally.accumulation[d.properties.id]);
         if (v == 0) {
-          return "#fff"
+          return "#fff";
         } else {
-          var c = d3ScaleChromatic.interpolateYlGnBu(v)
+          var c = d3ScaleChromatic.interpolateYlGnBu(v);
           // var c = d3ScaleChromatic.interpolateGnBu(v)
           // var c = d3ScaleChromatic.interpolateBlues(v)
           // var c = d3ScaleChromatic.interpolateCubehelixDefault(1 - v)
           return c;
         }
-      })
+      });
     // .attr("id", d => d.properties.id)
     // .attr("class", "mapgridcell")
 
@@ -333,7 +329,12 @@ function generateViz(rainfallApiData) {
       .transition(transitionFx)
       .attr("transform", d => `translate(${makeCentroid(gridAsPath, d)})`)
       .attr("r", d => radigeography(d.properties.rain))
-      .text(d => `${d.properties.rain} inches | ${d.properties.watershed} | ${d.properties.ww_basin} `);
+      .text(
+        d =>
+        `${d.properties.rain} inches | ${d.properties.watershed} | ${
+            d.properties.ww_basin
+          } `
+      );
 
     return;
   }
@@ -347,7 +348,7 @@ function generateViz(rainfallApiData) {
     // set up the viz and add in the first record
     // console.log("starting at", Object.keys(data)[0]);
     updateTimestamp(Object.keys(data)[0]);
-    var first = data[Object.keys(data)[0]]
+    var first = data[Object.keys(data)[0]];
     addGrid(geojson, transformRainfallResponse(first));
     tally.accumulator(first);
 
@@ -357,64 +358,66 @@ function generateViz(rainfallApiData) {
     function doUpdate() {
       i++;
       if (i >= Object.keys(data).length) {
-        return
-      };
+        return;
+      }
       setTimeout(function () {
-        var t = Object.keys(data)[i]
+        var t = Object.keys(data)[i];
         var next = data[t];
         tally.accumulator(next);
         // console.log(now)
         updateTimestamp(t);
-        updateData(geojson, transformRainfallResponse(next))
+        updateData(geojson, transformRainfallResponse(next));
         doUpdate();
-      }, frameRate)
+      }, frameRate);
     }
 
     doUpdate();
 
     // then, clear the circles (?)
-
   }
 
-
   // get grid and add it
-  d3.json("http://localhost:3000/data/grid.geojson", function (geojson) {
-    run(geojson, rainfallApiData);
-  });
-
-}
-
-function resetViz() {
-  $('.leaflet-overlay-pane').empty();
-  $('#timestamp').empty()
-  $('#rainfall-max').empty()
-}
-
-function getData(dataURL, callback) {
-  console.log("Requesting data...");
-  $('#status-bar').show();
-  $.ajax(dataURL, {
-    method: "POST",
-    success: function (data, status, jqXHR) {
-      console.log("...data received.");
-      $('#status-bar').hide();
-      callback(data)
+  $.ajax("/data/grid.geojson", {
+    success: function (geojson, status, jqXHR) {
+      console.log(geojson);
+      run(geojson, rainfallApiData);
     }
   })
 }
 
+function resetViz() {
+  $(".leaflet-overlay-pane").empty();
+  $("#timestamp").empty();
+  $("#rainfall-max").empty();
+}
+
+function getData(dataURL, callback) {
+  console.log("Requesting data...");
+  $("#status-bar").show();
+  $.ajax(dataURL, {
+    method: "POST",
+    success: function (data, status, jqXHR) {
+      console.log("...data received.");
+      $("#status-bar").hide();
+      callback(data);
+    }
+  });
+}
+
 function updateTimestamp(timestamp) {
   var t = moment(timestamp).format("dddd, MMMM Do YYYY, h:mm:ss a");
-  $("#timestamp").html(t)
+  $("#timestamp").html(t);
 }
 
 $(".event-list-item").on("click", function (e) {
   resetViz();
   console.log(e.currentTarget.dataset.id);
-  var url = "http://3rww-rainfall-api.civicmapper.com/api/garrd/?interval=15-minute&basin=&ids=&keyed_by=time&zerofill=false&dates=" + e.currentTarget.dataset.id
+  var url =
+    "http://3rww-rainfall-api.civicmapper.com/api/garrd/?interval=15-minute&basin=&ids=&keyed_by=time&zerofill=false&dates=" +
+    e.currentTarget.dataset.id;
   getData(url, generateViz);
 });
 
 $("#reset-button").on("click", function (e) {
   resetViz();
-})
+});

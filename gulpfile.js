@@ -48,16 +48,16 @@ var bundlingConfigs = Object.keys(bundles);
 /**
  * BUNDLE JS
  */
-bundlingConfigs.forEach(function(bundleName) {
-  gulp.task("scripts:" + bundleName, function() {
+bundlingConfigs.forEach(function (bundleName) {
+  gulp.task("scripts:" + bundleName, function () {
     return (
       browserify({
         basedir: ".",
         insertGlobalVars: {
-          $: function(file, dir) {
+          $: function (file, dir) {
             return 'require("jquery")';
           },
-          jQuery: function(file, dir) {
+          jQuery: function (file, dir) {
             return 'require("jquery")';
           }
         },
@@ -66,31 +66,32 @@ bundlingConfigs.forEach(function(bundleName) {
         // cache: {},
         // packageCache: {}
       })
-        // .transform("babelify", {
-        //     presets: ["env"],
-        //     extensions: [".js"]
-        // })
-        .transform(
-          // Required in order to process node_modules files
-          {
-            global: true
-          },
-          envify({
-            NODE_ENV: "production"
-          })
-        )
-        .bundle()
-        .pipe(source(bundles[bundleName].js.dist.file))
-        .pipe(buffer())
-        // .pipe(sourcemaps.init({ loadMaps: true }))
-        // .pipe(uglify())
-        // .pipe(sourcemaps.write("./"))
-        .pipe(gulp.dest(bundles[bundleName].js.dist.path))
-        .pipe(
-          browserSync.reload({
-            stream: true
-          })
-        )
+      .transform('babelify', {
+        presets: ['babel-preset-env']
+      })
+      .transform(
+        // Required in order to process node_modules files
+        {
+          global: true
+        },
+        envify({
+          NODE_ENV: "production"
+        })
+      )
+      .bundle()
+      .pipe(source(bundles[bundleName].js.dist.file))
+      .pipe(buffer())
+      .pipe(sourcemaps.init({
+        loadMaps: true
+      }))
+      .pipe(uglify())
+      .pipe(sourcemaps.write("./"))
+      .pipe(gulp.dest(bundles[bundleName].js.dist.path))
+      .pipe(
+        browserSync.reload({
+          stream: true
+        })
+      )
     );
   });
 });
@@ -98,7 +99,7 @@ bundlingConfigs.forEach(function(bundleName) {
 gulp.task(
   "pack-js",
   gulp.parallel(
-    bundlingConfigs.map(function(name) {
+    bundlingConfigs.map(function (name) {
       return "scripts:" + name;
     })
   )
@@ -107,8 +108,8 @@ gulp.task(
 /**
  * BUNDLE CSS/SCSS
  */
-bundlingConfigs.forEach(function(bundleName) {
-  gulp.task("styles:" + bundleName, function() {
+bundlingConfigs.forEach(function (bundleName) {
+  gulp.task("styles:" + bundleName, function () {
     return gulp
       .src(bundles[bundleName].css.src)
       .pipe(concat(bundles[bundleName].css.dist.file))
@@ -132,7 +133,7 @@ bundlingConfigs.forEach(function(bundleName) {
 gulp.task(
   "pack-css",
   gulp.parallel(
-    bundlingConfigs.map(function(name) {
+    bundlingConfigs.map(function (name) {
       return "styles:" + name;
     })
   )
@@ -157,8 +158,8 @@ var assets = {
 
 var assetConfigs = Object.keys(assets);
 
-assetConfigs.forEach(function(assetName) {
-  gulp.task("assets:" + assetName, function() {
+assetConfigs.forEach(function (assetName) {
+  gulp.task("assets:" + assetName, function () {
     return gulp
       .src(assets[assetName].src)
       .pipe(gulp.dest(assets[assetName].dist))
@@ -173,7 +174,7 @@ assetConfigs.forEach(function(assetName) {
 gulp.task(
   "copy-assets",
   gulp.parallel(
-    assetConfigs.map(function(name) {
+    assetConfigs.map(function (name) {
       return "assets:" + name;
     })
   )
@@ -187,12 +188,12 @@ gulp.task(
 gulp.task("build", gulp.parallel("pack-js", "pack-css", "copy-assets"));
 
 // Run a development server
-gulp.task("runserver", function() {
+gulp.task("runserver", function () {
   // var proc = exec("jekyll serve");
   var proc = exec("http-server -p 4000");
 });
 // sync the browser
-gulp.task("browser-sync", function() {
+gulp.task("browser-sync", function () {
   browserSync({
     notify: true,
     proxy: "localhost:4000"
@@ -211,7 +212,7 @@ gulp.task(
     "pack-js",
     "copy-assets",
     // re-run these tasks if source directories change
-    function() {
+    function () {
       gulp.watch("index.html");
       gulp.watch("src/css/*.scss", gulp.parallel("pack-css"));
       gulp.watch("src/js/*.js", gulp.parallel("pack-js"));

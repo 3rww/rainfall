@@ -1,8 +1,7 @@
 // jQuery + Bootstrap
-var $ = (jQuery = require("jquery"));
+var $ = require("jquery");
+var jQuery = $;
 require("bootstrap");
-
-
 
 $(function () {
   $('#status-bar').hide();

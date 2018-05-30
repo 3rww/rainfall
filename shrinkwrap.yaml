@@ -895,7 +895,7 @@ packages:
       babel-plugin-transform-es2015-unicode-regex: 6.24.1
       babel-plugin-transform-exponentiation-operator: 6.24.1
       babel-plugin-transform-regenerator: 6.26.0
-      browserslist: 3.2.7
+      browserslist: 3.2.8
       invariant: 2.2.4
       semver: 5.5.0
     dev: true
@@ -915,7 +915,7 @@ packages:
       integrity: sha1-btAhFz4vy0htestFxgCahW9kcHE=
   /babel-runtime/6.26.0:
     dependencies:
-      core-js: 2.5.6
+      core-js: 2.5.7
       regenerator-runtime: 0.11.1
     dev: true
     resolution:
@@ -1380,6 +1380,13 @@ packages:
     dev: true
     resolution:
       integrity: sha512-oYVLxFVqpX9uMhOIQBLtZL+CX4uY8ZpWcjNTaxyWl5rO8yA9SSNikFnAfvk8J3P/7z3BZwNmEqFKaJoYltj3MQ==
+  /browserslist/3.2.8:
+    dependencies:
+      caniuse-lite: 1.0.30000846
+      electron-to-chromium: 1.3.48
+    dev: true
+    resolution:
+      integrity: sha512-WHVocJYavUwVgVViC0ORikPHQquXwVh939TaelZ4WDqpWgTX/FsGhl/+P4qBUAGcRvtOgDgC+xftNWWp2RUTAQ==
   /bs-recipes/1.3.4:
     dev: true
     resolution:
@@ -1502,6 +1509,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-Lw6AaouV6lh7TgIdQtLiUFKKO2mtDnZFkzCq5/V6tqs4ZI0OGVSDCEt1uegZ3OOBEBUYuVw3Hhr9DQSbgVofFA==
+  /caniuse-lite/1.0.30000846:
+    dev: true
+    resolution:
+      integrity: sha512-qxUOHr5mTaadWH1ap0ueivHd8x42Bnemcn+JutVr7GWmm2bU4zoBhjuv5QdXgALQnnT626lOQros7cCDf8PwCg==
   /caseless/0.11.0:
     dev: false
     resolution:
@@ -1867,6 +1878,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-lQUVfQi0aLix2xpyjrrJEvfuYCqPc/HwmTKsC/VNf8q0zsjX7SQZtp4+oRONN5Tsur9GDETPjj+Ub2iDiGZfSQ==
+  /core-js/2.5.7:
+    dev: true
+    resolution:
+      integrity: sha512-RszJCAxg/PP6uzXVXL6BsxSXx/B05oJAQ2vkJRjyjrEcNVycaqOmNb5OTxZPE3xa5gwZduqza6L9JOCenh/Ecw==
   /core-util-is/1.0.2:
     resolution:
       integrity: sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
@@ -2577,6 +2592,10 @@ packages:
     dev: true
     resolution:
       integrity: sha1-RYrBscXHYM6IEaFtK/vZfsMLr7g=
+  /electron-to-chromium/1.3.48:
+    dev: true
+    resolution:
+      integrity: sha1-07DYWTgUBE4JLs4hCPw6ya6kuQA=
   /elliptic/6.4.0:
     dependencies:
       bn.js: 4.11.8
@@ -7888,7 +7907,7 @@ shrinkwrapMinorVersion: 6
 shrinkwrapVersion: 3
 specifiers:
   babel-core: ^6.26.0
-  babel-preset-env: ^1.6.1
+  babel-preset-env: ^1.7.0
   babelify: ^8.0.0
   bootstrap: '4'
   browser-sync: ^2.23.5
