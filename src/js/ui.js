@@ -2,6 +2,9 @@
 var $ = (jQuery = require("jquery"));
 require("bootstrap");
 
-$(function() {
+
+
+$(function () {
+  $('#status-bar').hide();
   $('[data-toggle="tooltip"]').tooltip();
 });

@@ -5,46 +5,91 @@
 <head>
     <meta charset="utf-8">
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <title>Make It Rain</title>
+    <title>3RWW Rainfall Explorer</title>
     <link href="dist/css/bundle.core.css" type="text/css" rel="stylesheet" />
 
 </head>
 
 <body>
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <hr>
-                <h1>3RWW Rainfall</h1>
-                <hr>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-3">
-                <ul class="nav nav-pills flex-column">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">
+                <img style="height: 30px" class="img-responsive" src="./dist/img/3rww_logo.png" /> 3RWW Rainfall Explorer
+                <small>
+                    <em>prototype</em>
+                </small>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-toggle="tooltip" data-placement="right" title="Animate last 12 hours of data, showing heaviest rainfall per 15-min interval as scaled symbol w/ cumulative rainfall as chlorpleth underlay">Last 12 Hours</a>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#aboutModal">
+                            ?
+                        </button>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#" data-toggle="tooltip" data-placement="bottom" title="Animate last 12 hours of data at 15 minute intervals, showing heaviest rainfall at each interval and total cumulative rainfall">Last 12 Hours</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Cumulative Precipitation</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">12 hours</a>
-                            <a class="dropdown-item" href="#">24 hours</a>
-                            <a class="dropdown-item" href="#">Last 7 days</a>
+                            <a class="dropdown-item disabled" href="#">6 hours</a>
+                            <a class="dropdown-item disabled" href="#">12 hours</a>
+                            <a class="dropdown-item disabled" href="#">24 hours</a>
+                            <a class="dropdown-item disabled" href="#">36 hours</a>
+                            <a class="dropdown-item disabled" href="#">48 hours</a>
+                            <a class="dropdown-item disabled" href="#">72 hours</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Last month</a>
-                            <a class="dropdown-item" href="#">Last 3 months</a>
-                            <a class="dropdown-item" href="#">Last 6 months</a>
+                            <a class="dropdown-item disabled" href="#">7 days</a>
+                            <a class="dropdown-item disabled" href="#">1 month</a>
+                            <a class="dropdown-item disabled" href="#">3 months</a>
+                            <a class="dropdown-item disabled" href="#">6 months</a>
+                            <a class="dropdown-item disabled" href="#">12 months</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Last year-to-date</a>
+                            <a class="dropdown-item disabled" href="#">This Month</a>
+                            <a class="dropdown-item disabled" href="#">This Year</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="right" title="View cumulative rainfall over a custom date/time range">Custom</a>
+                            <a class="dropdown-item disabled" href="#" data-toggle="tooltip" data-placement="right" title="View cumulative rainfall over a custom date/time range">Custom Range</a>
                         </div>
                     </li>
-
                 </ul>
+            </div>
+        </nav>
 
+        <div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="aboutModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="aboutModalLabel">What is this?</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            The
+                            <b>3RWW Rainfall Explorer Prototype</b> is a live preview of a prototype for the next version of
+                            3 Rivers Wet Weather's
+                            <a href="http://3riverswetweather.org/municipalities/calibrated-radar-rainfall-data">Calibrated Radar Rainfall</a> tool. It utilizes the new
+                            <a href="http://3rww-rainfall-api.civicmapper.com">3RWW Rainfall API</a>.
+                        </p>
+                        <p>This project is under active development. Source code is available on
+                            <a href="https://github.com/3rww/rainfall">GitHub</a>.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
                 <div class="card" id="event-list">
                     <div class="card-header text-primary">
                         Historic Rainfall Events
@@ -53,10 +98,10 @@
                         <input class="search form-control form-control-sm" placeholder="Search" />
                         <div class="input-group-append" aria-label="Event sorting">
                             <button type="button" class="btn btn-outline-primary btn-sm sort" data-sort="date">
-                                <span class="small">Date</span>
+                                <span class="small">Sort by Date</span>
                             </button>
                             <button type="button" class="btn btn-outline-primary btn-sm sort" data-sort="name">
-                                <span class="small">Name</span>
+                                <span class="small">Sort by Name</span>
                             </button>
                         </div>
                     </div>
@@ -73,15 +118,23 @@
 
 
             </div>
-            <div id="map-container" class="col-md-9">
+            <div id="map-container" class="col-md-8">
                 <div id="map"></div>
                 <div class="row">
                     <div class="col-sm-6">
                         <p id="timestamp"></p>
+                        <div id="status-bar" class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0"
+                                aria-valuemax="100" style="width: 100%"></div>
+                        </div>
                     </div>
                     <div class="col-sm-6">
                         <p>Maximum rainfall:
                             <span id="rainfall-max"></span> inches</p>
+                        <p>
+                            <img style="height: 30px; width:100%" class="img-responsive" src="https://raw.githubusercontent.com/d3/d3-scale-chromatic/master/img/YlGnBu.png"
+                            />
+                        </p>
                     </div>
                 </div>
                 <!-- <svg class="chart" width="640" height="480"></svg> -->

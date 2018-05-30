@@ -6,6 +6,8 @@ var L = require("leaflet");
 var moment = require("moment");
 topojson = require("topojson-client");
 
+var store = {}
+
 // var geojson;
 // get grid
 //var geojson = await d3.json("http://localhost:3000/data/grid.geojson");
@@ -39,10 +41,14 @@ map.addLayer(
   )
 );
 
+// map.addLayer(
+//   new L.geoJSON("https://opendata.arcgis.com/datasets/364f4c3613164f79a1d8c84aed6c03e0_0.geojson")
+// )
+
 var g, g2
 
 
-function generateViz(dataURL) {
+function generateViz(rainfallApiData) {
 
   /**
    * store rainfall tallies from the Rainfall API
@@ -196,7 +202,6 @@ function generateViz(dataURL) {
   function addGrid(geojson, rainfall) {
 
     // append a g element to the svg element - this is where data will go
-
     var data = geojson.features
       .map(d => {
         var x = ((d.properties.rain = rainfall.get(d.properties.id)), d);
@@ -232,9 +237,9 @@ function generateViz(dataURL) {
       // .attr("stroke-opacity", 0.3)
       // .attr("fill-opacity", 0.6)
       // .attr("fill", "#3890e2")
-      .attr("stroke", "black")
-      .attr("stroke-width", 0.8)
-      .attr("stroke-opacity", 0.5)
+      .attr("stroke", "#051133")
+      .attr("stroke-width", 1)
+      .attr("stroke-opacity", 0.75)
       .attr("fill-opacity", 0)
       .attr("fill", "white")
     // .append("title")
@@ -374,18 +379,7 @@ function generateViz(dataURL) {
 
   // get grid and add it
   d3.json("http://localhost:3000/data/grid.geojson", function (geojson) {
-    console.log("Requesting data...");
-    $.ajax(dataURL, {
-      method: "POST",
-      success: function (data, status, jqXHR) {
-        console.log("...data received.");
-        run(geojson, data);
-      }
-    })
-    // d3.json(dataURL, function (data) {
-    //   console.log("...data received.");
-    //   run(geojson, data);
-    // });
+    run(geojson, rainfallApiData);
   });
 
 }
@@ -396,15 +390,29 @@ function resetViz() {
   $('#rainfall-max').empty()
 }
 
+function getData(dataURL, callback) {
+  console.log("Requesting data...");
+  $('#status-bar').show();
+  $.ajax(dataURL, {
+    method: "POST",
+    success: function (data, status, jqXHR) {
+      console.log("...data received.");
+      $('#status-bar').hide();
+      callback(data)
+    }
+  })
+}
+
 function updateTimestamp(timestamp) {
   var t = moment(timestamp).format("dddd, MMMM Do YYYY, h:mm:ss a");
   $("#timestamp").html(t)
 }
 
 $(".event-list-item").on("click", function (e) {
+  resetViz();
   console.log(e.currentTarget.dataset.id);
   var url = "http://3rww-rainfall-api.civicmapper.com/api/garrd/?interval=15-minute&basin=&ids=&keyed_by=time&zerofill=false&dates=" + e.currentTarget.dataset.id
-  generateViz(url);
+  getData(url, generateViz);
 });
 
 $("#reset-button").on("click", function (e) {
