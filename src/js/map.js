@@ -5,6 +5,8 @@ var _ = require("lodash");
 var L = require("leaflet");
 var moment = require("moment");
 
+console.log(window.location);
+
 var store = {
   data: {},
   current: ""
@@ -387,7 +389,7 @@ function generateViz(rainfallApiData) {
   }
 
   // get grid and add it
-  $.ajax("/data/grid.geojson", {
+  $.ajax(`${window.location}data/grid.geojson`, {
     success: function (geojson, status, jqXHR) {
       var data;
       // console.log(geojson, typeof (geojson));
