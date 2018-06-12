@@ -454,7 +454,7 @@ $(".event-list-item").on("click", function (e) {
   console.log(e.currentTarget.dataset.id);
   store.current = e.currentTarget.dataset.id
   var url =
-    "http://3rww-rainfall-api.civicmapper.com/api/garrd/?interval=15-minute&basin=&ids=&keyed_by=time&zerofill=false&dates=" +
+    "https://3rww-rainfall-api.civicmapper.com/api/garrd/?interval=15-minute&basin=&ids=&keyed_by=time&zerofill=false&dates=" +
     store.current;
   getData(url, store.current, generateViz);
 });
