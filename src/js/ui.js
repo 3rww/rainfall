@@ -1,9 +1,11 @@
 // jQuery + Bootstrap
-var $ = require("jquery");
-var jQuery = $;
-require("bootstrap");
+import $ from 'jquery';
 
-$(function () {
+
+export default function initBootstrapConfigs() {
+  console.log('initBootstrapConfigs');
   $('#status-bar').hide();
   $('[data-toggle="tooltip"]').tooltip();
-});
+}
+
+initBootstrapConfigs();

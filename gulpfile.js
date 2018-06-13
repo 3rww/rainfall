@@ -1,3 +1,4 @@
+/* eslint-disable */
 var gulp = require("gulp");
 var gutil = require("gulp-util");
 var concat = require("gulp-concat");
@@ -12,7 +13,6 @@ var buffer = require("vinyl-buffer");
 var envify = require("envify/custom");
 var sass = require("gulp-sass");
 const autoprefixer = require("gulp-autoprefixer");
-// var vueify = require("vueify");
 
 var browserSync = require("browser-sync");
 var exec = require("child_process").exec;

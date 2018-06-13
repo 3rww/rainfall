@@ -1,0 +1,24 @@
+{
+    "extends": "airbnb",
+    "parser": "babel-eslint",
+    "plugins": [
+        "react",
+        "jsx-a11y",
+        "import"
+    ],
+    "rules": {
+        "linebreak-style": "off",
+        "eol-last": "off",
+        "no-console": "off",
+        "func-names": "off",
+        "no-underscore-dangle": "off",
+        "max-len": "off",
+        "function-paren-newline": "off",
+        "indent": "off",
+        "no-use-before-define": "off"
+    },
+    "env": {
+        "browser": true,
+        "node": true
+    }
+}
