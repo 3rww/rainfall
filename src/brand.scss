@@ -1,0 +1,25 @@
+// Typography
+// $web-font-path: "https://fonts.googleapis.com/css?family=Open+Sans|Oswald:700" !default;
+// $web-font-path: "https://fonts.googleapis.com/css?family=Open+Sans|Oswald:500&display=swap" !default;
+// $headings-font-family: "Oswald", "Arial Narrow Bold", sans-serif !default;
+// $accent-font-family: 'Open Sans Condensed', sans-serif;
+// $body-font-family: "Open Sans", "Arial", "Helvetica", sans-serif !default;
+
+body {
+    // font-family: $body-font-family !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;    
+  }
+  
+  // .navbar .navbar-brand {
+  //   font-family: $headings-font-family !important;
+  // }
+
+/* Import Bootstrap and themes (note the order) **********/
+@import "~bootswatch/dist/materia/variables";
+@import "~bootstrap/scss/bootstrap";
+@import "~bootswatch/dist/materia/bootswatch";
+
+.card {
+  border-radius: 0px;
+}
