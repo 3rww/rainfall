@@ -8,49 +8,47 @@
 import moment from 'moment'
 
 // Seed data --------------------------------------------
-import RAINFALL_EVENTS from '../data/events.json'
+// import RAINFALL_EVENTS from '../data/events.json'
+const ROOT = window.location.href
 
 
 // Mapbox constants -------------------------------------
-export const MAPBOX_TOKEN = 'pk.eyJ1IjoiY2l2aWNtYXBwZXIiLCJhIjoiY2s2azUycjc4MDBvMzNsbnliZDU4dTZiZCJ9.35H-OLQdcpQuCjKE9iAmwg'
-export const MAPBOX_STYLE_BASEMAP = 'mapbox://styles/civicmapper/ck2xlf5qg2pbc1clav3r8ddku'
+export const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN
+export const MAPBOX_STYLE_BASEMAP = process.env.REACT_APP_MAPBOX_STYLE_BASEMAP
 
 // Service URLs -----------------------------------------
 // export const URL_GARRD_GEOJSON = "https://services6.arcgis.com/dMKWX9NPCcfmaZl3/arcgis/rest/services/garrd/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&returnExceededLimitFeatures=true&f=pgeojson"
 // export const URL_GAUGE_GEOJSON = "https://services6.arcgis.com/dMKWX9NPCcfmaZl3/arcgis/rest/services/3RWWRG/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&returnExceededLimitFeatures=true&f=pgeojson"
-export const API_URL_ROOT = "http://127.0.0.1:3000/"
+export const EVENTS_JSON_URL = "/static/data/events.json"
 export const URL_GARRD_GEOJSON = "/static/data/pixels.geojson"
 export const URL_GAUGE_GEOJSON = "/static/data/gauges.geojson"
 export const URL_BASIN_PIXEL_LOOKUP = "/static/data/basin-lookup-pixel.json"
 
 
 // rainfall events data ----------------------------------
-// this is derived from a static file for now; will be replaced with an API call
-export const eventsData = RAINFALL_EVENTS.events
-  .slice(0)
-  .reverse()
-  .map((e, i) => ({
-    ...e,
-    hours: moment(e.end_dt).diff(moment(e.start_dt), 'hours'),
-    isFetching: false
-  }))
-  .filter(e => e.hours > 0)
 
-export const eventLongest = Math.max(...eventsData.map(e => e.hours))
-export const eventLatest = eventsData.map(e => e.end_dt).sort()[eventsData.length - 1]
-export const defaultStartDt = moment(eventLatest).startOf("month").format()
-export const defaultEndDt = moment(eventLatest).endOf("month").format()
+// export const eventsData = RAINFALL_EVENTS.events
+//   .slice(0)
+//   .reverse()
+//   .map((e, i) => ({
+//     ...e,
+//     hours: moment(e.end_dt).diff(moment(e.start_dt), 'hours'),
+//     isFetching: false
+//   }))
+//   .filter(e => e.hours > 0)
+
+// export const eventLongest = Math.max(...eventsData.map(e => e.hours))
+// export const eventLatest = eventsData.map(e => e.end_dt).sort()[eventsData.length - 1]
+// export const defaultStartDt = moment(eventLatest).startOf("month").format()
+// export const defaultEndDt = moment(eventLatest).endOf("month").format()
 
 
 // rainfall layers + styles (mapbox style spec)
 
-
-
-
-export const mapLayers = {
+export const MAP_LAYERS = {
   layerGauges: {
-    id: 'rain-gauges',
-    source: 'raingauge',
+    id: 'gauges',
+    source: 'gauge',
     type: 'circle',
     paint: {
       "circle-radius": 10,
@@ -58,7 +56,7 @@ export const mapLayers = {
     }
   },
   layerPixels : {
-    id: 'rain-gaard',
+    id: 'pixels',
     source: 'pixel',
     type: 'fill-extrusion',
     paint: {

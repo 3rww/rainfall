@@ -23,7 +23,7 @@ import {
   pickSensor
 } from '../../store/actions'
 import { fetchJSON } from '../../store/middleware'
-import { URL_BASIN_PIXEL_LOOKUP } from '../../store/config'
+// import { URL_BASIN_PIXEL_LOOKUP } from '../../store/config'
 
 
 class GeodataPicker extends React.Component {
@@ -40,17 +40,17 @@ class GeodataPicker extends React.Component {
 
   }
 
-  componentDidMount() {
-    this.props.dispatchFetchJSON({
-      url: URL_BASIN_PIXEL_LOOKUP,
-      pathArray: ['refData', 'basinPixelLookup']
-    }
-    );
-  }
+  // componentDidMount() {
+  //   this.props.dispatchFetchJSON({
+  //     url: URL_BASIN_PIXEL_LOOKUP,
+  //     pathArray: ['refData', 'basinPixelLookup']
+  //   }
+  //   );
+  // }
 
   handleSelectGauge = selectedGauges => {
     this.props.dispatchPickSensorParam({
-      sensorLocationType: "raingauge",
+      sensorLocationType: "gauge",
       selectedOptions: selectedGauges // this is a list
     })
   };
@@ -138,7 +138,7 @@ class GeodataPicker extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    raingaugeOpts: selectMapStyleSourceDataFeatures(state, 'raingauge')
+    raingaugeOpts: selectMapStyleSourceDataFeatures(state, 'gauge')
       .map(i => ({ value: i.id, label: `${i.id}: ${i.properties.name}` })),
     basinOpts: selectPixelLookupsBasinsOnly(state)
       .map(i => ({ value: i.value, label: i.value })),

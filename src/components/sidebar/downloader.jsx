@@ -31,7 +31,10 @@ class RainfallDownloader extends React.Component {
   }
 
   handleDownloadClick() {
-    this.props.fetchRainfallData(moment.now().toString())
+    this.props.fetchRainfallData(
+      // rainfallDataStatus is either "historic" or "realtime"
+      this.props.rainfallDataStatus
+    )
   }
 
   toggleAccordion(e) {console.log(e.target)}

@@ -1,6 +1,6 @@
 import { createReducer } from '@reduxjs/toolkit'
-
-import { set, forEach, keys } from 'lodash-es'
+import moment from 'moment'
+import { set, get, forEach, keys, has } from 'lodash-es'
 
 import { initialState } from './initialState'
 
@@ -17,10 +17,15 @@ import {
   requestRainfallDataInvalid,
   requestRainfallDataSuccess,
   requestRainfallDataFail,
-  requestJson,
-  requestJsonSuccess,
-  requestJsonFail,
-  addLayers
+  asyncAction,
+  asyncActionSuccess,
+  asyncActionFail,
+  addLayers,
+  calcEventStats,
+  setState,
+  isFetching,
+  startThinking,
+  stopThinking
 } from './actions'
 
 import { 
@@ -38,16 +43,17 @@ import {
 export const rootReducer = createReducer(
   // INITIAL STATE ----------------------
   initialState,
+
   // REDUCERS----------------------------
   {
     /**
      * Request JSON (+success/fail)
      * used by the fetchJSON middleware
      */
-    [requestJson]: (state, action) => {
+    [asyncAction]: (state, action) => {
       state.progress.isFetching = true
     },
-    [requestJsonSuccess]: (state, action) => {
+    [asyncActionSuccess]: (state, action) => {
       state.progress.isFetching = false
       const { data, pathArray, keepACopy } = action.payload
       set(state, pathArray, data)
@@ -56,9 +62,29 @@ export const rootReducer = createReducer(
         set(state, refPatharray, data)
       }
     },
-    [requestJsonFail]: (state, action) => {
+    [asyncActionFail]: (state, action) => {
       state.progress.isFetching = false
       console.log(action.payload)
+    },
+    [isFetching]: (state, action) => {
+      state.progress.isFetching = action.payload.isFetching
+    },
+    [startThinking]: state => {
+      state.progress.isThinking = state.progress.isThinking + 1
+    },
+    [stopThinking]: state => {
+      state.progress.isThinking = state.progress.isThinking - 1
+    },
+    /**
+     * calculate stats for rainfall events in the store
+     */
+    [calcEventStats] : (state, action) => {
+      const eventsData = state.rainfallEvents.list
+      let eventLatest = eventsData.map(e => e.end_dt).sort()[eventsData.length - 1]
+      state.rainfallEvents.stats.latest = eventLatest
+      state.rainfallEvents.stats.longest = Math.max(...eventsData.map(e => e.hours))
+      state.rainfallEvents.stats.minDate = moment(eventLatest).startOf("month").format()
+      state.rainfallEvents.stats.maxDate = moment(eventLatest).endOf("month").format()
     },
     /**
      * pickRainfallEvent
@@ -78,9 +104,10 @@ export const rootReducer = createReducer(
       selectedEvent = {
         start_dt: startDt,
         end_dt: endDt,
-        eventid: "user-defined",
+        eventid: "custom",
         report: null
       }
+      state.fetchKwargs.selectedEvent = selectedEvent
     },
     [pickSensor]: (state, action) => {
 
@@ -105,7 +132,6 @@ export const rootReducer = createReducer(
       state.fetchKwargs.rollup = action.payload
     },
     [requestRainfallDataInvalid]: (state, action) => {
-      
     },
     /**
      * requestRainfallData/Success/Fail
@@ -263,10 +289,34 @@ export const rootReducer = createReducer(
     },
     [addLayers]: (state, action) => {
       forEach(action.payload, (v, k) => {
-        state.mapStyle.layers.push(v)
+        // if an index is provided, use for layer order
+        if (has(v, 'INDEX')) {
+          let {INDEX, ...lyr} = v
+          let layers = [...state.mapStyle.layers]
+          layers.splice(INDEX, 0, lyr);
+          state.mapStyle.layers = layers
+        // otherwise, put on top it on top of the layer list
+        } else {
+          state.mapStyle.layers.push(v)
+        }
       })
+    },
+    /**
+     * generic action called from middleware, used to set a piece of state, e.g.,
+     * with the response from an async call
+     */
+    [setState]: (state, action) => {
+      const { data, path, how } = action.payload
 
-    }
+      if (how == "replace") {
+        // put the JSON in the store at path using lodash's set function
+        set(state, path, data)
+      } else if (how == "append") {
+        let existing = get(state, path)
+        // console.log(existing, data)
+        set(state, path, [...existing, ...data])
+      }
+    },    
 
   }
 )

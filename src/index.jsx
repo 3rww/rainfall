@@ -13,6 +13,8 @@ import App from './App';
 // service worker
 import * as serviceWorker from './serviceWorker';
 
+console.log("Hello there curious person! The 3RWW Rainfall API is located at", process.env.REACT_APP_API_URL_ROOT, "- check it out for more powerful querying capability!")
+
 // entrypoint for the react app
 ReactDOM.render(
     <Provider store={store}>

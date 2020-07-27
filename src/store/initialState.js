@@ -8,7 +8,7 @@ import {
   MAPBOX_STYLE_BASEMAP
 } from './config'
 
-import { testFetchHistoryItems } from './helpers'
+import { testFetchHistoryItems } from './utils'
 
 export const initialState = {
   // progress ---------------------------------------------
@@ -17,6 +17,10 @@ export const initialState = {
     mapLoaded: false,
     initialStyleLoaded: false,
     isFetching: true,
+    // isThinking increments decrements with calls to start/stopThinking. Set 
+    // at 1 so we're "thinking" on load. There will be one additional call to 
+    // stopThinking that's only hit after all start up tasks complete
+    isThinking: 0, 
   },
 
   // fetchKwargs ------------------------------------------
@@ -24,14 +28,14 @@ export const initialState = {
   fetchKwargs: {
     // selectedEvent holds date/time parameters for the request, along with any other info about the event
     selectedEvent: {
-      start_dt: eventsData[0].start_dt, //defaultStartDt,
-      end_dt: eventsData[0].end_dt,
+      start_dt: "", //eventsData[0].start_dt, //defaultStartDt,
+      end_dt: "", // eventsData[0].end_dt,
       // these two props are available with the pre-defined events:
       eventid: null,
       report: null
     },
     sensorLocations: {
-      raingauge: [],
+      gauge: [],
       basin: [],
       pixel: []
     },
@@ -40,18 +44,19 @@ export const initialState = {
     f: 'sensor'
   },
   // fetchHistory is for storing requests to the API, *along with the received data*
-  fetchHistory: testFetchHistoryItems,
+  fetchHistory: [], //testFetchHistoryItems,
 
   // EVENTS -----------------------------------------------  
   rainfallEvents: {
-    // events is the pre-loaded rainfall events data; TODO: replace with call to the events table in DDB
-    list: eventsData,
+    // list of rainfall events; populated via an async call to the API at load time.
+    list: [],
     // maxDateTime stores the max datetime found in the events array. It's eval'd an on-app load and 
     // used to set limits on selectable datetime
     stats: {
-      latest: eventLatest,
-      longest: eventLongest,
-      maxDate: defaultEndDt
+      latest: null,
+      longest: null,
+      maxDate: null,
+      minDate: null
     },
     // eventFilters stores any filter conditions used to filter the list of events
     filters: {
@@ -81,14 +86,5 @@ export const initialState = {
   },  
   // mapStyle is where the MapboxGL map's style sheet is stored; changes here change the map
   // note that we're pre-populating some expected objects
-  mapStyle: {
-    sources: {
-      pixel: {
-        data: {}
-      },
-      raingauge: {
-        data: {}
-      }      
-    }
-  }
+  mapStyle: {}
 } 

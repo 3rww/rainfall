@@ -1,0 +1,23 @@
+.thinking-overlay {
+    height: 100%;
+    width: 100%;
+    // background-color: rgba(255,255,255,0.75);
+    background-color: #2195f36c;
+    position: absolute;
+    z-index: 100;
+}
+
+.thinking-content {
+    color: #fff;
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    -moz-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.thinking-spinner {
+    width: 8rem; 
+    height: 8rem;
+}

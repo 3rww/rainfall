@@ -5,14 +5,19 @@ import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import { isEmpty } from 'lodash-es'
 
-import { setStyle, mapLoaded, addLayers } from '../../store/actions';
-import { fetchJSON } from '../../store/middleware';
-import { transformToMapboxSourceObject } from '../../store/helpers'
+import { 
+  setStyle, 
+  mapLoaded, 
+  startThinking, 
+  stopThinking 
+} from '../../store/actions';
+import { initDataFetch } from '../../store/middleware';
+import { transformToMapboxSourceObject } from '../../store/utils'
 
 import {
   URL_GARRD_GEOJSON,
   URL_GAUGE_GEOJSON,
-  mapLayers
+  MAP_LAYERS
 } from '../../store/config'
 
 import diffStyles from '../../utilities/styleSpecDiff';
@@ -20,7 +25,6 @@ import diffStyles from '../../utilities/styleSpecDiff';
 import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import './map.scss'
-import store from '../../store';
 
 
 let DEBUG = true
@@ -41,6 +45,7 @@ class ReactMap extends Component {
   tooltipContainer;
 
   componentDidMount() {
+    this.props.loadingMap()
     // create and load the map
     this.loadMap()
   }
@@ -129,7 +134,7 @@ class ReactMap extends Component {
 
   mapSources = [{
       url: URL_GAUGE_GEOJSON,
-      pathArray: ["mapStyle", "sources", "raingauge"],
+      pathArray: ["mapStyle", "sources", "gauge"],
       transformer: transformToMapboxSourceObject
     },{
       url: URL_GARRD_GEOJSON,
@@ -142,26 +147,7 @@ class ReactMap extends Component {
    */
   fetchMapLayers() {
     
-    return Promise.all([
-      new Promise((resolve, reject) => {
-        let result = this.props.fetchLayerSource({
-          url: URL_GAUGE_GEOJSON,
-          pathArray: ["mapStyle", "sources", "raingauge"],
-          transformer: transformToMapboxSourceObject,
-          keepACopy: true
-        })
-        resolve(result)
-      }),
-      new Promise((resolve, reject) => {
-        let result = this.props.fetchLayerSource({
-          url: URL_GARRD_GEOJSON,
-          pathArray: ["mapStyle", "sources", "pixel"],
-          transformer: transformToMapboxSourceObject,
-          keepACopy: true
-        })
-        resolve(result)
-      })
-    ])
+
 
   }
 
@@ -220,56 +206,31 @@ class ReactMap extends Component {
         customAttribution: this.props.initMap.attribution
       }));
 
-      // add the source for the operational layers to the mapStyle here
-      // this.webmap.addSource("ppt-outreach-concepts", this.props.initMap.mapboxSources["ppt-outreach-concepts"])
-      // this.props.initMap.mapboxLayers.forEach(layer => {
-      //   // this is the base layer
-      //   this.webmap.addLayer(layer)
-      // })
-
-      // add sources for the geocoding and drawing here
-      //   this.webmap.addSource(GEOCODING_LAYER_SOURCE, {
-      //     type: 'geojson',
-      //     data: {
-      //       'type': 'FeatureCollection',
-      //       'features': []
-      //     }        
-      //   });
-      //   this.props.initMap.geocodingLayers.forEach(layer => {
-      //     // insert the geocoding layer above the destinations layer:
-      //     this.webmap.addLayer(layer, "paac-proposed-brt-labels")  
-      //     this.webmap.setLayoutProperty(layer.id, 'visibility', 'visible')
-      //   })
-
       // Get the entire map stylesheet from the loaded map and put it in the 
       // mapStyle object state tree via (ulimtately) the setStyle action
       let style = this.webmap.getStyle();
-      style = {
-        ...style,
-        transition: {
-          "duration": 50,
-          "delay": 0
-        }
-      }
-      // console.log("set style 1")
+      // style = {
+      //   ...style,
+      //   transition: {
+      //     "duration": 50,
+      //     "delay": 0
+      //   }
+      // }
+      // // console.log("set style 1")
       this.props.setStyle(style);
-      
 
-      // set our local state properties
-      //   const { lng, lat } = this.webmap.getCenter();
-      //   this.setState({lng:Number(lng.toFixed(4))})
-      //   this.setState({lat: Number(lat.toFixed(4))})
-      //   this.setState({zoom: Number(this.webmap.getZoom().toFixed(2))})
 
       console.log("map loaded")
       //dispatch the mapLoadded action
       this.props.mapLoaded(this.webmap.loaded());
 
       // dispatch actions that add geojson sources to the mapStyle.source object in redux,
-      this.fetchMapLayers().then(() => {
-        // then add the layers
-        this.props.addLayersToMap(mapLayers)
-      })
+      // this.fetchMapLayers().then(() => {
+      //   // then add the layers
+      //   this.props.addLayersToMap(mapLayers)
+      // })
+
+      this.props.initFetchData()
         
       
 
@@ -404,18 +365,19 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     // makeChoiceOnMapClick: payload => {
     //   dispatch(makeChoiceOnMapClick(payload))
     // },
+    loadingMap: payload => {
+      dispatch(startThinking())
+    },    
     setStyle: payload => {
       dispatch(setStyle(payload))
     },
     mapLoaded: payload => {
       dispatch(mapLoaded(payload))
+      dispatch(stopThinking())
     },
-    fetchLayerSource: payload => {
-      return dispatch(fetchJSON(payload))
-    },
-    addLayersToMap: payload => {
-      dispatch(addLayers(payload))
-    }
+    initFetchData: payload => {
+      return dispatch(initDataFetch(payload))
+    }    
   }
 }
 

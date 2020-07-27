@@ -67,12 +67,12 @@ class Navigation extends Component {
           </Navbar.Brand>
           <Navbar.Text>
             &nbsp;&nbsp;
-            {this.props.isFetching === true || this.props.mapLoaded === false ? (
+            {/* {this.props.isThinking === true || this.props.mapLoaded === false ? (
               <span className="fa-layers fa-fw">
                 <FontAwesomeIcon icon={faSpinner} pulse size="4x"/>
                 <FontAwesomeIcon icon={faCloudRain} size="2x" transform="right-8"/>
               </span>
-            ) : ("")}
+            ) : ("")} */}
             
           </Navbar.Text>          
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -130,7 +130,7 @@ class Navigation extends Component {
 
 function mapStateToProps(state) {
   return {
-    isFetching: state.progress.isFetching,
+    isThinking: state.progress.isThinking > 0,
     mapLoaded: state.progress.mapLoaded
   }
 }

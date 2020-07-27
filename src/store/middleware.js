@@ -7,15 +7,30 @@ import {
   requestRainfallDataInvalid,
   requestRainfallDataSuccess,
   requestRainfallDataFail,
-  requestJson,
-  requestJsonSuccess,
-  requestJsonFail
+  asyncAction,
+  asyncActionSuccess,
+  asyncActionFail,
+  startThinking,
+  stopThinking,
+  addLayers,
+  pickRainfallDateTimeRange,
+  calcEventStats
 } from './actions'
+
 import {
   selectFetchKwargsKeys
 } from './selectors'
 
-import { API_URL_ROOT } from './config'
+import { transformEventsJSON, transformToMapboxSourceObject } from './utils'
+
+import {
+  MAP_LAYERS,
+  EVENTS_JSON_URL,
+  URL_BASIN_PIXEL_LOOKUP,
+  URL_GARRD_GEOJSON,
+  URL_GAUGE_GEOJSON
+} from './config'
+
 
 import store from './index'
 
@@ -39,7 +54,8 @@ export function fetchJSON(payload) {
 
     console.log(`getting data from "${url}" and loading to store.${pathArray.join(".")}`)
 
-    dispatch(requestJson(url))
+    dispatch(startThinking())
+    dispatch(asyncAction(url))
 
     let data;
 
@@ -61,8 +77,7 @@ export function fetchJSON(payload) {
 
             // NOTE: We can dispatch many times!
             // Here, we update the app state with the results of the API call. 
-          dispatch(requestJsonSuccess({ data: data, pathArray: pathArray, keepACopy: keepACopy }))
-          
+          dispatch(asyncActionSuccess({ data: data, pathArray: pathArray, keepACopy: keepACopy }))
           return true
         },
           // Do not use catch, because that will also catch
@@ -71,14 +86,135 @@ export function fetchJSON(payload) {
           // https://github.com/facebook/react/issues/6895        
         (error) => {
           console.log('An error occurred.', error)
-          dispatch(requestJsonFail('An error occurred.'))
+          dispatch(asyncActionFail('An error occurred.'))
           return false
         }
       )
-
+      .finally(() => dispatch(stopThinking()))
 
   }
 }
+
+
+/******************************************************************************
+ * APPLICATION START UP 
+ */
+
+/**
+ * asynchronously fetch the three seed datasets required for the app to start and render. 
+ * Called by initDataFetch before promiseFetchDatasets
+ * @param {*} dispatch 
+ */
+function promiseFetchReferenceDatasets(dispatch) {
+
+  return Promise.all([
+    // get the rainfall events json
+    new Promise((resolve, reject) => {
+      let result = dispatch(fetchJSON({
+        url: EVENTS_JSON_URL,
+        pathArray: ["rainfallEvents", "list"],
+        transformer: transformEventsJSON,
+        keepACopy: false
+      }))
+      resolve(result)
+    }),
+    // get the pixel-basin lookup json
+    new Promise((resolve, reject) => {
+      let result = dispatch(fetchJSON({
+        url: URL_BASIN_PIXEL_LOOKUP,
+        pathArray: ['refData', 'basinPixelLookup'],
+        transformer: false,
+        keepACopy: false
+      }))
+      resolve(result)
+    }),
+    // get the gauge geojson
+    new Promise((resolve, reject) => {
+      let result = dispatch(fetchJSON({
+        url: URL_GAUGE_GEOJSON,
+        pathArray: ["mapStyle", "sources", "gauge"],
+        transformer: transformToMapboxSourceObject,
+        keepACopy: true
+      }))
+      resolve(result)
+    }),
+    // get the pixel geojson
+    new Promise((resolve, reject) => {
+      let result = dispatch(fetchJSON({
+        url: URL_GARRD_GEOJSON,
+        pathArray: ["mapStyle", "sources", "pixel"],
+        transformer: transformToMapboxSourceObject,
+        keepACopy: true
+      }))
+      resolve(result)
+    })    
+
+  ])
+
+}
+
+/**
+ * initial async data fetches, map set up, and pre-calculations
+ * @param {*} payload 
+ */
+export function initDataFetch(payload) {
+
+  return function (dispatch) {
+
+    dispatch(startThinking())
+
+    // get all the core datsets and add them to the store (in parallel), then...
+    promiseFetchReferenceDatasets(dispatch)
+      .then((r) => {
+        // calculate event stats
+        dispatch(calcEventStats())
+      })
+      .then(() => {
+        // set the defaul date/time range
+        let payload = {
+          startDt: store.getState().rainfallEvents.stats.minDate, 
+          endDt: store.getState().rainfallEvents.stats.maxDate
+        }
+        dispatch(pickRainfallDateTimeRange(payload))
+      })
+      .then(() => dispatch(stopThinking())
+      )
+
+  }
+}
+
+/**
+ * initial async map layer fetches -- called by the map component
+ * @param {*} payload 
+ */
+export function initLayerFetch(payload) {
+
+  return function (dispatch) {
+
+    dispatch(startThinking())
+
+    // get all the core datsets and add them to the store (in parallel), then...
+    promiseFetchReferenceDatasets(dispatch)
+      .then((r) => {
+        // add layers/styles to the style source
+        dispatch(addLayers(MAP_LAYERS))        
+        // calculate event stats
+        dispatch(calcEventStats())
+      })
+      .then(() => {
+        // set the defaul date/time range
+        let payload = {
+          startDt: store.getState().rainfallEvents.stats.minDate, 
+          endDt: store.getState().rainfallEvents.stats.maxDate
+        }
+        dispatch(pickRainfallDateTimeRange(payload))
+      })
+      .finally(() => dispatch(stopThinking())
+      )
+
+  }
+}
+
 
 /**
  * request data from the 3RWW Rainfall API
@@ -113,7 +249,7 @@ export function fetchRainfallDataFromApiV2(payload) {
     // requestRainfallDataInvalid(s)
 
     // parse the props of selectedEvent to form the body of the API request
-    let requestSensors = ['raingauge', 'basin']
+    let requestSensors = ['gauge', 'basin']
     requestSensors.forEach((s, i) => {
 
       // skip if no selections
@@ -134,14 +270,14 @@ export function fetchRainfallDataFromApiV2(payload) {
       // little weird here: get the correct names used for various 
       // api params and state tree lookups
       // 0: api url endpoint and state tree path, 1: api param
-      let sensor = (s == 'basin') ? ['pixel', 'pixels'] : ['raingauge', 'gauges']
+      let sensor = (s == 'basin') ? ['pixel', 'pixels'] : ['gauge', 'gauges']
 
       requestParams[sensor[1]] = kwargs.sensorLocations[sensor[0]].map(i => i.value).join(",")
 
 
       // indicate that the request is proceeding in the UI
       // (this will include looked-up pixel locations)
-      dispatch(requestRainfallData({ 
+      dispatch(requestRainfallData({
         fetchKwargs: kwargs, 
         requestId: requestId,
         sensor: sensor[0]
@@ -150,7 +286,7 @@ export function fetchRainfallDataFromApiV2(payload) {
       console.log(requestParams)
       
       axios({
-        url: `${API_URL_ROOT}v2/${sensor[0]}`,
+        url: `${process.env.REACT_APP_API_URL_ROOT}v2/${sensor[0]}`,
         method: 'GET',
         params: requestParams
       })

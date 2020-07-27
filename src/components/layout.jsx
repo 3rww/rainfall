@@ -4,6 +4,7 @@ import {Row, Col, Container, Tabs, Tab} from 'react-bootstrap';
 
 import ReactMap from './map/map';
 import RainfallDownloader from './sidebar/downloader'
+import ThinkingOverlay from './thinking/thinkingOverlay'
 
 import './layout.scss'
 
@@ -14,8 +15,10 @@ class Layout extends React.Component {
   render() {
 
     return (
-      // <Container fluid style={{marginBottom: 95+"px"}}>
+    
       <div className="fill no-gutters">
+
+        <ThinkingOverlay/>
 
         <Row>
           <Col>
@@ -28,12 +31,11 @@ class Layout extends React.Component {
             <Container className="sidebar">
             <Tabs defaultActiveKey="tab-historic" id="uncontrolled-tab-example" >
               <Tab eventKey="tab-realtime" title="Real-Time" disabled>
-                <p>(Loop selector here)</p>
-                
+                <RainfallDownloader rainfallDataStatus="realtime"/>
               </Tab>
               <Tab eventKey="tab-historic" title="Historic" >
                 <br></br>
-                <RainfallDownloader/>
+                <RainfallDownloader rainfallDataStatus="historic"/>
               </Tab>
             </Tabs>
             </Container>         

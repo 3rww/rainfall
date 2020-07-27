@@ -12,7 +12,7 @@ import { pickDownload } from '../../store/actions'
 
 
 /**
-* Layout Component. Everything on the page under the Nav: Controls and Map.
+* Downloads List Component. 
 */
 class DownloadsList extends React.Component {
 
