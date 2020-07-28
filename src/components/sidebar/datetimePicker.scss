@@ -1,8 +1,16 @@
-.datetimepicker-control {
-  font-size: 0.85rem !important;
+// .datetimepicker-control {
+//   font-size: 0.85rem !important;
+// }
+
+// button.datetimepicker-control {
+//   border-radius: 0px;
+//   height: 100%;
+// }
+
+.daterangepicker {
+  z-index: 1000000 !important;
 }
 
-button.datetimepicker-control {
-  border-radius: 0px;
-  height: 100%;
+.MyDateTimeRangeContainer {
+  z-index: 1000000 !important;
 }
