@@ -25,23 +25,16 @@ export const URL_GAUGE_GEOJSON = "/static/data/gauges.geojson"
 export const URL_BASIN_PIXEL_LOOKUP = "/static/data/basin-lookup-pixel.json"
 
 
-// rainfall events data ----------------------------------
+// rainfall data constants ----------------------------------
 
-// export const eventsData = RAINFALL_EVENTS.events
-//   .slice(0)
-//   .reverse()
-//   .map((e, i) => ({
-//     ...e,
-//     hours: moment(e.end_dt).diff(moment(e.start_dt), 'hours'),
-//     isFetching: false
-//   }))
-//   .filter(e => e.hours > 0)
+// the earliest date that can be selected:
+export const RAINFALL_MIN_DATE = "2000-04-01"
 
-// export const eventLongest = Math.max(...eventsData.map(e => e.hours))
-// export const eventLatest = eventsData.map(e => e.end_dt).sort()[eventsData.length - 1]
-// export const defaultStartDt = moment(eventLatest).startOf("month").format()
-// export const defaultEndDt = moment(eventLatest).endOf("month").format()
-
+// the types of rainfall data that can be queried
+export const RAINFALL_TYPES = {
+  historic: "historic",
+  realtime: "realtime"
+}
 
 // rainfall layers + styles (mapbox style spec)
 

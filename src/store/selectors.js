@@ -56,6 +56,18 @@ export const selectFetchKwargsKeys = (state) => {
   return [...keys(state.fetchKwargs).map(k => k)]
 }
 
+export const eventIsSelected = (state) => {
+  const s = selectSelectedEvent(state)
+  if (
+    (s.start_dt !== null && s.start_dt !== undefined)
+    && 
+    (s.end_dt !== null  && s.end_dt !== undefined) 
+  ) {
+    return true
+  }
+  return false
+}
+
 export const selectEventStats = (state) => state.rainfallEvents.stats
 
 // export const selectPixelsForBasin = (state, basin) => {

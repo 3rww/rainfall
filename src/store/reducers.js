@@ -83,7 +83,6 @@ export const rootReducer = createReducer(
       let eventLatest = eventsData.map(e => e.end_dt).sort()[eventsData.length - 1]
       state.rainfallEvents.stats.latest = eventLatest
       state.rainfallEvents.stats.longest = Math.max(...eventsData.map(e => e.hours))
-      state.rainfallEvents.stats.minDate = moment(eventLatest).startOf("month").format()
       state.rainfallEvents.stats.maxDate = moment(eventLatest).endOf("month").format()
     },
     /**

@@ -6,6 +6,8 @@ import ReactMap from './map/map';
 import RainfallDownloader from './sidebar/downloader'
 import ThinkingOverlay from './thinking/thinkingOverlay'
 
+import { RAINFALL_TYPES } from '../store/config'
+
 import './layout.scss'
 
 /**
@@ -29,13 +31,17 @@ class Layout extends React.Component {
         <Row className="fill no-gutters">
           <Col sm={5} className="scrolling-column">
             <Container className="sidebar">
-            <Tabs defaultActiveKey="tab-historic" id="uncontrolled-tab-example" >
-              <Tab eventKey="tab-realtime" title="Real-Time" disabled>
-                <RainfallDownloader rainfallDataStatus="realtime"/>
+            <Tabs 
+              defaultActiveKey="tab-historic" 
+              id="rainfall-data-type-tabs" 
+              mountOnEnter={true}
+            >
+              <Tab eventKey="tab-realtime" title="Real-Time (raw)" disabled>
+                <RainfallDownloader rainfallDataType={RAINFALL_TYPES.realtime}/>
               </Tab>
-              <Tab eventKey="tab-historic" title="Historic" >
+              <Tab eventKey="tab-historic" title="Historic (calibrated)" >
                 <br></br>
-                <RainfallDownloader rainfallDataStatus="historic"/>
+                <RainfallDownloader rainfallDataType={RAINFALL_TYPES.historic}/>
               </Tab>
             </Tabs>
             </Container>         

@@ -32,8 +32,8 @@ class RainfallDownloader extends React.Component {
 
   handleDownloadClick() {
     this.props.fetchRainfallData(
-      // rainfallDataStatus is either "historic" or "realtime"
-      this.props.rainfallDataStatus
+      // rainfallDataType is either "historic" or "realtime"
+      this.props.rainfallDataType
     )
   }
 
@@ -51,7 +51,7 @@ class RainfallDownloader extends React.Component {
           </Card.Header>
           <Accordion.Collapse eventKey="0">
             <Card.Body>
-              <DateTimePicker />
+              <DateTimePicker rainfallDataType={this.props.rainfallDataType}/>
               <hr></hr>
               <GeodataPicker />
               <hr></hr>

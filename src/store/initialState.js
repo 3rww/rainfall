@@ -1,11 +1,7 @@
 import {
-  eventsData,
-  eventLatest,
-  eventLongest,
-  defaultStartDt,
-  defaultEndDt,
   MAPBOX_TOKEN,
-  MAPBOX_STYLE_BASEMAP
+  MAPBOX_STYLE_BASEMAP,
+  RAINFALL_MIN_DATE
 } from './config'
 
 import { testFetchHistoryItems } from './utils'
@@ -28,8 +24,8 @@ export const initialState = {
   fetchKwargs: {
     // selectedEvent holds date/time parameters for the request, along with any other info about the event
     selectedEvent: {
-      start_dt: "", //eventsData[0].start_dt, //defaultStartDt,
-      end_dt: "", // eventsData[0].end_dt,
+      start_dt: null, //eventsData[0].start_dt, //defaultStartDt,
+      end_dt: null, // eventsData[0].end_dt,
       // these two props are available with the pre-defined events:
       eventid: null,
       report: null
@@ -56,7 +52,7 @@ export const initialState = {
       latest: null,
       longest: null,
       maxDate: null,
-      minDate: null
+      minDate: RAINFALL_MIN_DATE
     },
     // eventFilters stores any filter conditions used to filter the list of events
     filters: {

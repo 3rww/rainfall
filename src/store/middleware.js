@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { MD5 } from 'object-hash'
 import { has } from 'lodash-es'
+import moment from 'moment'
 
 import {
   requestRainfallData,
@@ -74,7 +75,6 @@ export function fetchJSON(payload) {
           } else {
             data = response.data
           }
-
             // NOTE: We can dispatch many times!
             // Here, we update the app state with the results of the API call. 
           dispatch(asyncActionSuccess({ data: data, pathArray: pathArray, keepACopy: keepACopy }))
@@ -163,7 +163,7 @@ export function initDataFetch(payload) {
 
     dispatch(startThinking())
 
-    // get all the core datsets and add them to the store (in parallel), then...
+    // get all the core datsets and layers and add them to the store (in parallel), then...
     promiseFetchReferenceDatasets(dispatch)
       .then((r) => {
         // calculate event stats
@@ -171,45 +171,14 @@ export function initDataFetch(payload) {
       })
       .then(() => {
         // set the defaul date/time range
+        let maxDate = store.getState().rainfallEvents.stats.maxDate
         let payload = {
-          startDt: store.getState().rainfallEvents.stats.minDate, 
-          endDt: store.getState().rainfallEvents.stats.maxDate
+          startDt: moment(maxDate).startOf('month').toISOString(),
+          endDt: maxDate
         }
         dispatch(pickRainfallDateTimeRange(payload))
       })
       .then(() => dispatch(stopThinking())
-      )
-
-  }
-}
-
-/**
- * initial async map layer fetches -- called by the map component
- * @param {*} payload 
- */
-export function initLayerFetch(payload) {
-
-  return function (dispatch) {
-
-    dispatch(startThinking())
-
-    // get all the core datsets and add them to the store (in parallel), then...
-    promiseFetchReferenceDatasets(dispatch)
-      .then((r) => {
-        // add layers/styles to the style source
-        dispatch(addLayers(MAP_LAYERS))        
-        // calculate event stats
-        dispatch(calcEventStats())
-      })
-      .then(() => {
-        // set the defaul date/time range
-        let payload = {
-          startDt: store.getState().rainfallEvents.stats.minDate, 
-          endDt: store.getState().rainfallEvents.stats.maxDate
-        }
-        dispatch(pickRainfallDateTimeRange(payload))
-      })
-      .finally(() => dispatch(stopThinking())
       )
 
   }
