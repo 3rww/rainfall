@@ -33,10 +33,11 @@ class DownloadsList extends React.Component {
           return (
             <ListGroup.Item
               key={idx}
-              active={fetchHistoryItem.isActive}
+              // active={fetchHistoryItem.isActive}
               // action
               as="div"              
               // onClick={() => this.handleListClick(fetchHistoryItem)}
+              variant={(fetchHistoryItem.isActive) ? ("primary"): ("")}
             >
 
               <Row noGutters>

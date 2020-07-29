@@ -4,6 +4,7 @@ import { Row, Col, Button, ButtonToolbar, ButtonGroup } from 'react-bootstrap';
 import moment from 'moment'
 
 import DownloadModal from './downloadModal'
+import { pickDownload } from '../../store/actions'
 
 
 /**
@@ -29,6 +30,7 @@ class DownloadsItem extends React.Component {
   handleShow(e) {
     // console.log(e)
     this.setState({ show: true });
+    this.props.pickDownload()
   }  
 
   render() {
@@ -136,12 +138,12 @@ const mapStateToProps = (state, ownProps) => {
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
-  return {}
-  // return {
-  //   pickDownload: payload => {
-  //     dispatch(pickDownload(payload))
-  //   }
-  // }
+  return {
+    pickDownload: payload => {
+      let p = {...ownProps.fetchHistoryItem, rainfallDataType: ownProps.rainfallDataType}
+      dispatch(pickDownload(p))
+    }
+  }
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(DownloadsItem);
