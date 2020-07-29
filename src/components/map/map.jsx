@@ -159,7 +159,7 @@ class ReactMap extends Component {
    */
   loadMap() {
 
-    console.log("loading the map")
+    // console.log("loading the map")
     // console.log(this.props.initMap)
     // ({initMap, styleUrl, longitude, latitude, zoom, token } = this.props.initMap)
 
@@ -220,7 +220,7 @@ class ReactMap extends Component {
       this.props.setStyle(style);
 
 
-      console.log("map loaded")
+      // console.log("map loaded")
       //dispatch the mapLoadded action
       this.props.mapLoaded(this.webmap.loaded());
 
@@ -366,14 +366,14 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     //   dispatch(makeChoiceOnMapClick(payload))
     // },
     loadingMap: payload => {
-      dispatch(startThinking())
+      dispatch(startThinking("Loading the map"))
     },    
     setStyle: payload => {
       dispatch(setStyle(payload))
     },
     mapLoaded: payload => {
       dispatch(mapLoaded(payload))
-      dispatch(stopThinking())
+      dispatch(stopThinking("Map loaded"))
     },
     initFetchData: payload => {
       return dispatch(initDataFetch(payload))

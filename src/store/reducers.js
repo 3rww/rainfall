@@ -30,11 +30,13 @@ import {
 
 import { 
   selectEvent, 
+  selectEventInverse,
   selectFetchKwargs,
-  selectFetchById,
-  selectFetchesById,
-  selectFetchesByIdInverse,
-  selectSelectedEvent
+  selectFetchHistoryItemById,
+  selectFetchHistoryItemsById,
+  selectFetchHistoryItemsByIdInverse,
+  selectRainfallEvents,
+  selectFetchHistory
 } from './selectors'
 
 /**
@@ -69,10 +71,12 @@ export const rootReducer = createReducer(
     [isFetching]: (state, action) => {
       state.progress.isFetching = action.payload.isFetching
     },
-    [startThinking]: state => {
+    [startThinking]: (state, action) => {
+      if (action.payload !== undefined) {console.log(action.payload)}
       state.progress.isThinking = state.progress.isThinking + 1
     },
-    [stopThinking]: state => {
+    [stopThinking]: (state, action) => {
+      if (action.payload !== undefined) {console.log(action.payload)}
       state.progress.isThinking = state.progress.isThinking - 1
     },
     /**
@@ -80,58 +84,71 @@ export const rootReducer = createReducer(
      */
     [calcEventStats] : (state, action) => {
       const eventsData = state.rainfallEvents.list
-      let eventLatest = eventsData.map(e => e.end_dt).sort()[eventsData.length - 1]
+      let eventLatest = eventsData.map(e => e.endDt).sort()[eventsData.length - 1]
+      
       state.rainfallEvents.stats.latest = eventLatest
       state.rainfallEvents.stats.longest = Math.max(...eventsData.map(e => e.hours))
       state.rainfallEvents.stats.maxDate = moment(eventLatest).endOf("month").format()
     },
+
     /**
-     * pickRainfallEvent
-     * retrieves details for the selected event from the events list;
-     * copies to fetchKwargs.selectedEvent state property
+     * pick the datetime range from the calendar
+     */
+    [pickRainfallDateTimeRange]: (state, action) => {
+      // update the start and end datetimes store for the type of rainfall data
+      // to be queried.
+      const { rainfallDataType, startDt, endDt } = action.payload
+      state.fetchKwargs[rainfallDataType].startDt = startDt
+      state.fetchKwargs[rainfallDataType].endDt = endDt
+      // also deselect any events if previously selected
+      selectRainfallEvents(state).list
+        .filter(e => e.selected)
+        .forEach(e => e.selected === false)
+    },
+    /**
+     * pick the datetime range from the rainfall events list (historic only)
      */
     [pickRainfallEvent]: (state, action) => {
-      // get the event from the list
+      // get the event from the list, set it's selected state to True
       let rainfallEvent = selectEvent(state, action.payload)
-      console.log({...rainfallEvent})
-      // set as the actively selected event
-      state.fetchKwargs.selectedEvent = rainfallEvent
+      rainfallEvent.selected = true
+      // set the others to false
+      let otherEvents = selectEventInverse(state, action.payload)
+      otherEvents.forEach((v,i) => v.selected = false)
+
+      //set the event's start and end datetimes as the actively selected event
+      state.fetchKwargs['historic'].startDt = rainfallEvent.startDt
+      state.fetchKwargs['historic'].endDt = rainfallEvent.endDt
     },
-    [pickRainfallDateTimeRange]: (state, action) => {
-      const { startDt, endDt } = action.payload
-      let selectedEvent = selectSelectedEvent(state)
-      selectedEvent = {
-        start_dt: startDt,
-        end_dt: endDt,
-        eventid: "custom",
-        report: null
-      }
-      state.fetchKwargs.selectedEvent = selectedEvent
-    },
+    /**
+     * pick the sensor (the "where")
+     */    
     [pickSensor]: (state, action) => {
 
-      const {sensorLocationType, selectedOptions} = action.payload
+      const {rainfallDataType, sensorLocationType, selectedOptions} = action.payload
       if (selectedOptions !== null) {
-        selectFetchKwargs(state).sensorLocations[sensorLocationType] = selectedOptions
+        selectFetchKwargs(state, rainfallDataType).sensorLocations[sensorLocationType] = selectedOptions
           .filter((opt) => opt !== null)
       } else {
-        selectFetchKwargs(state).sensorLocations[sensorLocationType] = []
+        selectFetchKwargs(state, rainfallDataType).sensorLocations[sensorLocationType] = []
       }
 
       // we do some additional work if a basin was picked, finding corresponding pixels.
       if (sensorLocationType == 'basin') {
-        selectFetchKwargs(state).sensorLocations[sensorLocationType].forEach((b, i) => {
+        selectFetchKwargs(state, rainfallDataType).sensorLocations[sensorLocationType].forEach((b, i) => {
           let pixelIds = state.refData.basinPixelLookup[b.value]
-          selectFetchKwargs(state).sensorLocations.pixel = pixelIds.map(i => ({value: i, label: i}))
+          selectFetchKwargs(state, rainfallDataType).sensorLocations.pixel = pixelIds.map(i => ({value: i, label: i}))
         })
       }
-
     },
+    /**
+     * pick the sensor (the "where")
+     */       
     [pickInterval]: (state, action) => {
-      state.fetchKwargs.rollup = action.payload
+       let {rollup, rainfallDataType } = action.payload
+       selectFetchKwargs(state, rainfallDataType).rollup = rollup
     },
-    [requestRainfallDataInvalid]: (state, action) => {
-    },
+
     /**
      * requestRainfallData/Success/Fail
      * used to indicate that rainfall is being requested, 
@@ -139,39 +156,39 @@ export const rootReducer = createReducer(
      */
     [requestRainfallData]: (state, action) => {
 
-      let { fetchKwargs, requestId, sensor } = action.payload
-
-      let currentFetch = state.fetchHistory.find(h => h.requestId == requestId)
-
+      let { fetchKwargs, requestId, rainfallDataType } = action.payload
+      
+      let currentFetch = selectFetchHistoryItemById(state, requestId)
+      // creates a fetch history item, which includes all the parameters
+      // that were used in generating the request
       if (currentFetch == undefined) {
-        state.fetchHistory.push({
+        selectFetchHistory(state, rainfallDataType).push({
           fetchKwargs: fetchKwargs,
           requestId: requestId,
-          isFetching: true,
+          isFetching: 1,
           isActive: false,
-          results: false,
-          // results: {[sensor]: false}
+          results: false
         })
-      } // else {
-      //   currentFetch[sensor] = false
-      // }
-
-      state.progress.isFetching = true
+      } else {
+        currentFetch.isFetching = currentFetch.isFetching + 1
+      }
 
     },
     [requestRainfallDataSuccess]: (state, action) => {
 
       console.log("request", action.payload, "succeeded")
-      let {requestId, results, kwargs } = action.payload
+      let {requestId, rainfallDataType, results, processedKwargs } = action.payload
 
       // the current fetch:
-      selectFetchesById(state, requestId).forEach(thisRequest => {
+      selectFetchHistoryItemsById(state, requestId).forEach(fetchItem => {
         // set actively selected status to true
-        thisRequest.isActive = true
+        fetchItem.isActive = true
         // set fetching status to false
-        thisRequest.isFetching = false
+        fetchItem.isFetching = fetchItem.isFetching - 1
         // push the results
-        thisRequest.results = {...results, ...thisRequest.results}
+        fetchItem.results = {...results, ...fetchItem.results}
+        // save a copy of the request kwargs as interpreted by the API (useful for debugging)
+        fetchItem.processedKwargs = processedKwargs
   
         // then for each type of result (potentially: raingauge and/or pixel)
         // manipulate the map state by first adding the results to the geojson
@@ -188,7 +205,7 @@ export const rootReducer = createReducer(
                   ...f.properties, 
                   intervals: rainfallData.data,
                   total: rainfallData.total,
-                  params: kwargs
+                  params: processedKwargs
                 }
               })
             // repalce the geojson in the style sheet with the updated version
@@ -200,9 +217,8 @@ export const rootReducer = createReducer(
       })
 
       // for all other fetches (if any), set isActive to false
-      selectFetchesByIdInverse(state, requestId).forEach(h => h.isActive = false)
-
-      state.progress.isFetching = false
+      selectFetchHistoryItemsByIdInverse(state, requestId)
+        .forEach(h => h.isActive = false)
 
     },
     /**
@@ -210,24 +226,29 @@ export const rootReducer = createReducer(
      * downloaded rainfall dataset
      */
     [pickDownload]: (state, action) => {
-      let { requestId, fetchKwargs } = action.payload
-      console.log(requestId, fetchKwargs)
-      // set the overall fetch kwargs to match those of the selected download
-      state.fetchKwargs = fetchKwargs
+
+      console.log(action.payload)
+      let { rainfallDataType, ...fetchHistoryItem } = action.payload
+      let requestId = fetchHistoryItem.requestId
+      let fetchKwargs = fetchHistoryItem.fetchKwargs
+
       // update the state of the item in the download list
+      let thisFetch = selectFetchHistoryItemById(state, requestId)
+      console.log("thisFetch", thisFetch)
+      thisFetch.isActive = true
 
-      state.fetchHistory
-        .forEach(h => h.isActive = false)
-      state.fetchHistory
-        .filter(h => h.requestId == requestId)
-        .forEach(h => h.isActive = true)
+      let otherFetches = selectFetchHistoryItemsByIdInverse(state, requestId)
+      otherFetches.forEach((v) => v.isActive = false)
+      console.log("otherFetches", otherFetches)
 
-      let thisFetch = selectFetchById(state, requestId)
+      // set the overall fetch kwargs to match those of the selected download
+      // let overallFetchKwargs = selectFetchKwargs(state, rainfallDataType)
+      // overallFetchKwargs = thisFetch.fetchKwargs
+      state.fetchKwargs[rainfallDataType] = thisFetch.fetchKwargs
 
       // then for each type of result (potentially: raingauge and/or pixel)
       // manipulate the map state by first adding the results to the geojson
       keys(thisFetch.results).forEach(layerSource => {
-
         // find the corresponding geojson (original copy)
         let thisGeoJson = {...state.refData[layerSource].data}
         // add the results to the properties in the corresponding geojson feature
@@ -246,18 +267,16 @@ export const rootReducer = createReducer(
           state.mapStyle.sources[layerSource].data = thisGeoJson
         })
 
-      })        
+      })
 
-    },    
+    },
     [requestRainfallDataFail]: (state, action) => {
 
       console.log("request", action.payload, "failed")
       let {requestId, results } = action.payload
-      let thisRequest = selectFetchById(state, requestId)
-      thisRequest.isFetching = false
-      // thisRequest.results = {...results, ...thisRequest.results}
-      state.progress.isFetching = false
-
+      let fetchItem = selectFetchHistoryItemById(state, requestId)
+      fetchItem.isFetching = fetchItem.isFetching - 1
+      // fetchItem.results = {...results, ...fetchItem.results}
     },
 
     /**

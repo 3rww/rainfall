@@ -4,7 +4,7 @@ import {
   RAINFALL_MIN_DATE
 } from './config'
 
-import { testFetchHistoryItems } from './utils'
+import { testFetchHistoryItems } from './data/test_events'
 
 export const initialState = {
   // progress ---------------------------------------------
@@ -22,32 +22,42 @@ export const initialState = {
   // fetchKwargs ------------------------------------------
   // holds arguments for calling the API, e.g., sensor type, rollup, zerofill
   fetchKwargs: {
-    // selectedEvent holds date/time parameters for the request, along with any other info about the event
-    selectedEvent: {
-      start_dt: null, //eventsData[0].start_dt, //defaultStartDt,
-      end_dt: null, // eventsData[0].end_dt,
-      // these two props are available with the pre-defined events:
-      eventid: null,
-      report: null
+    realtime: {
+      startDt: null,
+      endDt: null,
+      sensorLocations: {
+        gauge: [],
+        basin: [],
+        pixel: []
+      },
+      rollup: "Total",
+      zerofill: true,
+      f: 'sensor'
     },
-    sensorLocations: {
-      gauge: [],
-      basin: [],
-      pixel: []
-    },
-    rollup: "Total",
-    zerofill: true,
-    f: 'sensor'
+    historic: {
+      startDt: null,
+      endDt: null,
+      sensorLocations: {
+        gauge: [],
+        basin: [],
+        pixel: []
+      },
+      rollup: "Total",
+      zerofill: true,
+      f: 'sensor'
+    }
   },
   // fetchHistory is for storing requests to the API, *along with the received data*
-  fetchHistory: [], //testFetchHistoryItems,
-
+  fetchHistory: {
+    realtime: [],
+    historic: testFetchHistoryItems //[],
+  },
   // EVENTS -----------------------------------------------  
   rainfallEvents: {
     // list of rainfall events; populated via an async call to the API at load time.
     list: [],
     // maxDateTime stores the max datetime found in the events array. It's eval'd an on-app load and 
-    // used to set limits on selectable datetime
+    // used to set limits on selectable datetimes for the historic data
     stats: {
       latest: null,
       longest: null,

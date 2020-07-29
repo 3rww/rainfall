@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Navbar, Nav, Button, Modal } from 'react-bootstrap';
+import { Navbar, Nav, Button, Modal, Col, Row } from 'react-bootstrap';
 import ReactMarkdown from 'react-markdown/with-html'
 
 // icons
@@ -25,13 +25,29 @@ class Navigation extends Component {
       content: {
         AboutButton: {
           title: (
-            <div>
-              Make it Rain
-              <br></br><br></br>
-              <small>A project by </small><img className="brand-logo" src="/static/assets/3rww_logo_full_inverse_transparent_blue.png" placeholder="3 River Wet Weather" alt="3RWW Logo"/>
-            </div>
+            <Row>
+              <Col sm={9}>
+              <h1>Make It Rain <small><em>beta</em></small></h1>
+              <h2><small>Hyper-local rainfall data for Allegheny County</small></h2>
+              </Col>
+              <Col>
+              <small>A project by </small>
+              <br></br><img className="brand-logo" src="/static/assets/3rww_logo_full_inverse_transparent_blue.png" placeholder="3 River Wet Weather" alt="3RWW Logo"/>
+              </Col>
+            </Row>
           ),
-          content: ``
+          content: `
+Have you ever wondered how rainfall is actually measured? Technical instruments, called rain gauges, are designed to collect and accurately measure rainfall during wet weather events. However, a rain gauge can only provide a specific rainfall measurement for the limited geographic area where the gauge is located.
+
+On the flip side, radar systems, often used in weather reports, do not measure rainfall directly, but rather they detect the intensity of microwave energy reflected by raindrops, called reflectivity. Through the use of a mathematical formula, the reflectivity of the raindrops can be converted by the radar system into rainfall estimates for a particular defined area.
+
+Neither measurement technique is perfect, but when the two are combined—when radar estimates are calibrated with actual rain gauge data—a highly accurate and valuable source of rainfall data can be calculated over large geographic areas.
+
+Because engineers and planners addressing the wet weather issue need this level of accuracy, 3 Rivers Wet Weather created the calibrated radar rainfall system in 2001. Communities throughout Allegheny County use this data—provided in both real-time and historical formats—to design more cost-effective solutions to reduce or eliminate sewage overflows and improve stormwater management.
+
+The NEXRAD radar (located in Moon Township) data is calibrated with the rain gauge measurements collected during the same time period and rain event for every square kilometer in Allegheny County. The resulting rainfall data is equivalent in accuracy to having 2,276 rain gauges placed across the County.
+
+          `
         },
         // LegendButton: {
         //   title:"Map Legend",

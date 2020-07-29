@@ -40,8 +40,8 @@ class EventsList extends React.Component {
               {
                 this.props.events.map((e, i) => {
 
-                  let dt0 = moment(e.start_dt)
-                  let dt1 = moment(e.end_dt);
+                  let dt0 = moment(e.startDt)
+                  let dt1 = moment(e.endDt);
                   // let hasData = e.data.length > 0;
                   // let pct = (e.hours / this.props.maxHours) * 100
                   let pct = (e.hours / 48) * 100

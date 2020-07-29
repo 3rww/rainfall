@@ -53,9 +53,9 @@ class RainfallDownloader extends React.Component {
             <Card.Body>
               <DateTimePicker rainfallDataType={this.props.rainfallDataType}/>
               <hr></hr>
-              <GeodataPicker />
+              <GeodataPicker rainfallDataType={this.props.rainfallDataType}/>
               <hr></hr>
-              <IntervalPicker />
+              <IntervalPicker rainfallDataType={this.props.rainfallDataType}/>
               <hr></hr>
               <Button
                 onClick={this.handleDownloadClick}
@@ -76,13 +76,10 @@ class RainfallDownloader extends React.Component {
           <Accordion.Collapse eventKey="1">
             <Card.Body>
               {this.props.hasDownloads ? (
-                ""
+                <DownloadsList rainfallDataType={this.props.rainfallDataType}/>  
               ) : (
                 <p>Fetched rainfall data will be available here.</p>
               )}
-
-              <DownloadsList/>
-
             </Card.Body>
           </Accordion.Collapse>
         </Card>
@@ -93,12 +90,13 @@ class RainfallDownloader extends React.Component {
   }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps(state, ownProps) {
 
-  let hasSelections = keys(state.fetchKwargs.sensorLocations).filter(k => state.fetchKwargs.sensorLocations[k].length > 0)
+  let hasSelections = keys(state.fetchKwargs[ownProps.rainfallDataType].sensorLocations)
+    .filter(k => state.fetchKwargs[ownProps.rainfallDataType].sensorLocations[k].length > 0)
 
   return {
-    hasDownloads: state.fetchHistory.length > 0,
+    hasDownloads: state.fetchHistory[ownProps.rainfallDataType].length > 0,
     hasKwargs: !hasSelections.length > 0
   }
 }

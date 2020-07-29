@@ -19,7 +19,7 @@ import {
 } from './actions'
 
 import {
-  selectFetchKwargsKeys
+  selectFetchKwargs
 } from './selectors'
 
 import { transformEventsJSON, transformToMapboxSourceObject } from './utils'
@@ -53,9 +53,7 @@ export function fetchJSON(payload) {
 
     const { url, pathArray, transformer, keepACopy } = payload
 
-    console.log(`getting data from "${url}" and loading to store.${pathArray.join(".")}`)
-
-    dispatch(startThinking())
+    dispatch(startThinking(`getting data from "${url}"`))
     dispatch(asyncAction(url))
 
     let data;
@@ -90,7 +88,7 @@ export function fetchJSON(payload) {
           return false
         }
       )
-      .finally(() => dispatch(stopThinking()))
+      .finally(() => dispatch(stopThinking(`data from "${url}" loaded to ${pathArray.join(".")}`)))
 
   }
 }
@@ -102,7 +100,7 @@ export function fetchJSON(payload) {
 
 /**
  * asynchronously fetch the three seed datasets required for the app to start and render. 
- * Called by initDataFetch before promiseFetchDatasets
+ * Called by initDataFetch 
  * @param {*} dispatch 
  */
 function promiseFetchReferenceDatasets(dispatch) {
@@ -161,24 +159,38 @@ export function initDataFetch(payload) {
 
   return function (dispatch) {
 
-    dispatch(startThinking())
+    dispatch(startThinking("Loading reference data and map layers"))
 
     // get all the core datsets and layers and add them to the store (in parallel), then...
     promiseFetchReferenceDatasets(dispatch)
       .then((r) => {
+
         // calculate event stats
+        // TODO: make an API endpoint for a database view that does this calc 
+        // to save some time here
         dispatch(calcEventStats())
+
       })
       .then(() => {
-        // set the defaul date/time range
+
+        // set the default date/time range for historic and realtime pickers
+
         let maxDate = store.getState().rainfallEvents.stats.maxDate
-        let payload = {
+
+        dispatch(pickRainfallDateTimeRange({
+          rainfallDataType: "realtime",
+          startDt: moment().subtract(2, 'hour').toISOString(),
+          endDt: moment().toISOString()
+        }))
+
+        dispatch(pickRainfallDateTimeRange({
+          rainfallDataType: "historic",
           startDt: moment(maxDate).startOf('month').toISOString(),
-          endDt: maxDate
-        }
-        dispatch(pickRainfallDateTimeRange(payload))
+          endDt: maxDate          
+        }))   
+
       })
-      .then(() => dispatch(stopThinking())
+      .then(() => dispatch(stopThinking("Initial data load complete."))
       )
 
   }
@@ -191,21 +203,27 @@ export function initDataFetch(payload) {
  */
 export function fetchRainfallDataFromApiV2(payload) {
 
+  console.log(payload)
+
   return function (dispatch) {
 
-    // get the current set of fetchKwargs; use the payload if provided, 
-    // otherwise get from the state tree
-    let kwargs
-    if (payload !== undefined) {
-      if (selectFetchKwargsKeys(store.getState()).every(k => has(payload, k))) {
-        kwargs = {...payload}
-      } else {
-        kwargs = {...store.getState().fetchKwargs}
-      }
-    } else {
-      kwargs = {...store.getState().fetchKwargs}
-    }
+    // // get the current set of fetchKwargs; use the payload if provided, 
+    // // otherwise get from the state tree
+    // let kwargs
+    // if (payload !== undefined) {
+    //   if (selectFetchKwargsKeys(store.getState()).every(k => has(payload, k))) {
+    //     kwargs = {...payload}
+    //   } else {
+    //     kwargs = {...store.getState().fetchKwargs}
+    //   }
+    // } else {
+    //   kwargs = {...store.getState().fetchKwargs}
+    // }
 
+    let rainfallDataType = payload
+    let kwargs = selectFetchKwargs(store.getState(), rainfallDataType)
+
+    console.log(rainfallDataType, kwargs)
 
     // generate a unique ID, based on the hash of the kwargs
     // this will let us 1) update the correct object in fetchHistory
@@ -228,8 +246,8 @@ export function fetchRainfallDataFromApiV2(payload) {
 
       // assemble the request params, except IDs
       let requestParams = {
-        start_dt: kwargs.selectedEvent.start_dt,
-        end_dt: kwargs.selectedEvent.end_dt,
+        start_dt: kwargs.startDt,
+        end_dt: kwargs.endDt,
         rollup: kwargs.rollup,
         f: kwargs.f
       }
@@ -245,17 +263,18 @@ export function fetchRainfallDataFromApiV2(payload) {
 
 
       // indicate that the request is proceeding in the UI
-      // (this will include looked-up pixel locations)
+      // stores the fetchKwargs from the state in the history object.
       dispatch(requestRainfallData({
         fetchKwargs: kwargs, 
         requestId: requestId,
-        sensor: sensor[0]
+        rainfallDataType: rainfallDataType
+        // sensor: sensor[0]
       }))
 
       console.log(requestParams)
       
       axios({
-        url: `${process.env.REACT_APP_API_URL_ROOT}v2/${sensor[0]}`,
+        url: `${process.env.REACT_APP_API_URL_ROOT}v2/${sensor[0]}/${rainfallDataType}/`,
         method: 'GET',
         params: requestParams
       })
@@ -263,34 +282,44 @@ export function fetchRainfallDataFromApiV2(payload) {
           (response) => {
             console.log(response) //.data.meta.records, "records retrieved")
 
-            let responseData = {...response.data}
+            let responseBody = response.data
 
-            let processedData = responseData.data.reduce(function(result, item) {
-              let {id, ...attrs} = item
-              attrs.total = attrs.data.map(i => i.val).reduce((a, b) => a + b, 0)
-              result[id] = attrs
-              return result;
-            }, {});
+            let processedData = []
+            if (responseBody.data.length > 0) {
+              processedData = responseBody.data.reduce(function(result, item) {
+                let {id, ...attrs} = item
+                attrs.total = attrs.data.map(i => i.val).reduce((a, b) => a + b, 0)
+                result[id] = attrs
+                return result;
+              }, {});
+            }
 
             dispatch(requestRainfallDataSuccess(
               {
                 requestId: requestId,
+                rainfallDataType: rainfallDataType,
                 results: {
                   [sensor[0]]: processedData
                 },
-                kwargs: {...responseData.args}
+                processedKwargs: responseBody.args,
+                // status: responseBody.status,
+                // messages: (responseBody.messages.length > 0) ? (responseBody.messages) : (false)
               }
             ))
             return true
           },
-
           (error) => {
             console.log('An error occurred.', error)
+
             dispatch(requestRainfallDataFail({
               requestId: requestId,
+              rainfallDataType,
               results: {
                 [sensor[0]]: false
-              }
+              },
+              // processedKwargs: responseBody.args,
+              // status: responseBody.status,
+              // messages: (responseBody.messages.length > 0) ? (responseBody.messages) : (false)
             }))
             return false
           }

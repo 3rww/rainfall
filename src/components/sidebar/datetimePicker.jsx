@@ -12,16 +12,18 @@ import {
   Spinner
 } from 'react-bootstrap'
 import moment from 'moment'
-import DateTimeRangeContainer from 'react-advanced-datetimerange-picker'
+import DateRangePicker from 'react-bootstrap-daterangepicker';
+
 // icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCalendar, faList } from '@fortawesome/free-solid-svg-icons'
+import { faCalendarAlt, faList } from '@fortawesome/free-solid-svg-icons'
 
 import EventsList from './eventsList';
 import { pickRainfallDateTimeRange } from '../../store/actions';
-import { selectSelectedEvent, selectEventStats, eventIsSelected } from '../../store/selectors'
-import { RAINFALL_TYPES } from '../../store/config'
+import { selectSelectedEvent, selectEventStats, eventIsSelected, selectFetchKwargs } from '../../store/selectors'
+import { RAINFALL_TYPES, RAINFALL_MIN_DATE } from '../../store/config'
 
+import 'bootstrap-daterangepicker/daterangepicker.css';
 import './datetimePicker.scss'
 
 class DateTimePicker extends React.Component {
@@ -38,11 +40,12 @@ class DateTimePicker extends React.Component {
 
   }
 
-  handleOnApply(startDt, endDt) {
+  handleOnApply(e, p) {
 
     this.props.dispatchPickRainfallDateTimeRange({
-      startDt: startDt.toISOString(),
-      endDt: endDt.toISOString()
+      rainfallDataType: this.props.rainfallDataType,
+      startDt: p.startDate.toISOString(),
+      endDt: p.endDate.toISOString()
     })
   }
 
@@ -58,6 +61,7 @@ class DateTimePicker extends React.Component {
 
     return (
       <div>
+
         <Modal
           show={this.state.show}
           onHide={this.handleClose}
@@ -84,90 +88,66 @@ class DateTimePicker extends React.Component {
         <Row noGutters>
           <Col>
 
-            {/* <InputGroup className="datetimepicker-control">
-              <FormControl
-                plaintext 
-                readOnly
-                placeholder="start and end date/times"
-                value={`${this.props.startDt} - ${this.props.endDt}`}
-                aria-label="start and end dates"
-                className="datetimepicker-control"
-              />
-              <InputGroup.Append>
-                
-                <DateRangePicker
-                  id="dtp-show-daterangepicker"
-                  initialSettings={{
-                    autoUpdateInput: true,
-                    locale: {
-                      cancelLabel: 'Clear',
-                      format: "MM/DD/YYYY hh:mm A"
-                    },
-                    startDate: this.props.startDt,
-                    endDate: this.props.endDt,
-                    timePicker: true,
-                    timePickerIncrement: 15,
-                    minDate: new Date("04/01/2000"),
-                    maxDate: this.props.maxDate
-                  }}
-                >
-                  <Button 
+            {(this.props.startDt !== false && this.props.endDt !== false) ? (
+
+              <InputGroup className="datetimepicker-control">
+                <FormControl
+                  plaintext
+                  readOnly
+                  placeholder="start and end date/times"
+                  value={`${this.props.startDt.format("MM/DD/YYYY hh:mm A")} to ${this.props.endDt.format("MM/DD/YYYY hh:mm A")}`}
+                  aria-label="start and end dates"
+                  className="datetimepicker-control"
+                />
+                <InputGroup.Append>
+                  {/* Button to show a datetime-range picker */}
+                  <DateRangePicker
+                    id={`dtp-show-daterangepicker-${this.props.rainfallDataType }`}
+                    startDate={this.props.startDt}
+                    endDate={this.props.endDt}
+                    // minDate={this.props.minDate}
+                    maxDate={this.props.maxDate}
+                    timePicker={true}
+                    timePickerIncrement={15}
+                    showDropdowns={false}
+                    // minYear={this.props.minYear}
+                    // maxYear={this.props.maxYear}
+                    ranges={this.props.ranges}
+                    alwaysShowCalendars={true}
+                    onApply={this.handleOnApply}
+                    // linkedCalendars={true}
+                  >
+                    <Button
+                      variant="light"
+                      className="datetimepicker-control"
+                    >
+                      <FontAwesomeIcon icon={faCalendarAlt} />
+                    </Button>
+                  </DateRangePicker>
+                  
+                  {(this.props.rainfallDataType === RAINFALL_TYPES.historic) ? (
+                  <Button
+                    id="dtp-show-eventlistmodal"
                     variant="light"
+                    onClick={this.handleShow}
                     className="datetimepicker-control"
                   >
-                    <FontAwesomeIcon icon={faCalendar}/>
+                    <FontAwesomeIcon icon={faList} />
                   </Button>
-                </DateRangePicker>
-                
-                <Button 
-                  id="dtp-show-eventlistmodal"
-                  variant="light"
-                  onClick={this.handleShow}
-                  className="datetimepicker-control"
-                >
-                    <FontAwesomeIcon icon={faList}/>
-                </Button>                
-              </InputGroup.Append>
-            </InputGroup> */}
+                  ) : (
+                    null
+                  )}
+                </InputGroup.Append>
+              </InputGroup>
 
-            {/* <Button
-              id="dtp-show-eventlistmodal"
-              variant="light"
-              onClick={this.handleShow}
-              className="datetimepicker-control"
-            >
-              <FontAwesomeIcon icon={faList} />
-            </Button> */}
-
-            {(this.props.startDt !== false && this.props.endDt !==false) ? (
-              <DateTimeRangeContainer
-                ranges={this.props.ranges}
-                start={this.props.startDt}
-                end={this.props.endDt}
-                local={this.props.local}
-                maxDate={this.props.maxDate}
-                applyCallback={this.handleOnApply}
-                years={[2000, moment().year()]}
-                pastSearchFriendly
-                className="MyDateTimeRangeContainer"
-              >
-                <FormControl
-                  id="formControlsTextB"
-                  type="text"
-                  label="Text"
-                  placeholder="start and end date/times"
-                  style={{ cursor: "pointer" }}
-                  defaultValue={`${this.props.startDt.format("MM/DD/YYYY hh:mm A")} - ${this.props.endDt.format("MM/DD/YYYY hh:mm A")}`}
-                />
-              </DateTimeRangeContainer>
             ) : (
-              <Spinner
-                animation="grow"
-                variant="primary"
-                size="sm"
-              >
-                <span className="sr-only">"Fetching historic ranges...</span>
-              </Spinner>
+                <Spinner
+                  animation="border"
+                  variant="primary"
+                  size="sm"
+                >
+                  <span className="sr-only">"Fetching historic ranges...</span>
+                </Spinner>
               )}
 
           </Col>
@@ -178,51 +158,65 @@ class DateTimePicker extends React.Component {
 }
 
 function mapStateToProps(state, ownProps) {
-  let selectedEvent = selectSelectedEvent(state)
-  let hasEvent = eventIsSelected(state)
+  let currentKwargs = selectFetchKwargs(state, ownProps.rainfallDataType)
   let eventStats = selectEventStats(state)
 
-  // calculate different available ranges, depending on rainfall data type
+  // calculate different available ranges, start, and endtimes, depending on rainfall data type
+  let startDt = moment(currentKwargs.startDt)
+  let endDt = moment(currentKwargs.endDt)
+  let maxDate = false
   let ranges = {}
+
   if (ownProps.rainfallDataType == RAINFALL_TYPES.historic && eventStats.maxDate !== null) {
-    let maxDate = moment(eventStats.maxDate)
+    maxDate = eventStats.maxDate
     ranges = {
-      "Latest month": [maxDate.subtract(1, 'months'), maxDate],
-      "Latest 3 months": [maxDate.subtract(2, 'months'), maxDate],
-      "Latest 6 months": [maxDate.subtract(6, 'months'), maxDate],
-      "Latest 12 months": [maxDate.subtract(12, 'months'), maxDate],
-      "Last Year": [maxDate.subtract(1, "years").endOf("year"), maxDate.subtract(1, "years").startOf("year")],
+      "Latest month": [moment(maxDate).startOf('month'), moment(maxDate)],
+      "Latest 3 months": [moment(maxDate).subtract(2, 'month').startOf('month'), moment(maxDate)],
+      "Latest 6 months": [moment(maxDate).subtract(5, 'month').startOf('month'), moment(maxDate)],
+      "Latest 12 months": [moment(maxDate).subtract(11, 'month').startOf('month'), moment(maxDate)],
+      "Latest Available This Year": [moment(maxDate).startOf("year"),  moment(maxDate)],
+      "Last Year": [
+        moment(maxDate).subtract(1, "year").startOf("year"),
+        moment(maxDate).subtract(1, "year").endOf("year")
+      ],
     }
   } else if (ownProps.rainfallDataType == RAINFALL_TYPES.realtime) {
+    let now = moment().toISOString()
     ranges = {
-      "Past 2 hours": [moment().subtract(2, 'hours'), moment()],
-      "Past 4 hours": [moment().subtract(4, 'hours'), moment()],
-      "Past 6 hours": [moment().subtract(6, 'hours'), moment()],
-      "Past 12 hours": [moment().subtract(12, 'hours'), moment()],
-      "Past 24 hours": [moment().subtract(24, 'hours'), moment()],
-      "Past 48 hours": [moment().subtract(48, 'hours'), moment()],
-      "Today": [moment().startOf('day'), moment()],
-      "Yesterday": [moment().subtract(1, "days").startOf('day'), moment().subtract(1, "days").endOf('day')],
-      "Past 3 days": [moment().subtract(3, "days").startOf('day'), moment()],
-      "Past 7 days": [moment().subtract(7, "days").startOf('day'), moment()],
-      "Past month": [moment().subtract(1, "months").startOf('day'), moment()],
-      "Past 3 months": [moment().subtract(3, "months").startOf('month'), moment()],
+      "Past 2 hours": [moment(now).subtract(2, 'hour'), moment(now)],
+      "Past 4 hours": [moment(now).subtract(4, 'hour'), moment(now)],
+      "Past 6 hours": [moment(now).subtract(6, 'hour'), moment(now)],
+      "Past 12 hours": [moment(now).subtract(12, 'hour'), moment(now)],
+      "Past 24 hours": [moment(now).subtract(24, 'hour'), moment(now)],
+      "Past 48 hours": [moment(now).subtract(48, 'hour'), moment(now)],
+      "Today": [moment(now).startOf('day'), moment(now)],
+      "Yesterday": [moment(now).subtract(1, "day").startOf('day'), moment(now).subtract(1, "day").endOf('day')],
+      "Past 3 days": [moment(now).subtract(3, "day").startOf('day'), moment(now)],
+      "Past 7 days": [moment(now).subtract(7, "day").startOf('day'), moment(now)],
+      "Past month": [moment(now).subtract(1, "month").startOf('day'), moment(now)],
+      "Past 3 months": [moment(now).subtract(3, "month").startOf('month'), moment(now)],
     }
+    maxDate = moment()
+
   } else {
+    maxDate = false
+    startDt = false
+    endDt = false
     ranges = {}
   }
 
-  console.log(ranges)
   let p = {
-    hasEvent: hasEvent,
     local: { format: "MM/DD/YYYY hh:mm A" },
-    startDt: hasEvent ? moment(selectedEvent.start_dt): false,
-    endDt: hasEvent ? moment(selectedEvent.end_dt): false,
-    minDate: moment(eventStats.maxDate).subtract(1, 'months').startOf('month'),
-    maxDate: moment(eventStats.maxDate),
-    ranges: ranges
+    startDt: startDt,
+    endDt: endDt,
+    minDate: moment(RAINFALL_MIN_DATE),
+    maxDate: moment(maxDate),
+    minYear: moment(RAINFALL_MIN_DATE).year(),
+    maxYear: moment().year(),
+    ranges: ranges,
+    rainfallDataType: ownProps.rainfallDataType
   }
-  // console.log(p)
+  // console.log(ownProps.rainfallDataType, p)
   return p
 }
 

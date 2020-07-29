@@ -6,11 +6,13 @@ dependencies:
   '@reduxjs/toolkit': 1.4.0
   axios: 0.19.2
   babel-polyfill: 6.26.0
-  bootstrap: 4.5.0
+  bootstrap: 4.5.0_jquery@3.5.1
+  bootstrap-daterangepicker: 3.1.0
   bootswatch: 4.5.0
   cross-fetch: 3.0.5
   file-saver: 2.0.2
   immutable: 4.0.0-rc.12
+  jquery: 3.5.1
   lodash-es: 4.17.15
   mapbox-gl: 1.11.1_mapbox-gl@1.11.1
   moment: 2.27.0
@@ -20,10 +22,8 @@ dependencies:
   prop-types: 15.7.2
   qs: 6.9.4
   react: 16.13.1
-  react-advanced-datetimerange-picker: 1.0.11_react-dom@16.13.1+react@16.13.1
   react-bootstrap: 1.3.0_react-dom@16.13.1+react@16.13.1
-  react-datetime: 2.16.3_d06876d2a0885ddf9862abcf8e44f5fa
-  react-datetime-range-picker: 2.0.5_e5d5a8b492b9ba3bd39fb0e26df90a37
+  react-bootstrap-daterangepicker: 4.1.0_fbd60a6c1ddc732e7ebcc891b6a17ab6
   react-dom: 16.13.1_react@16.13.1
   react-markdown: 4.3.1_react@16.13.1
   react-redux: 7.2.1_react-dom@16.13.1+react@16.13.1
@@ -3474,7 +3474,16 @@ packages:
     dev: false
     resolution:
       integrity: sha1-aN/1++YMUes3cl6p4+0xDcwed24=
-  /bootstrap/4.5.0:
+  /bootstrap-daterangepicker/3.1.0:
+    dependencies:
+      jquery: 3.5.1
+      moment: 2.27.0
+    dev: false
+    resolution:
+      integrity: sha512-oaQZx6ZBDo/dZNyXGVi2rx5GmFXThyQLAxdtIqjtLlYVaQUfQALl5JZMJJZzyDIX7blfy4ppZPAJ10g8Ma4d/g==
+  /bootstrap/4.5.0_jquery@3.5.1:
+    dependencies:
+      jquery: 3.5.1
     dev: false
     peerDependencies:
       jquery: 1.9.1 - 3
@@ -4268,11 +4277,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-7ItTKOhOZbznhXAQ2g/slGg1PJV5zDO/WdkTwi7UEOJmkvsE32PWvx6mKtDjiMpjnR2CNf6BAD6sSxIlv7ptng==
-  /core-js/1.2.7:
-    deprecated: 'core-js@<3 is no longer maintained and not recommended for usage due to the number of issues. Please, upgrade your dependencies to the actual version of core-js@3.'
-    dev: false
-    resolution:
-      integrity: sha1-ZSKUwUZR2yj6k70tX/KYOk8IxjY=
   /core-js/2.6.11:
     deprecated: 'core-js@<3 is no longer maintained and not recommended for usage due to the number of issues. Please, upgrade your dependencies to the actual version of core-js@3.'
     dev: false
@@ -4339,14 +4343,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-MJG9liiZ+ogc4TzUwuvbER1JRdgvUFSB5+VR/g5h82fGaIRWMWddtKBHi7/sVhfjQZ6SehlyhvQYrcYkaUIpLg==
-  /create-react-class/15.6.3:
-    dependencies:
-      fbjs: 0.8.17
-      loose-envify: 1.4.0
-      object-assign: 4.1.1
-    dev: false
-    resolution:
-      integrity: sha512-M+/3Q6E6DLO6Yx3OwrWjwHBnvfXXYA7W+dFjt/ZDBemHO1DDZhsalX/NUtnTYclN6GfnBDRh4qRHjcDHmlJBJg==
   /cross-fetch/3.0.5:
     dependencies:
       node-fetch: 2.6.0
@@ -4915,12 +4911,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-gd3ypIPfOMr9h5jIKq8E3sHOTCjeirnl0WK5ZdS1AW0Odt0b1PaWaHdJ4Qk4klv+YB9aJBS7mESXjFoDQPu6DA==
-  /dom-helpers/3.4.0:
-    dependencies:
-      '@babel/runtime': 7.10.5
-    dev: false
-    resolution:
-      integrity: sha512-LnuPJ+dwqKDIyotW1VzmOZ5TONUN7CwkCR5hrgawTUbkBGYdeoNLZo6nNfGkCrjtE1nXXaj7iMMpDa8/d9WoIA==
   /dom-helpers/5.1.4:
     dependencies:
       '@babel/runtime': 7.10.5
@@ -5084,12 +5074,6 @@ packages:
       node: '>= 0.8'
     resolution:
       integrity: sha1-rT/0yG7C0CkyL1oCw6mmBslbP1k=
-  /encoding/0.1.13:
-    dependencies:
-      iconv-lite: 0.6.2
-    dev: false
-    resolution:
-      integrity: sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==
   /end-of-stream/1.4.4:
     dependencies:
       once: 1.4.0
@@ -5710,18 +5694,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-DkPJKQeY6kKwmuMretBhr7G6Vodr7bFwDYTXIkfG1gjvNpaxBTQV3PbXg6bR1c1UP4jPOX0jHUbbHANL9vRjVg==
-  /fbjs/0.8.17:
-    dependencies:
-      core-js: 1.2.7
-      isomorphic-fetch: 2.2.1
-      loose-envify: 1.4.0
-      object-assign: 4.1.1
-      promise: 7.3.1
-      setimmediate: 1.0.5
-      ua-parser-js: 0.7.21
-    dev: false
-    resolution:
-      integrity: sha1-xNWY6taUkRJlPWWIsBpc3Nn5D90=
   /figgy-pudding/3.5.2:
     dev: false
     resolution:
@@ -6662,14 +6634,6 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==
-  /iconv-lite/0.6.2:
-    dependencies:
-      safer-buffer: 2.1.2
-    dev: false
-    engines:
-      node: '>=0.10.0'
-    resolution:
-      integrity: sha512-2y91h5OpQlolefMPmUlivelittSWy0rP+oYVpn6A7GwVHNE8AWzoYOBNmlwks3LobaJxgHCYZAnyNo2GgpNRNQ==
   /icss-replace-symbols/1.1.0:
     dev: false
     resolution:
@@ -7297,13 +7261,6 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-TkMekrEalzFjaqH5yNHMvP2reN8=
-  /isomorphic-fetch/2.2.1:
-    dependencies:
-      node-fetch: 1.7.3
-      whatwg-fetch: 3.2.0
-    dev: false
-    resolution:
-      integrity: sha1-YRrhrPFPXoH3KVB0coGf6XM1WKk=
   /isstream/0.1.2:
     dev: false
     resolution:
@@ -7780,6 +7737,10 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-YvkBL1Zm7d2B1+h5fHEOdyjCG+sGMz4f8D86/0HiqJ6MB4MnDc8FgP5vdWsGnemOQro7lnYo8UakZ3+5A0jxGw==
+  /jquery/3.5.1:
+    dev: false
+    resolution:
+      integrity: sha512-XwIBPqcMn57FxfT+Go5pzySnm4KWkT1Tv7gjrpT1srtf8Weynl6R273VJ5GjkRb51IzMp5nbaPjJXMWeju2MKg==
   /js-base64/2.6.3:
     dev: false
     resolution:
@@ -7964,10 +7925,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-hRkd6/XW4HTsA9vjVpY9tuXJYLSlelnkTmVFu4M9/7MIYQtFcHpbugAU7UbOfjOiVSVYl2fqgBuJ32JUmRo5Ew==
-  /keycode/2.2.0:
-    dev: false
-    resolution:
-      integrity: sha1-PQr1bce4uOXLqNCpfxByBO7CKwQ=
   /keyv/3.0.0:
     dependencies:
       json-buffer: 3.0.0
@@ -8753,13 +8710,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-rmTZ9kz+f3rCvK2TD1Ue/oZlns7OGoIWP4fc3llxxRXlOkHKoWPPWJOfFYpITabSow43QJbRIoHQXtt10VldyQ==
-  /node-fetch/1.7.3:
-    dependencies:
-      encoding: 0.1.13
-      is-stream: 1.1.0
-    dev: false
-    resolution:
-      integrity: sha512-NhZ4CsKx7cYm2vSrBAr2PvFOe6sWDf0UYLRqA6svUYg7+/TSfVAu49jYC4BvQ4Sms9SZgdqGBgroqfDhJdTyKQ==
   /node-fetch/2.6.0:
     dev: false
     engines:
@@ -8974,12 +8924,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-fexhUFFPTGV8ybAtSIGbV6gOkSv8UtRbDBnAyLQw4QPKkgNlsH2ByPGtMUqdWkos6YCRmAqViwgZrJc/mRDzZQ==
-  /object-assign/3.0.0:
-    dev: false
-    engines:
-      node: '>=0.10.0'
-    resolution:
-      integrity: sha1-m+3VygiXlJvKR+f/QIBi1Un1h/I=
   /object-assign/4.1.1:
     dev: false
     engines:
@@ -10423,12 +10367,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-mEcocL8igTL8vdhoEputEsPAKeM=
-  /promise/7.3.1:
-    dependencies:
-      asap: 2.0.6
-    dev: false
-    resolution:
-      integrity: sha512-nolQXZ/4L+bP/UGlkfaIujX9BKxGwmQ9OT4mOt5yvy8iK1h3wqTEJCijzGANTCCl9nWjY41juyAn2K3Q1hLLTg==
   /promise/8.1.0:
     dependencies:
       asap: 2.0.6
@@ -10644,19 +10582,6 @@ packages:
       node: '>= 0.8'
     resolution:
       integrity: sha512-4Oz8DUIwdvoa5qMJelxipzi/iJIi40O5cGV1wNYp5hvZP8ZN0T+jiNkL0QepXs+EsQ9XJ8ipEDoiH70ySUJP3Q==
-  /react-advanced-datetimerange-picker/1.0.11_react-dom@16.13.1+react@16.13.1:
-    dependencies:
-      moment: 2.27.0
-      prop-types: 15.7.2
-      react-bootstrap: 0.31.5_react-dom@16.13.1+react@16.13.1
-      react-dot-fragment: 0.2.10_react@16.13.1
-      react-moment-proptypes: 1.7.0
-    dev: false
-    peerDependencies:
-      react: '*'
-      react-dom: '*'
-    resolution:
-      integrity: sha512-89cMVFlk1wq68LxY3pBT4KcpP/Gri7uTy0ZVlyojsqrJoQw3Q+X8dC72+8ZtNtnA6hwLXbE+qpyn0QdTfR6DHg==
   /react-app-polyfill/1.0.6:
     dependencies:
       core-js: 3.6.5
@@ -10670,26 +10595,22 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-OfBnObtnGgLGfweORmdZbyEz+3dgVePQBb3zipiaDsMHV1NpWm0rDFYIVXFV/AK+x4VIIfWHhrdMIeoTLyRr2g==
-  /react-bootstrap/0.31.5_react-dom@16.13.1+react@16.13.1:
+  /react-bootstrap-daterangepicker/4.1.0_fbd60a6c1ddc732e7ebcc891b6a17ab6:
     dependencies:
-      babel-runtime: 6.26.0
-      classnames: 2.2.6
-      dom-helpers: 3.4.0
-      invariant: 2.2.4
-      keycode: 2.2.0
+      bootstrap-daterangepicker: 3.1.0
+      jquery: 3.5.1
+      moment: 2.27.0
       prop-types: 15.7.2
-      prop-types-extra: 1.1.1_react@16.13.1
       react: 16.13.1
-      react-dom: 16.13.1_react@16.13.1
-      react-overlays: 0.7.4_react-dom@16.13.1+react@16.13.1
-      uncontrollable: 4.1.0_react@16.13.1
-      warning: 3.0.0
     dev: false
     peerDependencies:
-      react: ^0.14.9 || >=15.3.0
-      react-dom: ^0.14.9 || >=15.3.0
+      bootstrap-daterangepicker: '*'
+      jquery: '*'
+      moment: '*'
+      prop-types: '*'
+      react: '*'
     resolution:
-      integrity: sha512-xgDihgX4QvYHmHzL87faDBMDnGfYyqcrqV0TEbWY+JizePOG1vfb8M3xJN+6MJ3kUYqDtQSZ7v/Q6Y5YDrkMdA==
+      integrity: sha512-BZwwRaWcUDZVVgzQBtbmnbV1jyNNlfI5v7Jxb9FNEJ9FW8m+hzJgDFUMUlvz3VKCe5JNKcv5fKBizIDFSIUu+A==
   /react-bootstrap/1.3.0_react-dom@16.13.1+react@16.13.1:
     dependencies:
       '@babel/runtime': 7.10.5
@@ -10718,34 +10639,6 @@ packages:
       react-dom: '>=16.8.0'
     resolution:
       integrity: sha512-GYj0c6FO9mx7DaO8Xyz2zs0IcQ6CGCtM3O6/feIoCaG4N8B0+l4eqL7stlMcLpqO4d8NG2PoMO/AbUOD+MO7mg==
-  /react-datetime-range-picker/2.0.5_e5d5a8b492b9ba3bd39fb0e26df90a37:
-    dependencies:
-      moment: 2.27.0
-      prop-types: 15.7.2
-      react: 16.13.1
-      react-datetime: 2.16.3_d06876d2a0885ddf9862abcf8e44f5fa
-    dev: false
-    peerDependencies:
-      react: ^16.3.0
-      react-datetime: ^2.8.10
-    resolution:
-      integrity: sha512-y7ZAeAiPAOFmhGITqezqxkNIikz+3Gp939tymEhyjM8Vjaul3DM/D+XzZBzOwjGTSSRKbgnZLK1JTpIubnzb0w==
-  /react-datetime/2.16.3_d06876d2a0885ddf9862abcf8e44f5fa:
-    dependencies:
-      create-react-class: 15.6.3
-      moment: 2.27.0
-      object-assign: 3.0.0
-      prop-types: 15.7.2
-      react: 16.13.1
-      react-dom: 16.13.1_react@16.13.1
-      react-onclickoutside: 6.9.0_react-dom@16.13.1+react@16.13.1
-    dev: false
-    peerDependencies:
-      moment: '>=2.16.0'
-      react: '>=0.13'
-      react-dom: '>=0.13'
-    resolution:
-      integrity: sha512-amWfb5iGEiyqjLmqCLlPpu2oN415jK8wX1qoTq7qn6EYiU7qQgbNHglww014PT4O/3G5eo/3kbJu/M/IxxTyGw==
   /react-dev-utils/9.1.0:
     dependencies:
       '@babel/code-frame': 7.5.5
@@ -10790,16 +10683,6 @@ packages:
       react: ^16.13.1
     resolution:
       integrity: sha512-81PIMmVLnCNLO/fFOQxdQkvEq/+Hfpv24XNJfpyZhTRfO0QcmQIF/PgCa1zCOj2w1hrn12MFLyaJ/G0+Mxtfag==
-  /react-dot-fragment/0.2.10_react@16.13.1:
-    dependencies:
-      react: 16.13.1
-    dev: false
-    engines:
-      node: '>=4.0.0'
-    peerDependencies:
-      react: ^15.0.0 || ^16.0.0
-    resolution:
-      integrity: sha512-fjPAFiyA79chUgJDi8nKxd6bsPkuwrzJcNqSnYg8vNyv6gRgEPrEs+ZCsnjLC3q3D5E6lZLNl3k8seqj6sI3lw==
   /react-error-overlay/6.0.7:
     dev: false
     resolution:
@@ -10837,37 +10720,6 @@ packages:
       react: ^15.0.0 || ^16.0.0
     resolution:
       integrity: sha512-HQlWFTbDxTtNY6bjgp3C3uv1h2xcjCSi1zAEzfBW9OwJJvENSYiLXWNXN5hHLsoqai7RnZiiHzcnWdXk2Splzw==
-  /react-moment-proptypes/1.7.0:
-    dependencies:
-      moment: 2.27.0
-    dev: false
-    resolution:
-      integrity: sha512-ZbOn/P4u469WEGAw5hgkS/E+g1YZqdves2BjYsLluJobzUZCtManhjHiZKjniBVT7MSHM6D/iKtRVzlXVv3ikA==
-  /react-onclickoutside/6.9.0_react-dom@16.13.1+react@16.13.1:
-    dependencies:
-      react: 16.13.1
-      react-dom: 16.13.1_react@16.13.1
-    dev: false
-    peerDependencies:
-      react: ^15.5.x || ^16.x
-      react-dom: ^15.5.x || ^16.x
-    resolution:
-      integrity: sha512-8ltIY3bC7oGhj2nPAvWOGi+xGFybPNhJM0V1H8hY/whNcXgmDeaeoCMPPd8VatrpTsUWjb/vGzrmu6SrXVty3A==
-  /react-overlays/0.7.4_react-dom@16.13.1+react@16.13.1:
-    dependencies:
-      classnames: 2.2.6
-      dom-helpers: 3.4.0
-      prop-types: 15.7.2
-      prop-types-extra: 1.1.1_react@16.13.1
-      react: 16.13.1
-      react-dom: 16.13.1_react@16.13.1
-      warning: 3.0.0
-    dev: false
-    peerDependencies:
-      react: ^0.14.9 || >=15.3.0
-      react-dom: ^0.14.9 || >=15.3.0
-    resolution:
-      integrity: sha512-7vsooMx3siLAuEfTs8FYeP/lAORWWFXTO8PON3KgX0Htq1Oa+po6ioSjGyO0/GO5CVSMNhpWt6V2opeexHgBuQ==
   /react-overlays/4.1.0_react-dom@16.13.1+react@16.13.1:
     dependencies:
       '@babel/runtime': 7.10.5
@@ -12752,10 +12604,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
-  /ua-parser-js/0.7.21:
-    dev: false
-    resolution:
-      integrity: sha512-+O8/qh/Qj8CgC6eYBVBykMrNtp5Gebn4dlGD/kKXVkJNDwyrAwSIqwz8CDf+tsAIWVycKcku6gIXJ0qwx/ZXaQ==
   /uglify-js/3.4.10:
     dependencies:
       commander: 2.19.0
@@ -12766,15 +12614,6 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-Y2VsbPVs0FIshJztycsO2SfPk7/KAF/T72qzv9u5EpQ4kB2hQoHlhNQTsNyy6ul7lQtqJN/AoWeS23OzEiEFxw==
-  /uncontrollable/4.1.0_react@16.13.1:
-    dependencies:
-      invariant: 2.2.4
-      react: 16.13.1
-    dev: false
-    peerDependencies:
-      react: '>=0.11.0'
-    resolution:
-      integrity: sha1-4DWCkSUuGGUiLZCTmxny9J+Bwak=
   /uncontrollable/7.1.1_react@16.13.1:
     dependencies:
       '@babel/runtime': 7.10.5
@@ -13115,12 +12954,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-L3+bj9ENZ3JisYqITijRlhjgKPs=
-  /warning/3.0.0:
-    dependencies:
-      loose-envify: 1.4.0
-    dev: false
-    resolution:
-      integrity: sha1-MuU3fLVy3kqwR1O9+IIcAe1gW3w=
   /warning/4.0.3:
     dependencies:
       loose-envify: 1.4.0
@@ -13636,10 +13469,12 @@ specifiers:
   axios: ^0.19.2
   babel-polyfill: ^6.26.0
   bootstrap: ^4.5.0
+  bootstrap-daterangepicker: ^3.1.0
   bootswatch: ^4.5.0
   cross-fetch: ^3.0.5
   file-saver: ^2.0.2
   immutable: ^4.0.0-rc.12
+  jquery: ^3.5.1
   lodash-es: ^4.17.15
   mapbox-gl: ^1.11.1
   moment: ^2.27.0
@@ -13649,10 +13484,8 @@ specifiers:
   prop-types: ^15.7.2
   qs: ^6.9.4
   react: ^16.13.1
-  react-advanced-datetimerange-picker: ^1.0.11
   react-bootstrap: ^1.3.0
-  react-datetime: ^2.16.3
-  react-datetime-range-picker: ^2.0.5
+  react-bootstrap-daterangepicker: ~4.1.0
   react-dom: ^16.13.1
   react-markdown: ^4.3.1
   react-redux: ^7.2.1

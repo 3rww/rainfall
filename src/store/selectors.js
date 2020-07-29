@@ -1,4 +1,4 @@
-import { has, isEmpty, keys } from 'lodash-es'
+import { has, isEmpty, keys, forEach } from 'lodash-es'
 
 export const selectEvent = (state, eventid) => (
   state.rainfallEvents.list.find((e) => e.eventid === eventid)
@@ -8,19 +8,34 @@ export const selectEventInverse = (state, eventid) => (
   state.rainfallEvents.list.filter((e) => e.eventid !== eventid)
 )
 
-export const selectFetchKwargs = (state) => state.fetchKwargs
+export const selectFetchKwargs = (state, rainfallDataType) => state.fetchKwargs[rainfallDataType]
 
-export const selectFetchById = (state, requestId) => (
-  state.fetchHistory.find(f => f.requestId == requestId)
-)
+export const selectFetchHistory = (state, rainfallDataType) => state.fetchHistory[rainfallDataType]
 
-export const selectFetchesById = (state, requestId) => (
-  state.fetchHistory.filter(f => f.requestId == requestId)
-)
+export const selectFetchHistoryItemById = (state, requestId) => {
+  let i;
+  forEach(state.fetchHistory, (historyList, rainfallDataType) => {
+    let f = historyList.find(f => f.requestId == requestId)
+    if (f !== undefined) { i = f }
+  })
+  return i
+}
 
-export const selectFetchesByIdInverse = (state, requestId) => (
-  state.fetchHistory.filter(f => f.requestId !== requestId)
-)
+export const selectFetchHistoryItemsById = (state, requestId) => {
+  let i = [];
+  forEach(state.fetchHistory, (historyList) => {
+    i = i.concat(historyList.filter(f => f.requestId == requestId))
+  })
+  return i
+}
+
+export const selectFetchHistoryItemsByIdInverse = (state, requestId) => {
+  let i = [];
+  forEach(state.fetchHistory, (historyList) => {
+    i = i.concat(historyList.filter(f => f.requestId !== requestId))
+  })
+  return i
+}
 
 export const selectMapStyleSourceDataFeatures = (state, name) => {
   if (has(state.mapStyle, ['sources', name, 'data', 'features'])) {
@@ -42,15 +57,15 @@ export const selectPixelLookupsBasinsOnly = (state) => {
     let basins = state.refData.basinPixelLookup
     return keys(basins)
       .filter(k => k !== "other")
-      .map(k => ({value: k, pixels: basins[k]}))
+      .map(k => ({ value: k, pixels: basins[k] }))
   } else {
     return []
   }
 }
 
-export const selectSelectedEvent = (state) => state.fetchKwargs.selectedEvent
-
 export const selectRainfallEvents = (state) => state.rainfallEvents
+
+export const selectSelectedEvent = (state) => selectRainfallEvents(state).list.find(e => e.selected)
 
 export const selectFetchKwargsKeys = (state) => {
   return [...keys(state.fetchKwargs).map(k => k)]
@@ -58,10 +73,11 @@ export const selectFetchKwargsKeys = (state) => {
 
 export const eventIsSelected = (state) => {
   const s = selectSelectedEvent(state)
+  if (s === undefined) { return false }
   if (
-    (s.start_dt !== null && s.start_dt !== undefined)
-    && 
-    (s.end_dt !== null  && s.end_dt !== undefined) 
+    (s.startDt !== null && s.startDt !== undefined)
+    &&
+    (s.endDt !== null && s.endDt !== undefined)
   ) {
     return true
   }
@@ -78,16 +94,8 @@ export const selectEventStats = (state) => state.rainfallEvents.stats
 //   }
 // }
 
-export const selectPickedSensors = (state, sensorLocationType) => {
-  return state.fetchKwargs.sensorLocations[sensorLocationType]
-  // let d = state.fetchKwargs.sensorLocations[sensorLocationType]
-  // if (sensorLocationType == 'basin') {
-  //   if (d.length > 0) {
-  //     return d[0]
-  //   } else { return null}
-  // } else {
-  //   return d
-  // }
+export const selectPickedSensors = (state, rainfallDataType, sensorLocationType) => {
+  return state.fetchKwargs[rainfallDataType].sensorLocations[sensorLocationType]
 }
 
 export const selectActiveFetches = (state) => {

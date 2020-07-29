@@ -36,7 +36,12 @@ class Layout extends React.Component {
               id="rainfall-data-type-tabs" 
               mountOnEnter={true}
             >
-              <Tab eventKey="tab-realtime" title="Real-Time (raw)" disabled>
+              <Tab eventKey="tab-overview" title="About">
+                <br></br>
+                Introductory text here.
+              </Tab>              
+              <Tab eventKey="tab-realtime" title="Real-Time (raw)">
+                <br></br>
                 <RainfallDownloader rainfallDataType={RAINFALL_TYPES.realtime}/>
               </Tab>
               <Tab eventKey="tab-historic" title="Historic (calibrated)" >

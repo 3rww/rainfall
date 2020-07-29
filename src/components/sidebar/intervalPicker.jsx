@@ -39,12 +39,12 @@ class IntervalPicker extends React.Component {
               <Form.Check
                 defaultChecked={opt == "Total" ? true : false}
                 inline
-                custom
-                key={`interval-${opt}-${i}`}
+                // custom
+                key={`interval-${opt}-${i}-${this.props.rainfallDataType}`}
                 label={opt}
                 value={opt}
                 type="radio"
-                id={`interval-${opt}`}
+                id={`interval-${opt}-${this.props.rainfallDataType}`}
                 name="intervalRadios"
                 onChange={this.handleSelectInterval}
               />
@@ -64,7 +64,8 @@ function mapStateToProps(state) {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     dispatchPickInterval: payload => {
-      dispatch(pickInterval(payload))
+      // console.log(payload, ownProps.rainfallDataType)
+      dispatch(pickInterval({rollup: payload, rainfallDataType: ownProps.rainfallDataType}))
     }
   }
 }

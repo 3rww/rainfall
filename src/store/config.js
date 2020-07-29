@@ -36,6 +36,11 @@ export const RAINFALL_TYPES = {
   realtime: "realtime"
 }
 
+export const SENSOR_TYPES = {
+  pixel: "pixel",
+  gauge: "gauge"
+}
+
 // rainfall layers + styles (mapbox style spec)
 
 export const MAP_LAYERS = {
