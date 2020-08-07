@@ -22,6 +22,8 @@ import DownloadsList from './downloadList'
 import { fetchRainfallDataFromApiV2 } from '../../store/middleware'
 import { selectActiveFetches } from '../../store/selectors'
 
+import './downloader.scss'
+
 
 class RainfallDownloader extends React.Component {
   constructor(props) {

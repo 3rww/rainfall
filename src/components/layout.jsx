@@ -8,7 +8,8 @@ import RainfallDownloader from './sidebar/downloader'
 import LegacyRealtimeRainfallPage from './sidebar/legacy/legacyRealtime'
 import ThinkingOverlay from './thinking/thinkingOverlay'
 
-import { RAINFALL_TYPES } from '../store/config'
+import { RAINFALL_TYPES, CONTEXT_TYPES } from '../store/config'
+import { switchTab } from '../store/actions'
 
 import './layout.scss'
 
@@ -34,27 +35,28 @@ class Layout extends React.Component {
           <Col sm={6} className="scrolling-column">
             <Container className="sidebar">
               <Tabs
-                defaultActiveKey="tab-legacy-realtime"
+                defaultActiveKey={CONTEXT_TYPES.legacyRealtime}
                 id="rainfall-data-type-tabs"
                 mountOnEnter={true}
+                onSelect={this.props.switchTab}
               >
-                <Tab eventKey="tab-legacy-realtime" title="Real-Time Rainfall">                  
+                <Tab eventKey={CONTEXT_TYPES.legacyRealtime} title="Real-Time Rainfall">                  
                   <LegacyRealtimeRainfallPage/>
-                </Tab>
-                <Tab eventKey="tab-legacy-gauge" title="Historical Rain Gauge">
-                  Select the rain gauges and time span for output. A map of the rain gauge locations is below.
-              </Tab>
-                <Tab eventKey="tab-legacy-garr" title="Calibrated Radar Rainfall">
-                Calibrated Radar Rainfall
-              </Tab>
-                {/* <Tab eventKey="tab-realtime" title="Real-Time (provisional)">
                   <RainfallDownloader rainfallDataType={RAINFALL_TYPES.realtime} />
-                </Tab> */}
-                <Tab eventKey="tab-historic" title="Explorer (new)" >
+                </Tab>
+                <Tab eventKey={CONTEXT_TYPES.legacyGauge} title="Historical Rain Gauge">
+                  Select the rain gauges and time span for output. A map of the rain gauge locations is below.
+                  <RainfallDownloader rainfallDataType={RAINFALL_TYPES.historic} />
+              </Tab>
+                <Tab eventKey={CONTEXT_TYPES.legacyGarr} title="Calibrated Radar Rainfall">
+                Calibrated Radar Rainfall
+                <RainfallDownloader rainfallDataType={RAINFALL_TYPES.historic} />
+              </Tab>
+                {/* <Tab eventKey={CONTEXT_TYPES.makeItRain} title="Explorer (new)" >
                   <h1>Make it Rain</h1>
                   <p>Visualize and download rainfall data from anytime for any location and get the best available data back. Then animate it, compare time periods and geographies, and download it.</p>
                   <RainfallDownloader rainfallDataType={RAINFALL_TYPES.historic} />
-                </Tab>
+                </Tab> */}
               </Tabs>
             </Container>
             {/* <Container>
@@ -90,4 +92,8 @@ function mapStateToProps(state) {
   return { ...state.initMap }
 }
 
-export default connect(mapStateToProps)(Layout);
+const mapDispatchToProps = {
+  switchTab
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Layout);

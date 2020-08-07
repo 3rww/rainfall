@@ -101,3 +101,7 @@ export const selectPickedSensors = (state, rainfallDataType, sensorLocationType)
 export const selectActiveFetches = (state) => {
   return state.fetchHistory.filter(fh => fh.isFetching)
 }
+
+export const selectContext = (state) => {
+  return state.progress.tab
+}

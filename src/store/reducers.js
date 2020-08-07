@@ -5,6 +5,7 @@ import { set, get, forEach, keys, has } from 'lodash-es'
 import { initialState } from './initialState'
 
 import {
+  switchTab,
   mapLoaded,
   setStyle,
   filterEventByHours,
@@ -47,7 +48,10 @@ export const rootReducer = createReducer(
   initialState,
 
   // REDUCERS----------------------------
-  {
+  { 
+    [switchTab]: (state, action) => {
+      state.progress.tab = action.payload
+    },
     /**
      * Request JSON (+success/fail)
      * used by the fetchJSON middleware

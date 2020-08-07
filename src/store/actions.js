@@ -1,10 +1,14 @@
 import {createAction} from '@reduxjs/toolkit';
 
-// Mapbox map loading -------------------------------------
+// --------------------------------------------------------
+// Map State
 export const mapLoaded = createAction('MAP_LOADED')
 export const setStyle = createAction('SET_STYLE')
 export const addLayers = createAction('LOAD_REF_LAYERS')
 
+// --------------------------------------------------------
+// Context
+export const switchTab = createAction('SWITCH_TAB')
 
 // --------------------------------------------------------
 // Feedback
@@ -16,8 +20,8 @@ export const isFetching = createAction('FETCHING')
 export const startThinking = createAction('THINKING_1')
 export const stopThinking = createAction('THINKING_0')
 
-
-// Rainfall data retrieval parameters ---------------------
+// --------------------------------------------------------
+// Rainfall data retrieval parameters 
 
 export const calcEventStats = createAction('CALC_EVENT_STATS')
 // get rainfall date/times and metadata for an event
@@ -31,8 +35,8 @@ export const pickInterval = createAction('PICK_INTERVAL')
 // pick a rainfall data download (set params and set as active on the map)
 export const pickDownload = createAction('PICK_DOWNLOAD')
 
-
-// Rainfall data retrieval --------------------------------
+// --------------------------------------------------------
+// Rainfall data retrieval 
 
 // rainfall data request status, successfully, received, or failed
 export const requestRainfallData = createAction('GETTING_RAINFALL')
@@ -43,8 +47,8 @@ export const requestRainfallDataFail = createAction('GETTING_RAINFALL_FAIL')
 // filter rainfall events
 export const filterEventByHours = createAction('FILTER_EVENT_BY_HOUR')
 
-
-// Map Animation ------------------------------------------
+// --------------------------------------------------------
+// Map Animation 
 export const startRainfallAnimation = createAction('START_ANIMATION')
 export const stopRainfallAnimation = createAction('STOP_ANIMATION')
 export const restartRainfallAnimation = createAction('RESTART_ANIMATION')

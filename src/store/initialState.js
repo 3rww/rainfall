@@ -10,6 +10,7 @@ export const initialState = {
   // progress ---------------------------------------------
   // for storing indicators of global application state
   progress: {
+    tab: "legacy-realtime",
     mapLoaded: false,
     initialStyleLoaded: false,
     isFetching: true,

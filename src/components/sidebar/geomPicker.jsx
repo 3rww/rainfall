@@ -17,13 +17,14 @@ import Select from 'react-select';
 import {
   selectMapStyleSourceDataFeatures,
   selectPixelLookupsBasinsOnly,
-  selectPickedSensors
+  selectPickedSensors,
+  selectContext
 } from '../../store/selectors'
 import {
   pickSensor
 } from '../../store/actions'
-import { fetchJSON } from '../../store/middleware'
-// import { URL_BASIN_PIXEL_LOOKUP } from '../../store/config'
+
+import { CONTEXT_TYPES } from '../../store/config'
 
 
 class GeodataPicker extends React.Component {
@@ -78,6 +79,7 @@ class GeodataPicker extends React.Component {
           </Col>
         </Row>
 
+        {(this.props.context !== CONTEXT_TYPES.legacyGarr) ? (
         <Row noGutters>
           <Col md={3}>
             <small>Rain Gauges</small>
@@ -93,6 +95,11 @@ class GeodataPicker extends React.Component {
             />
           </Col>
         </Row>
+        ):(
+          null
+        )}
+
+      {(this.props.context !== CONTEXT_TYPES.legacyGauge) ? (
         <Row noGutters>
           <Col md={3}>
             <small>Pixels (by Basin)</small>
@@ -107,8 +114,11 @@ class GeodataPicker extends React.Component {
             />
           </Col>
         </Row>
+        ):(
+          null
+        )}
 
-        <Modal show={this.state.show} onHide={this.handleClose} size="lg" >
+        {/* <Modal show={this.state.show} onHide={this.handleClose} size="lg" >
           <Modal.Header closeButton>
             <Modal.Title>
               Upload an area of interest polygon
@@ -122,7 +132,7 @@ class GeodataPicker extends React.Component {
               Close
             </Button>
           </Modal.Footer>
-        </Modal>
+        </Modal> */}
 
       </div>
 
@@ -138,6 +148,7 @@ function mapStateToProps(state, ownProps) {
       .map(i => ({ value: i.value, label: i.value })),
     selectedBasin: selectPickedSensors(state, ownProps.rainfallDataType, 'basin'),
     selectedRaingauges: selectPickedSensors(state, ownProps.rainfallDataType, 'raingauge'),
+    context: selectContext(state)
   }
 }
 

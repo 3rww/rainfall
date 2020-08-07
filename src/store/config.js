@@ -41,6 +41,13 @@ export const SENSOR_TYPES = {
   gauge: "gauge"
 }
 
+export const CONTEXT_TYPES = {
+  legacyRealtime: "legacy-realtime",
+  legacyGauge: "legacy-gauge",
+  legacyGarr: "legacy-garr",
+  makeItRain: "make-it-rain"
+}
+
 // rainfall layers + styles (mapbox style spec)
 
 export const MAP_LAYERS = {

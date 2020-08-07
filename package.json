@@ -13,6 +13,7 @@
     "bootstrap": "^4.5.0",
     "bootstrap-daterangepicker": "^3.1.0",
     "bootswatch": "^4.5.0",
+    "chroma-js": "^2.1.0",
     "cross-fetch": "^3.0.5",
     "file-saver": "^2.0.2",
     "immutable": "^4.0.0-rc.12",
