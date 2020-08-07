@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { MD5 } from 'object-hash'
-import { has } from 'lodash-es'
+import { includes } from 'lodash-es'
 import moment from 'moment'
 
 import {
@@ -73,15 +73,15 @@ export function fetchJSON(payload) {
           } else {
             data = response.data
           }
-            // NOTE: We can dispatch many times!
-            // Here, we update the app state with the results of the API call. 
+          // NOTE: We can dispatch many times!
+          // Here, we update the app state with the results of the API call. 
           dispatch(asyncActionSuccess({ data: data, pathArray: pathArray, keepACopy: keepACopy }))
           return true
         },
-          // Do not use catch, because that will also catch
-          // any errors in the dispatch and resulting render,
-          // causing a loop of 'Unexpected batch number' errors.
-          // https://github.com/facebook/react/issues/6895        
+        // Do not use catch, because that will also catch
+        // any errors in the dispatch and resulting render,
+        // causing a loop of 'Unexpected batch number' errors.
+        // https://github.com/facebook/react/issues/6895        
         (error) => {
           console.log('An error occurred.', error)
           dispatch(asyncActionFail('An error occurred.'))
@@ -145,7 +145,7 @@ function promiseFetchReferenceDatasets(dispatch) {
         keepACopy: true
       }))
       resolve(result)
-    })    
+    })
 
   ])
 
@@ -186,8 +186,8 @@ export function initDataFetch(payload) {
         dispatch(pickRainfallDateTimeRange({
           rainfallDataType: "historic",
           startDt: moment(maxDate).startOf('month').toISOString(),
-          endDt: maxDate          
-        }))   
+          endDt: maxDate
+        }))
 
       })
       .then(() => dispatch(stopThinking("Initial data load complete."))
@@ -196,14 +196,91 @@ export function initDataFetch(payload) {
   }
 }
 
+const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, rainfallDataType, url, params) => {
+
+  console.log(dispatch, requestId, sensor, rainfallDataType, url, params)
+
+  axios({ url: url, method: 'GET', params: params })
+    .then(
+      (response) => {
+        console.log(response) //.data.meta.records, "records retrieved")
+
+        // get the API's JSON response from the data prop of the ajax response obj
+        let r = response.data
+
+        console.log(`job ${r.meta.jobId} ${r.status}`, r)
+
+        let processedData = []
+
+        // if job status is queued or started:
+        if (includes(['queued', 'started'], r.status)) {
+
+          // wait, then check on status/results at the provided 'job-url'
+          setTimeout(
+            () => _fetchRainfallDataFromApiV2(dispatch, requestId, sensor, rainfallDataType, r.meta.jobUrl, params),
+            1000
+          )
+          // status is deferred or failed,
+        } else if (includes(['deferred', 'failed'], r.status)) {
+
+          dispatch(requestRainfallDataFail(
+            {
+              requestId: requestId,
+              rainfallDataType: rainfallDataType,
+              results: {
+                [sensor[0]]: false
+              },
+            }
+          ))
+
+        } else if (r.status === 'finished') {
+
+          // if (responseBody.data.length > 0) {
+          //   processedData = responseBody.data.reduce(function(result, item) {
+          //     let {id, ...attrs} = item
+          //     attrs.total = attrs.data.map(i => i.val).reduce((a, b) => a + b, 0)
+          //     result[id] = attrs
+          //     return result;
+          //   }, {});
+          // }
+
+          dispatch(requestRainfallDataSuccess({
+            requestId: requestId,
+            rainfallDataType: rainfallDataType,
+            results: {
+              [sensor[0]]: r.data
+            },
+            processedKwargs: r.args,
+            // status: r.status,
+            // messages: (r.messages.length > 0) ? (r.messages) : (false)
+          }))
+
+        }
+
+      },
+      (error) => {
+        console.log('An error occurred.', error)
+
+        dispatch(requestRainfallDataFail(
+          {
+            requestId: requestId,
+            rainfallDataType,
+            results: {
+              [sensor[0]]: false
+            }
+          }
+        ))
+      }
+    )
+
+}
+
 
 /**
  * request data from the 3RWW Rainfall API
  * @param {*} payload 
  */
 export function fetchRainfallDataFromApiV2(payload) {
-
-  console.log(payload)
 
   return function (dispatch) {
 
@@ -223,8 +300,6 @@ export function fetchRainfallDataFromApiV2(payload) {
     let rainfallDataType = payload
     let kwargs = selectFetchKwargs(store.getState(), rainfallDataType)
 
-    console.log(rainfallDataType, kwargs)
-
     // generate a unique ID, based on the hash of the kwargs
     // this will let us 1) update the correct object in fetchHistory
     // with the results, and 2) not retrieve the same data twice
@@ -240,7 +315,7 @@ export function fetchRainfallDataFromApiV2(payload) {
     requestSensors.forEach((s, i) => {
 
       // skip if no selections
-      if (kwargs.sensorLocations[s].length == 0 ) {
+      if (kwargs.sensorLocations[s].length == 0) {
         return
       }
 
@@ -265,67 +340,16 @@ export function fetchRainfallDataFromApiV2(payload) {
       // indicate that the request is proceeding in the UI
       // stores the fetchKwargs from the state in the history object.
       dispatch(requestRainfallData({
-        fetchKwargs: kwargs, 
+        fetchKwargs: kwargs,
         requestId: requestId,
         rainfallDataType: rainfallDataType
         // sensor: sensor[0]
       }))
 
-      console.log(requestParams)
-      
-      axios({
-        url: `${process.env.REACT_APP_API_URL_ROOT}v2/${sensor[0]}/${rainfallDataType}/`,
-        method: 'GET',
-        params: requestParams
-      })
-        .then(
-          (response) => {
-            console.log(response) //.data.meta.records, "records retrieved")
+      let url = `${process.env.REACT_APP_API_URL_ROOT}v2/${sensor[0]}/${rainfallDataType}/`
+      let params = requestParams
 
-            let responseBody = response.data
-
-            let processedData = []
-            if (responseBody.data.length > 0) {
-              processedData = responseBody.data.reduce(function(result, item) {
-                let {id, ...attrs} = item
-                attrs.total = attrs.data.map(i => i.val).reduce((a, b) => a + b, 0)
-                result[id] = attrs
-                return result;
-              }, {});
-            }
-
-            dispatch(requestRainfallDataSuccess(
-              {
-                requestId: requestId,
-                rainfallDataType: rainfallDataType,
-                results: {
-                  [sensor[0]]: processedData
-                },
-                processedKwargs: responseBody.args,
-                // status: responseBody.status,
-                // messages: (responseBody.messages.length > 0) ? (responseBody.messages) : (false)
-              }
-            ))
-            return true
-          },
-          (error) => {
-            console.log('An error occurred.', error)
-
-            dispatch(requestRainfallDataFail({
-              requestId: requestId,
-              rainfallDataType,
-              results: {
-                [sensor[0]]: false
-              },
-              // processedKwargs: responseBody.args,
-              // status: responseBody.status,
-              // messages: (responseBody.messages.length > 0) ? (responseBody.messages) : (false)
-            }))
-            return false
-          }
-        )
-      
-
+      _fetchRainfallDataFromApiV2(dispatch, requestId, sensor, rainfallDataType, url, params)
 
     })
 
