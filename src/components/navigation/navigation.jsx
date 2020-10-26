@@ -9,6 +9,10 @@ import { faSpinner, faCloudRain } from '@fortawesome/free-solid-svg-icons'
 
 // import {legend} from '../data/legend'
 
+import { RAINFALL_TYPES, CONTEXT_TYPES } from '../../store/config'
+
+import { switchTab } from '../../store/actions'
+
 import './navigation.scss';
 
 class Navigation extends Component {
@@ -27,12 +31,12 @@ class Navigation extends Component {
           title: (
             <Row>
               <Col sm={9}>
-              <h1>Make It Rain <small><em>beta</em></small></h1>
-              <h2><small>Hyper-local rainfall data for Allegheny County</small></h2>
+                <h1>Make It Rain <small><em>beta</em></small></h1>
+                <h2><small>Hyper-local rainfall data for Allegheny County</small></h2>
               </Col>
               <Col>
-              <small>A project by </small>
-              <br></br><img className="brand-logo" src="/static/assets/3rww_logo_full_inverse_transparent_blue.png" placeholder="3 River Wet Weather" alt="3RWW Logo"/>
+                <small>A project by </small>
+                <br></br><img className="brand-logo" src="/static/assets/3rww_logo_full_inverse_transparent_blue.png" placeholder="3 River Wet Weather" alt="3RWW Logo" />
               </Col>
             </Row>
           ),
@@ -74,26 +78,50 @@ The NEXRAD radar (located in Moon Township) data is calibrated with the rain gau
 
           <Navbar.Brand className="d-none d-sm-block">
             <img className="nav-brand-logo" src="/static/assets/3rww_logo_full_inverse_transparent.png" alt="3RWW Logo" />&nbsp;
-            Rainfall 
+            Rainfall
             {/* <small className="text-muted d-none d-lg-inline">by 3 Rivers Wet Weather</small> */}
           </Navbar.Brand>
           <Navbar.Brand className="d-block d-sm-none" style={{ fontSize: 0.9 + 'rem' }}>
             <img className="nav-brand-logo-xs" src="/static/assets/3rww_logo_full_inverse_transparent.png" alt="3RWW Logo" />&nbsp;
             Rainfall
           </Navbar.Brand>
-          <Navbar.Text>
+          {/* <Navbar.Text>
             &nbsp;&nbsp;
-            {/* {this.props.isThinking === true || this.props.mapLoaded === false ? (
+            {this.props.isThinking === true || this.props.mapLoaded === false ? (
               <span className="fa-layers fa-fw">
                 <FontAwesomeIcon icon={faSpinner} pulse size="4x"/>
                 <FontAwesomeIcon icon={faCloudRain} size="2x" transform="right-8"/>
               </span>
-            ) : ("")} */}
-            
-          </Navbar.Text>          
+            ) : ("")}
+          </Navbar.Text> */}
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
           <Navbar.Collapse id="basic-navbar-nav">
+            <Nav variant="pills" className="mr-auto" defaultActiveKey={CONTEXT_TYPES.legacyRealtime}>
+              <Nav.Item>
+                <Nav.Link
+                  active={this.props.tab == CONTEXT_TYPES.legacyRealtime}
+                  eventKey={CONTEXT_TYPES.legacyRealtime}
+                  onSelect={this.props.switchTab}
+                >
+                  Real-Time Rainfall
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link
+                  active={this.props.tab == CONTEXT_TYPES.legacyGauge}
+                  eventKey={CONTEXT_TYPES.legacyGauge}
+                  onSelect={this.props.switchTab}
+                >Historical Rain Gauge</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link
+                  active={this.props.tab == CONTEXT_TYPES.legacyGarr}
+                  eventKey={CONTEXT_TYPES.legacyGarr}
+                  onSelect={this.props.switchTab}
+                >Calibrated Radar Rainfall</Nav.Link>
+              </Nav.Item>
+            </Nav>
             <Nav className="ml-auto">
               {/* <Nav.Item
                 className="btn btn-outline-primary btn-sm"
@@ -101,7 +129,7 @@ The NEXRAD radar (located in Moon Township) data is calibrated with the rain gau
                 onClick={this.handleShow}              
                 >
                 Map Legend
-              </Nav.Item> */}              
+              </Nav.Item> */}
               <Nav.Item
                 className="btn btn-outline-light btn-sm"
                 id="AboutButton"
@@ -147,8 +175,13 @@ The NEXRAD radar (located in Moon Township) data is calibrated with the rain gau
 function mapStateToProps(state) {
   return {
     isThinking: state.progress.isThinking > 0,
-    mapLoaded: state.progress.mapLoaded
+    mapLoaded: state.progress.mapLoaded,
+    tab: state.progress.tab
   }
 }
 
-export default connect(mapStateToProps)(Navigation);
+const mapDispatchToProps = {
+  switchTab
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Navigation);

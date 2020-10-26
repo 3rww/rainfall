@@ -1,9 +1,10 @@
 import React from 'react';
 import { connect } from "react-redux";
-
+import {TabContainer} from 'react-bootstrap';
 import Navigation from './components/navigation/navigation';
 import Layout from './components/layout';
-// import { initDataFetch } from './store/middleware'
+import { CONTEXT_TYPES } from './store/config'
+import { switchTab } from './store/actions'
 
 class App extends React.Component {
 
@@ -14,18 +15,22 @@ class App extends React.Component {
   //   // * pixels
   //   // * gauges
   //   this.props.initFetchData()
-    
+
   // }
 
   render() {
     return (
 
-      <div style={{height: 100+'%'}}>
-        <Navigation
-          isloading={this.props.loading}
-        />
-        {/* <AppThining/> */}
-        <Layout/>
+      <div style={{ height: 100 + '%' }}>
+        <TabContainer
+          defaultActiveKey={CONTEXT_TYPES.legacyRealtime}
+          id="rainfall-tabs"
+          // mountOnEnter={true}
+          onSelect={this.props.switchTab}
+        >
+          <Navigation isloading={this.props.loading}/>
+          <Layout />
+        </TabContainer>
       </div>
 
     );
@@ -33,13 +38,17 @@ class App extends React.Component {
 
 }
 
-// const mapDispatchToProps = (dispatch, ownProps) => {
-//   return {
-//     initFetchData: payload => {
-//       return dispatch(initDataFetch(payload))
-//     }
-//   }
-// }
+function mapStateToProps(state) {
+  return { ...state.initMap }
+}
 
-// export default connect(null, mapDispatchToProps)(App);
-export default App;
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    switchTab: payload => {
+      console.log("switching", payload)
+      dispatch(switchTab(payload))
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)

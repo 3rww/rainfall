@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Row, Col, Container, Tabs, Tab, Button, ButtonGroup } from 'react-bootstrap';
+import { Row, Col, Container, TabContent, TabPane} from 'react-bootstrap';
 import ReactMarkdown from 'react-markdown/with-html'
 
 import ReactMap from './map/map';
@@ -32,47 +32,34 @@ class Layout extends React.Component {
         </Row>
 
         <Row className="fill no-gutters">
-          <Col sm={6} className="scrolling-column">
+          <Col sm={5} className="scrolling-column">
             <Container className="sidebar">
-              <Tabs
+              {/* <TabContainer
                 defaultActiveKey={CONTEXT_TYPES.legacyRealtime}
                 id="rainfall-data-type-tabs"
                 mountOnEnter={true}
                 onSelect={this.props.switchTab}
-              >
-                <Tab eventKey={CONTEXT_TYPES.legacyRealtime} title="Real-Time Rainfall">                  
-                  <LegacyRealtimeRainfallPage/>
-                  <RainfallDownloader rainfallDataType={RAINFALL_TYPES.realtime} />
-                </Tab>
-                <Tab eventKey={CONTEXT_TYPES.legacyGauge} title="Historical Rain Gauge">
-                  Select the rain gauges and time span for output. A map of the rain gauge locations is below.
-                  <RainfallDownloader rainfallDataType={RAINFALL_TYPES.historic} />
-              </Tab>
-                <Tab eventKey={CONTEXT_TYPES.legacyGarr} title="Calibrated Radar Rainfall">
-                Calibrated Radar Rainfall
-                <RainfallDownloader rainfallDataType={RAINFALL_TYPES.historic} />
-              </Tab>
-                {/* <Tab eventKey={CONTEXT_TYPES.makeItRain} title="Explorer (new)" >
-                  <h1>Make it Rain</h1>
-                  <p>Visualize and download rainfall data from anytime for any location and get the best available data back. Then animate it, compare time periods and geographies, and download it.</p>
-                  <RainfallDownloader rainfallDataType={RAINFALL_TYPES.historic} />
-                </Tab> */}
-              </Tabs>
+              > */}
+                <TabContent>
+                  <TabPane active={this.props.tab == CONTEXT_TYPES.legacyRealtime} eventKey={CONTEXT_TYPES.legacyRealtime} title="Real-Time Rainfall">
+                    <LegacyRealtimeRainfallPage/>
+                    <RainfallDownloader rainfallDataType={RAINFALL_TYPES.realtime} />
+                  </TabPane>
+                  <TabPane active={this.props.tab == CONTEXT_TYPES.legacyGauge} eventKey={CONTEXT_TYPES.legacyGauge} title="Historical Rain Gauge">
+                    <h1>Historical Rain Gauge Data</h1>
+                    <p>Select the rain gauges and time span for output. A map of the rain gauge locations is below.</p>
+                    <RainfallDownloader rainfallDataType={RAINFALL_TYPES.historic} />
+                  </TabPane>
+                  <TabPane active={this.props.tab == CONTEXT_TYPES.legacyGarr} eventKey={CONTEXT_TYPES.legacyGarr} title="Calibrated Radar Rainfall">
+                    <h1>Calibrated Radar Rainfall</h1>
+                    <RainfallDownloader rainfallDataType={RAINFALL_TYPES.historic} />
+                  </TabPane>
+              </TabContent>
+              {/* </TabContainer> */}
             </Container>
-            {/* <Container>
-              <Row>
-                <Col>
-                  <h4>Events</h4>
-                </Col>
-                <Col>
-                  <EventFilterControls/>
-                </Col>                
-              </Row>
-              <EventsList />
-            </Container> */}
           </Col>
 
-          <Col sm={6} className="map-column">
+          <Col sm={7} className="map-column">
             <ReactMap
               token={this.props.token}
               styleUrl={this.props.styleId}
@@ -89,7 +76,10 @@ class Layout extends React.Component {
 }
 
 function mapStateToProps(state) {
-  return { ...state.initMap }
+  return { 
+    ...state.initMap, 
+    tab: state.progress.tab 
+  }
 }
 
 const mapDispatchToProps = {

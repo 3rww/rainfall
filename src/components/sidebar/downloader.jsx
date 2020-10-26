@@ -46,7 +46,7 @@ class RainfallDownloader extends React.Component {
       <Accordion defaultActiveKey="0">
 
         <Card>
-          <Card.Header>
+          <Card.Header className="accordian-card-header">
             <Accordion.Toggle as={Button} variant="link" eventKey="0">
               When and Where
             </Accordion.Toggle>
@@ -70,7 +70,7 @@ class RainfallDownloader extends React.Component {
         </Card>
 
         <Card>
-          <Card.Header>
+          <Card.Header className="accordian-card-header">
             <Accordion.Toggle as={Button} variant="link" eventKey="1">
               Retrieved Rainfall Data
             </Accordion.Toggle>
