@@ -198,9 +198,21 @@ export function initDataFetch(payload) {
 
 const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, rainfallDataType, url, params) => {
 
-  console.log(dispatch, requestId, sensor, rainfallDataType, url, params)
+  // console.log(dispatch, requestId, sensor, rainfallDataType, url, params)
 
-  axios({ url: url, method: 'GET', params: params })
+  // assemble the arguments for fetch w/ axios
+  let requestKwargs = {
+    url: url, 
+    method: 'GET'
+  }
+  // if the request params are explicitly not `false`, then 
+  // add them in; otherwise we've called this function in a recursive loop to
+  // check on job status, and we don't want to include the params in that req.
+  if (params !== false) {
+    requestKwargs.params = params
+  }
+
+  axios(requestKwargs)
     .then(
       (response) => {
         console.log(response) //.data.meta.records, "records retrieved")
@@ -210,17 +222,18 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, rainfallDataTy
 
         console.log(`job ${r.meta.jobId} ${r.status}`, r)
 
-        let processedData = []
+        // let processedData = []
 
         // if job status is queued or started:
         if (includes(['queued', 'started'], r.status)) {
 
           // wait, then check on status/results at the provided 'job-url'
+          // this triggers a recurive call to _fetchRainfallDataFromApiV2
           setTimeout(
-            () => _fetchRainfallDataFromApiV2(dispatch, requestId, sensor, rainfallDataType, r.meta.jobUrl, params),
+            () => _fetchRainfallDataFromApiV2(dispatch, requestId, sensor, rainfallDataType, r.meta.jobUrl, false),
             1000
           )
-          // status is deferred or failed,
+        // if status is deferred or failed,
         } else if (includes(['deferred', 'failed'], r.status)) {
 
           dispatch(requestRainfallDataFail(
