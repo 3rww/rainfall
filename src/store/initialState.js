@@ -89,8 +89,10 @@ export const initialState = {
         url: MAPBOX_STYLE_BASEMAP
       }
     },
+    sourcesToAdd: [],
+    layersToAdd: [],
     attribution: '<a href="https://www.3riverswetweather.org" target="_blank">3RWW</a>, <a href="https://www.civicmapper.com" target="_blank">CivicMapper</a>.',
-  },  
+  },
   // mapStyle is where the MapboxGL map's style sheet is stored; changes here change the map
   // note that we're pre-populating some expected objects
   mapStyle: {}

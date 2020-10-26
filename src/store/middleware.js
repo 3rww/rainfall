@@ -164,7 +164,8 @@ export function initDataFetch(payload) {
     // get all the core datsets and layers and add them to the store (in parallel), then...
     promiseFetchReferenceDatasets(dispatch)
       .then((r) => {
-
+        // add additional map layer styles
+        dispatch(addLayers(MAP_LAYERS))
         // calculate event stats
         // TODO: make an API endpoint for a database view that does this calc 
         // to save some time here

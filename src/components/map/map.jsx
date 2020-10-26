@@ -5,27 +5,20 @@ import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import { isEmpty } from 'lodash-es'
 
-import { 
-  setStyle, 
-  mapLoaded, 
-  startThinking, 
-  stopThinking 
+import {
+  setStyle,
+  mapLoaded,
+  startThinking,
+  stopThinking
 } from '../../store/actions';
 import { initDataFetch } from '../../store/middleware';
-import { transformToMapboxSourceObject } from '../../store/utils'
-
-import {
-  URL_GARRD_GEOJSON,
-  URL_GAUGE_GEOJSON,
-  MAP_LAYERS
-} from '../../store/config'
+import { LAYERS_W_MOUSEOVER } from '../../store/config'
 
 import diffStyles from '../../utilities/styleSpecDiff';
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import './map.scss'
-
 
 let DEBUG = true
 const MAPID = 'map'
@@ -132,38 +125,12 @@ class ReactMap extends Component {
   //     })
   //   }
 
-  mapSources = [{
-      url: URL_GAUGE_GEOJSON,
-      pathArray: ["mapStyle", "sources", "gauge"],
-      transformer: transformToMapboxSourceObject
-    },{
-      url: URL_GARRD_GEOJSON,
-      pathArray: ["mapStyle", "sources", "pixel"],
-      transformer: transformToMapboxSourceObject
-  }]
-  /**
-   * asynchronously fetch map layers,
-   * return when all fetches have completed
-   */
-  fetchMapLayers() {
-    
-
-
-  }
-
-
 
   /**
    * create the MapboxGL Map from our initial map state object in redux (initMap)
    * and set the created map's style sheet into the redux (mapStyle)
    */
   loadMap() {
-
-    // console.log("loading the map")
-    // console.log(this.props.initMap)
-    // ({initMap, styleUrl, longitude, latitude, zoom, token } = this.props.initMap)
-
-    const { lng, lat, zoom } = this.state;
 
     // set up the map
     const mapConfig = {
@@ -177,27 +144,22 @@ class ReactMap extends Component {
     mapboxgl.accessToken = this.props.token;
     this.webmap = new mapboxgl.Map(mapConfig);
 
-    // setup the tooltip
-    // Container to put React generated content in.
-    // this.tooltipContainer = document.createElement('div');
-    // const tooltip = new mapboxgl.Marker(this.tooltipContainer, {
-    //   offset: [105, 0]
-    // }).setLngLat([0,0]).addTo(this.webmap);
-
     this.webmap.on('load', () => {
 
-      // add a geocoder for quick map searches
-        this.webmap.addControl(new MapboxGeocoder({
-          accessToken: mapboxgl.accessToken,
-          mapboxgl: mapboxgl,
-          placeholder: "Fly me to...",
-          marker: false,
-          collapsed: true,
-          clearAndBlurOnEsc: true,
-          clearOnBlur: true,
-          countries: 'us'
-        }));
+      // ----------------------------------------------
+      // CONTROLS
 
+      // add a geocoder for quick map searches
+      this.webmap.addControl(new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        mapboxgl: mapboxgl,
+        placeholder: "Fly me to...",
+        marker: false,
+        collapsed: true,
+        clearAndBlurOnEsc: true,
+        clearOnBlur: true,
+        countries: 'us'
+      }));
       // add the navigation control
       this.webmap.addControl(new mapboxgl.NavigationControl());
       // add the custom attribution control
@@ -206,49 +168,85 @@ class ReactMap extends Component {
         customAttribution: this.props.initMap.attribution
       }));
 
+      // ----------------------------------------------
+      // SOURCES AND LAYERS
+      // add sources and layers not in the hosted style but configured in the
+      // seed here:
+
+      // add sources here
+      this.props.initMap.sourcesToAdd.forEach(src => {
+        this.webmap.addSource(src.sourceName, src.sourceData)
+      })
+      // add the style layers here
+      this.props.initMap.layersToAdd.forEach(layer => {
+        layer.layerStyles.forEach(layerStyle => {
+          // insert the layer above this layer already in the style:
+          this.webmap.addLayer(layerStyle, layer.addLayerStylesAbove)
+        })
+      })
+
+      // ----------------------------------------------
+      // STYLE TO STORE
+
       // Get the entire map stylesheet from the loaded map and put it in the 
       // mapStyle object state tree via (ulimtately) the setStyle action
       let style = this.webmap.getStyle();
-      // style = {
-      //   ...style,
-      //   transition: {
-      //     "duration": 50,
-      //     "delay": 0
-      //   }
-      // }
-      // // console.log("set style 1")
       this.props.setStyle(style);
-
 
       // console.log("map loaded")
       //dispatch the mapLoadded action
       this.props.mapLoaded(this.webmap.loaded());
 
-      // dispatch actions that add geojson sources to the mapStyle.source object in redux,
-      // this.fetchMapLayers().then(() => {
-      //   // then add the layers
-      //   this.props.addLayersToMap(mapLayers)
-      // })
-
       this.props.initFetchData()
-        
-      
-
 
     });
 
-    // this.webmap.on('move', () => {
-    //   const { lng, lat } = this.webmap.getCenter();
-    //   this.handleMapMove({
-    //     lng: Number(lng.toFixed(4)),
-    //     lat: Number(lat.toFixed(4)),
-    //     zoom: Number(this.webmap.getZoom().toFixed(2))
-    //   })
-    // });
-    // this.webmap.on('mousemove', (e) => this.handleHover(e, tooltip))
-    // this.webmap.on('click', (e) => this.handleMapClick(e))
+    // ----------------------------------------------
+    // LAYER INTERACTIVITY
+
+    let hoveredStateId = {};
+
+    LAYERS_W_MOUSEOVER.forEach((lyrRef) => {
+      let lyrName = lyrRef[0]
+      let lyrSrc = lyrRef[1]
+
+      hoveredStateId[lyrName] = null;
+      // When the user moves their mouse over the HOVER-* layer, we'll update the
+      // feature state for the feature under the mouse.
+      this.webmap.on('mousemove', lyrName, (e) => {
+        this.webmap.getCanvas().style.cursor = e.features.length ? 'pointer' : '';
+        if (e.features.length > 0) {
+          if (hoveredStateId[lyrName]) {
+            this.webmap.setFeatureState(
+              { source: lyrSrc, id: hoveredStateId[lyrName] },
+              { hover: false }
+            );
+          }
+          hoveredStateId[lyrName] = e.features[0].id;
+          this.webmap.setFeatureState(
+            { source: lyrSrc, id: hoveredStateId[lyrName] },
+            { hover: true }
+          );
+        }
+      });
+
+      // When the mouse leaves the HOVER-* layer, update the feature state of the
+      // previously hovered feature.
+      this.webmap.on('mouseleave', lyrName, () => {
+        this.webmap.getCanvas().style.cursor = '';
+        if (hoveredStateId[lyrName]) {
+          this.webmap.setFeatureState(
+            { source: lyrSrc, id: hoveredStateId[lyrName] },
+            { hover: false }
+          );
+        }
+        hoveredStateId[lyrName] = null;
+      });
+
+    })
 
   }
+
 
   /**
    * call this to update the map style. Utilizes Mapbox's diffStyles algorithm 
@@ -278,7 +276,7 @@ class ReactMap extends Component {
     if (!Immutable.is(oldStyle, newStyle)) {
       // console.log("changes detected between old and new style")
       let changes = diffStyles(oldStyle.toJS(), newStyle.toJS());
-      if (DEBUG) { console.log(`updating mapStyle (${changes.map(c => c.command)})`)}
+      if (DEBUG) { console.log(`updating mapStyle (${changes.map(c => c.command)})`) }
 
       // if changes are detected, then we apply each one to the map
       // this executes map methods to do things like pan, zoom, change layer
@@ -306,52 +304,14 @@ class ReactMap extends Component {
     }
   }
 
-  // updateControlVisibility()
-
   render() {
 
-    // const { lng, lat, zoom} = this.state;
-
     return (
-      // <div className="map-container">
-      //   <div className="inline-block absolute top left mt12 ml12 bg-darken75 color-white z1 py6 px12 txt-s txt-bold">
-      //     <div>{`Longitude: ${lng} Latitude: ${lat} Zoom: ${zoom}`}</div>
-      //   </div>
       <div className="map" id={MAPID}></div>
-      // </div>
     );
   }
 
 }
-
-// class Tooltip extends React.Component {
-//   render() {
-//     const { features } = this.props;
-//     const c = features.filter(f => f.properties.title !== undefined).length
-
-//     const renderFeature = (feature, i) => {
-//       return (
-//         <ListGroup.Item key={i}>
-//           <span className="small">{feature.properties.title}</span>
-//           {/* <strong className='mr3'>{feature.layer['source-layer']}:</strong>
-//           <span className='color-gray-light'>{feature.layer.id}</span> */}
-//         </ListGroup.Item>
-//       )
-//     };
-
-//     if (c > 0) {
-//       return (
-//         <Card style={{ width: '180px' }}>
-//           <ListGroup variant="flush">
-//             {features.filter(f => f.properties.title !== undefined).map(renderFeature)}
-//           </ListGroup>
-//         </Card>
-//       )
-//     } else {
-//       return null
-//     }
-//   }
-// }
 
 function mapStateToProps(state) {
   return {
@@ -362,12 +322,9 @@ function mapStateToProps(state) {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    // makeChoiceOnMapClick: payload => {
-    //   dispatch(makeChoiceOnMapClick(payload))
-    // },
     loadingMap: payload => {
       dispatch(startThinking("Loading the map"))
-    },    
+    },
     setStyle: payload => {
       dispatch(setStyle(payload))
     },
@@ -377,7 +334,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     initFetchData: payload => {
       return dispatch(initDataFetch(payload))
-    }    
+    }
   }
 }
 

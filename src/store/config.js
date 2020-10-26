@@ -50,45 +50,82 @@ export const CONTEXT_TYPES = {
 
 // rainfall layers + styles (mapbox style spec)
 
-export const MAP_LAYERS = {
-  layerGauges: {
-    id: 'gauges',
-    source: 'gauge',
-    type: 'circle',
-    paint: {
-      "circle-radius": 10,
-      "circle-color": "rgba(255,255,255,0)",
+// Default Operational Layers + Styles --------------------
+// These are layer definitions per the Mapbox style-spec, with one exception: the INDEX property. 
+// When INDEX is used with the `addLayers` reducer, the layer will be inserted at that position 
+// in the style sheet, so that it renders in the correct order with the basemap elements
+export const MAP_LAYERS = [
+  {
+    INDEX: 71,
+    'id': 'HOVER-pixel',
+    'type': 'fill',
+    'source': 'pixel',
+    'layout': {},
+    'paint': {
+      'fill-color': '#2196f3',
+      'fill-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        0.75,
+        0
+      ]
     }
   },
-  layerPixels : {
-    id: 'pixels',
-    source: 'pixel',
-    type: 'fill-extrusion',
-    paint: {
-      'fill-extrusion-color': 'rgba(255,255,255,0.0)',
-      // use an 'interpolate' expression to add a smooth transition effect to the
-      // buildings as the user zooms in
-      'fill-extrusion-height': 0,
-      // [
-      //   'interpolate',
-      //   ['linear'],
-      //   ['zoom'],
-      //   15,
-      //   0,
-      //   15.05,
-      //   ['get', 'total']
-      // ],
-      'fill-extrusion-base': 0,
-      // [
-      //   'interpolate',
-      //   ['linear'],
-      //   ['zoom'],
-      //   15,
-      //   0,
-      //   15.05,
-      //   0
-      // ],
-      'fill-extrusion-opacity': 0
+  {
+    INDEX: 72,
+    "id": `HOVER-gauge-halo`,
+    "type": "circle",
+    "source": `gauge`,
+    'layout': {},
+    "paint": {
+      "circle-radius": 30,
+      "circle-color": "#2196f3",
+      "circle-blur": 0.8,
+      "circle-opacity": [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        0.8,
+        0
+      ],
+    }
+  },
+  {
+    // INDEX: 73,
+    "id": `HOVER-gauge`,
+    "type": "circle",
+    "source": `gauge`,
+    "layout": {},
+    "paint": {
+      "circle-radius": [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        7,
+        6,
+        18,
+        12
+      ],
+      "circle-color": "hsl(209, 25%, 55%)",
+      "circle-stroke-color": "#fff",
+      "circle-stroke-width": 2,
+      "circle-opacity": [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        1,
+        0
+      ],
+      "circle-stroke-opacity": [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        1,
+        0
+      ]      
     }
   }
-}
+]
+
+export const LAYERS_W_MOUSEOVER = [
+  ['HOVER-pixel', 'pixel'],
+  ['HOVER-gauge', 'gauge'],
+  ['HOVER-gauge-halo', 'gauge']
+]
