@@ -1,15 +1,28 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Modal, Button, Row, Col } from 'react-bootstrap';
-import { ResultsTable } from './resultsTable'
 import moment from 'moment'
 import { unparse, parse } from 'papaparse'
-import {saveAs} from 'file-saver'
+import { saveAs } from 'file-saver'
+import { keys } from 'lodash-es'
+
+import { ResultsTable } from './resultsTable'
 
 /**
 * Modal for Individual Data Downloads
 */
 class DownloadModal extends React.Component {
+
+  constructor(props) {
+    super();
+    this.handleDownloadClick = this.handleDownloadClick.bind(this);
+  }
+
+  handleDownloadClick(e) {
+    e.preventDefault()
+    var blob = new Blob([this.props.csv], { type: "application/csv" });
+    saveAs(blob, "rainfall.csv", { autoBom: true })
+  }  
 
   render() {
 
@@ -117,18 +130,18 @@ class DownloadModal extends React.Component {
             <Col sm={3}>
               <p>Download as: </p>
             </Col>
-            <Col>
-              <Button block variant="outline-primary" onClick={this.props.onHide}>
+            <Col sm={3}>
+              <Button block variant="outline-primary" size={'sm'} onClick={this.handleDownloadClick}>
                 CSV
               </Button>
-              <Button block variant="outline-primary" onClick={this.props.onHide}>
+              {/* <Button block variant="outline-primary" onClick={this.props.onHide}>
                 GeoJSON
-              </Button>
+              </Button> */}
             </Col>
           </Row>
           <Row>
             <Col>
-              <ResultsTable resultsTableData={this.props.fetchHistoryItem.results}/>
+              <ResultsTable rows={this.props.rows} header={this.props.header}/>
             </Col>
           </Row>
         </Modal.Body>
@@ -144,16 +157,25 @@ class DownloadModal extends React.Component {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  return {}
+
+  let resultsTableData = ownProps.fetchHistoryItem.results
+  
+  let allRows = []
+  keys(resultsTableData).forEach(s => {
+    let sensorRows = resultsTableData[s]
+    sensorRows.forEach(sr => {
+      let rows = sr.data.map(srd => {
+        return { ...srd, id: sr.id, type: s}
+      })
+      allRows = allRows.concat(rows)
+    })
+  })
+  
+  return {
+    header: (allRows.length > 0 ? keys(allRows[0]) : []),
+    rows: (allRows.length > 0 ? allRows : []),
+    csv: (allRows.length > 0 ? unparse(allRows) : ""),
+  }
 }
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {}
-  // return {
-  //   pickDownload: payload => {
-  //     dispatch(pickDownload(payload))
-  //   }
-  // }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(DownloadModal);
+export default connect(mapStateToProps)(DownloadModal);

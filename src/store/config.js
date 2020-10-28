@@ -58,6 +58,14 @@ export const CONTEXT_TYPES = {
   makeItRain: "makeItRain"
 }
 
+export const HEADER_LABELS = {
+  ts: "timestamp",
+  val: "rainfall",
+  src: "source",
+  id: "sensor id",
+  type: "sensor type"
+}
+
 // rainfall layers + styles (mapbox style spec)
 
 // Default Operational Layers + Styles --------------------
