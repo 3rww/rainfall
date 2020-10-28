@@ -1,7 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Modal, Button, Row, Col } from 'react-bootstrap';
+import { ResultsTable } from './resultsTable'
 import moment from 'moment'
+import { unparse, parse } from 'papaparse'
+import {saveAs} from 'file-saver'
 
 /**
 * Modal for Individual Data Downloads
@@ -58,6 +61,8 @@ class DownloadModal extends React.Component {
         show={this.props.show}
         onHide={this.props.onHide}
         size="lg"
+        dialogClassName="min-vw-95"
+        animation={false}
       >
         <Modal.Header closeButton>
           <Modal.Title>
@@ -123,7 +128,7 @@ class DownloadModal extends React.Component {
           </Row>
           <Row>
             <Col>
-              <code>{JSON.stringify(this.props.fetchHistoryItem.results)}</code>
+              <ResultsTable resultsTableData={this.props.fetchHistoryItem.results}/>
             </Col>
           </Row>
         </Modal.Body>

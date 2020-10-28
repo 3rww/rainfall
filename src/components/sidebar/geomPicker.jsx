@@ -4,8 +4,6 @@ import { connect } from 'react-redux';
 import {
   Row,
   Col,
-  Modal,
-  Button,
 } from 'react-bootstrap'
 
 import Select from 'react-select';
@@ -29,7 +27,7 @@ import { CONTEXT_TYPES } from '../../store/config'
 
 class GeodataPicker extends React.Component {
   constructor(props) {
-    super(props);
+    super();
 
     this.handleOnApply = this.handleOnApply.bind(this);
     this.handleShow = this.handleShow.bind(this);
@@ -43,7 +41,6 @@ class GeodataPicker extends React.Component {
 
   handleSelectGauge = selectedGauges => {
     this.props.dispatchPickSensorParam({
-      rainfallDataType: this.props.rainfallDataType,
       sensorLocationType: "gauge",
       selectedOptions: selectedGauges // this is a list
     })
@@ -51,9 +48,8 @@ class GeodataPicker extends React.Component {
 
   handleSelectBasin = selectedBasin => {
     this.props.dispatchPickSensorParam({
-      rainfallDataType: this.props.rainfallDataType,
       sensorLocationType: "basin",
-      selectedOptions: [selectedBasin] // make this a list
+      selectedOptions: selectedBasin !== null ? [selectedBasin] : null // make this a list
     })
   };
 
@@ -118,22 +114,6 @@ class GeodataPicker extends React.Component {
           null
         )}
 
-        {/* <Modal show={this.state.show} onHide={this.handleClose} size="lg" >
-          <Modal.Header closeButton>
-            <Modal.Title>
-              Upload an area of interest polygon
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            Text field
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={this.handleClose}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal> */}
-
       </div>
 
     );
@@ -146,8 +126,8 @@ function mapStateToProps(state, ownProps) {
       .map(i => ({ value: i.id, label: `${i.id}: ${i.properties.name}` })),
     basinOpts: selectPixelLookupsBasinsOnly(state)
       .map(i => ({ value: i.value, label: i.value })),
-    selectedBasin: selectPickedSensors(state, ownProps.rainfallDataType, 'basin'),
-    selectedRaingauges: selectPickedSensors(state, ownProps.rainfallDataType, 'raingauge'),
+    selectedBasin: selectPickedSensors(state, ownProps.contextType, 'basin'),
+    selectedRaingauges: selectPickedSensors(state, ownProps.contextType, 'raingauge'),
     context: selectContext(state)
   }
 }
@@ -155,7 +135,7 @@ function mapStateToProps(state, ownProps) {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     dispatchPickSensorParam: payload => {
-      dispatch(pickSensor(payload))
+      dispatch(pickSensor({...payload, contextType: ownProps.contextType}))
     }
   }
 }

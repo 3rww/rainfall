@@ -24,70 +24,70 @@ class EventsList extends React.Component {
 
     // This binding is necessary to make `this` work in the callback
     this.handleListClick = this.handleListClick.bind(this);
-  }  
+  }
 
   handleListClick(eventid) {
-    this.props.getRainfallEvent(eventid)
+    this.props.dispatchPickRainfallEvent(eventid)
   }
 
   render() {
 
     return (
-      
-        <Row>
-          <Col>
-            <ListGroup variant="flush">
-              {
-                this.props.events.map((e, i) => {
 
-                  let dt0 = moment(e.startDt)
-                  let dt1 = moment(e.endDt);
-                  // let hasData = e.data.length > 0;
-                  // let pct = (e.hours / this.props.maxHours) * 100
-                  let pct = (e.hours / 48) * 100
+      <Row>
+        <Col>
+          <ListGroup variant="flush">
+            {
+              this.props.events.map((e, i) => {
 
-                  return (
-                    <ListGroup.Item 
-                      action 
-                      onClick={() => this.handleListClick(e.eventid)} 
-                      key={i} 
-                      eventKey={e.eventid}
-                      // variant={hasData ? "primary" : ""}
-                      className="event-list-item"
-                    >
-                      <small>
-                        <Row>
-                          <Col xs={7}>
-                          {dt0.format("DD MMM YYYY, h:mm a")} &mdash; {dt1.format("DD MMM YYYY, h:mm a")}&nbsp; 
+                let dt0 = moment(e.startDt)
+                let dt1 = moment(e.endDt);
+                // let hasData = e.data.length > 0;
+                // let pct = (e.hours / this.props.maxHours) * 100
+                let pct = (e.hours / 48) * 100
+
+                return (
+                  <ListGroup.Item
+                    action
+                    onClick={() => this.handleListClick(e.eventid)}
+                    key={i}
+                    eventKey={e.eventid}
+                    // variant={hasData ? "primary" : ""}
+                    className="event-list-item"
+                  >
+                    <small>
+                      <Row>
+                        <Col xs={7}>
+                          {dt0.format("DD MMM YYYY, h:mm a")} &mdash; {dt1.format("DD MMM YYYY, h:mm a")}&nbsp;
                           </Col>
-                          <Col xs={5}>
-                            {e.hours} hour{(e.hours > 1) ? "s" : ""}
-                          </Col>
-                          {/* <Col xs={2}>
+                        <Col xs={5}>
+                          {e.hours} hour{(e.hours > 1) ? "s" : ""}
+                        </Col>
+                        {/* <Col xs={2}>
                           {e.isFetching ? <FontAwesomeIcon icon={faSpinner} pulse/> : ("")}
                           {hasData ? <FontAwesomeIcon icon={faCloudRain}/> : ("")}
                           </Col> */}
-                        </Row>
-                      </small>
-                        <Row>
-                          <Col>
-                            <ProgressBar 
-                              className="event-length-bar" 
-                              now={pct} 
-                              // label={`${e.hours} hours`} 
-                              variant="primary"
-                            />
-                          </Col>
-                        </Row>                      
-                    </ListGroup.Item>
-                  )
-                  
-                })
-              }
-            </ListGroup>
-          </Col>
-        </Row>
-      
+                      </Row>
+                    </small>
+                    <Row>
+                      <Col>
+                        <ProgressBar
+                          className="event-length-bar"
+                          now={pct}
+                          // label={`${e.hours} hours`} 
+                          variant="primary"
+                        />
+                      </Col>
+                    </Row>
+                  </ListGroup.Item>
+                )
+
+              })
+            }
+          </ListGroup>
+        </Col>
+      </Row>
+
     )
   }
 }
@@ -99,7 +99,7 @@ function mapStateToProps(state) {
       // return all events if filter is set to 24
       if (events.filters.maxHours >= 24) {
         return e
-      // otherwise use the filter
+        // otherwise use the filter
       } else {
         if (e.hours <= events.filters.maxHours) {
           return e
@@ -112,8 +112,9 @@ function mapStateToProps(state) {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    getRainfallEvent: payload => {
-      dispatch(pickRainfallEvent(payload))
+    dispatchPickRainfallEvent: eventid => {
+      dispatch(pickRainfallEvent({ eventid: eventid, contextType: ownProps.contextType }))
+      // ownProps.handleClose()
     }
   }
 }

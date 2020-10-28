@@ -14,10 +14,11 @@
     padding-top: 0.1rem !important;
     padding-left: 0.5rem !important;
     padding-right: 0.5rem !important;
+    box-shadow:  2px 2px 4px rgba(0,0,0,0.5);
+    z-index: 500;
 }
 
 .nav-pills .nav-link.active {
     background-color: #1972bb;
     box-shadow:  2px 2px 4px rgba(0,0,0,0.4);
-    // padding: 0.5rem;
 }

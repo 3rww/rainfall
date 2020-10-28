@@ -24,11 +24,21 @@ export const URL_GARRD_GEOJSON = "/static/data/pixels.geojson"
 export const URL_GAUGE_GEOJSON = "/static/data/gauges.geojson"
 export const URL_BASIN_PIXEL_LOOKUP = "/static/data/basin-lookup-pixel.json"
 
+// Service Parms -----------------------------------------
+export const REQUEST_TIME_INTERVAL = `${process.env.API_REQUEST_INTERVAL_MS}`
+
 
 // rainfall data constants ----------------------------------
 
+export const INTERVAL_OPTIONS = [
+  "15-minute",
+  "Hourly",
+  "Daily",
+  "Total"
+]
+
 // the earliest date that can be selected:
-export const RAINFALL_MIN_DATE = "2000-04-01"
+export const RAINFALL_MIN_DATE = `${process.env.REACT_APP_RAINFALL_MIN_DATE}`
 
 // the types of rainfall data that can be queried
 export const RAINFALL_TYPES = {
@@ -38,14 +48,14 @@ export const RAINFALL_TYPES = {
 
 export const SENSOR_TYPES = {
   pixel: "pixel",
-  gauge: "gauge"
+  gauge: "gauge",
 }
 
 export const CONTEXT_TYPES = {
-  legacyRealtime: "legacy-realtime",
-  legacyGauge: "legacy-gauge",
-  legacyGarr: "legacy-garr",
-  makeItRain: "make-it-rain"
+  legacyRealtime: "legacyRealtime",
+  legacyGauge: "legacyGauge",
+  legacyGarr: "legacyGarr",
+  makeItRain: "makeItRain"
 }
 
 // rainfall layers + styles (mapbox style spec)

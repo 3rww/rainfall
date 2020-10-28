@@ -3,14 +3,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Form, Row, Col } from 'react-bootstrap'
 
-import {
-  selectMapStyleSourceDataFeatures,
-  selectPixelLookupsBasinsOnly,
-  selectPickedSensors
-} from '../../store/selectors'
-import {
-  pickInterval
-} from '../../store/actions'
+import { pickInterval } from '../../store/actions'
+import { INTERVAL_OPTIONS } from '../../store/config'
 
 
 class IntervalPicker extends React.Component {
@@ -19,23 +13,15 @@ class IntervalPicker extends React.Component {
     this.props.dispatchPickInterval(e.currentTarget.value)
   };
 
-  options = [
-    "15-minute",
-    "Hourly",
-    "Daily",
-    "Total"
-  ]
-
   render() {
-    // const { selectedGauges, selectedBasin } = this.state;
     return (
       <Row noGutters>
-        <Col md={3}>
+        <Col lg={3}>
           <strong>Interval</strong>
         </Col>
-        <Col>
-        <Form>
-            {this.options.map((opt, i) => (
+        <Col lg={9}>
+          <Form>
+            {INTERVAL_OPTIONS.map((opt, i) => (
               <Form.Check
                 defaultChecked={opt == "Total" ? true : false}
                 inline
@@ -49,11 +35,12 @@ class IntervalPicker extends React.Component {
                 onChange={this.handleSelectInterval}
               />
             ))}
-          </Form>        
+          </Form>
         </Col>
       </Row>
-    );
+    )
   }
+
 }
 
 function mapStateToProps(state) {
@@ -64,8 +51,7 @@ function mapStateToProps(state) {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     dispatchPickInterval: payload => {
-      // console.log(payload, ownProps.rainfallDataType)
-      dispatch(pickInterval({rollup: payload, rainfallDataType: ownProps.rainfallDataType}))
+      dispatch(pickInterval({ rollup: payload, contextType: ownProps.contextType }))
     }
   }
 }

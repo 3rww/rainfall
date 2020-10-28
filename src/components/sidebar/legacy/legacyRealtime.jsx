@@ -5,6 +5,7 @@ import { Row, Col, Button, ButtonToolbar, ButtonGroup, Popover, OverlayTrigger, 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlay, faPause, faStop, faMap, faHandPointer } from '@fortawesome/free-solid-svg-icons'
 
+import '../../layout.scss';
 
 
 const popover = (
@@ -24,7 +25,7 @@ export default class LegacyRealtimeRainfallPage extends React.Component {
 
       <Row>
         <Col>
-          <h1>Real-time Rainfall&nbsp;
+          <h1 className="data-type-header">Real-time Rainfall<br></br>
             <small>
               <OverlayTrigger trigger="click" placement="right" overlay={popover}>
                 <Button variant="light" size="sm">Provisional Data Disclaimer</Button>

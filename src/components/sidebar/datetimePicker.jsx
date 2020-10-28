@@ -28,7 +28,7 @@ import './datetimePicker.scss'
 
 class DateTimePicker extends React.Component {
   constructor(props) {
-    super(props);
+    super();
 
     this.handleOnApply = this.handleOnApply.bind(this);
     this.handleShow = this.handleShow.bind(this);
@@ -41,9 +41,7 @@ class DateTimePicker extends React.Component {
   }
 
   handleOnApply(e, p) {
-
     this.props.dispatchPickRainfallDateTimeRange({
-      rainfallDataType: this.props.rainfallDataType,
       startDt: p.startDate.toISOString(),
       endDt: p.endDate.toISOString()
     })
@@ -73,7 +71,10 @@ class DateTimePicker extends React.Component {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <EventsList />
+            <EventsList 
+              contextType={this.props.contextType}
+              handleClose={this.handleClose}
+            />
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={this.handleClose}>
@@ -158,7 +159,7 @@ class DateTimePicker extends React.Component {
 }
 
 function mapStateToProps(state, ownProps) {
-  let currentKwargs = selectFetchKwargs(state, ownProps.rainfallDataType)
+  let currentKwargs = selectFetchKwargs(state, ownProps.contextType)
   let eventStats = selectEventStats(state)
 
   // calculate different available ranges, start, and endtimes, depending on rainfall data type
@@ -214,16 +215,16 @@ function mapStateToProps(state, ownProps) {
     minYear: moment(RAINFALL_MIN_DATE).year(),
     maxYear: moment().year(),
     ranges: ranges,
-    rainfallDataType: ownProps.rainfallDataType
+    rainfallDataType: ownProps.rainfallDataType,
   }
-  // console.log(ownProps.rainfallDataType, p)
+  // console.log(ownProps.contextType, ownProps.rainfallDataType, p)
   return p
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     dispatchPickRainfallDateTimeRange: payload => {
-      dispatch(pickRainfallDateTimeRange(payload))
+      dispatch(pickRainfallDateTimeRange({...payload, contextType: ownProps.contextType}))
     }
   }
 }

@@ -29,7 +29,9 @@ import {
   EVENTS_JSON_URL,
   URL_BASIN_PIXEL_LOOKUP,
   URL_GARRD_GEOJSON,
-  URL_GAUGE_GEOJSON
+  URL_GAUGE_GEOJSON,
+  CONTEXT_TYPES,
+  REQUEST_TIME_INTERVAL
 } from './config'
 
 
@@ -174,18 +176,24 @@ export function initDataFetch(payload) {
       })
       .then(() => {
 
-        // set the default date/time range for historic and realtime pickers
+        // set the default date/time range for all the contexts
 
         let maxDate = store.getState().rainfallEvents.stats.maxDate
 
         dispatch(pickRainfallDateTimeRange({
-          rainfallDataType: "realtime",
+          contextType: CONTEXT_TYPES.legacyRealtime,
           startDt: moment().subtract(2, 'hour').toISOString(),
           endDt: moment().toISOString()
         }))
 
         dispatch(pickRainfallDateTimeRange({
-          rainfallDataType: "historic",
+          contextType: CONTEXT_TYPES.legacyGauge,
+          startDt: moment(maxDate).startOf('month').toISOString(),
+          endDt: maxDate
+        }))
+
+        dispatch(pickRainfallDateTimeRange({
+          contextType: CONTEXT_TYPES.legacyGarr,
           startDt: moment(maxDate).startOf('month').toISOString(),
           endDt: maxDate
         }))
@@ -197,13 +205,13 @@ export function initDataFetch(payload) {
   }
 }
 
-const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, rainfallDataType, url, params) => {
+const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, url, params) => {
 
-  // console.log(dispatch, requestId, sensor, rainfallDataType, url, params)
+  // console.log(dispatch, requestId, sensor, contextType, url, params)
 
   // assemble the arguments for fetch w/ axios
   let requestKwargs = {
-    url: url, 
+    url: url,
     method: 'GET'
   }
   // if the request params are explicitly not `false`, then 
@@ -231,16 +239,15 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, rainfallDataTy
           // wait, then check on status/results at the provided 'job-url'
           // this triggers a recurive call to _fetchRainfallDataFromApiV2
           setTimeout(
-            () => _fetchRainfallDataFromApiV2(dispatch, requestId, sensor, rainfallDataType, r.meta.jobUrl, false),
-            1000
+            () => _fetchRainfallDataFromApiV2(dispatch, requestId, sensor, contextType, r.meta.jobUrl, false),
+            Number(REQUEST_TIME_INTERVAL)
           )
-        // if status is deferred or failed,
+          // if status is deferred or failed,
         } else if (includes(['deferred', 'failed'], r.status)) {
 
           dispatch(requestRainfallDataFail(
             {
               requestId: requestId,
-              rainfallDataType: rainfallDataType,
               results: {
                 [sensor[0]]: false
               },
@@ -260,7 +267,7 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, rainfallDataTy
 
           dispatch(requestRainfallDataSuccess({
             requestId: requestId,
-            rainfallDataType: rainfallDataType,
+            contextType: contextType,
             results: {
               [sensor[0]]: r.data
             },
@@ -278,7 +285,7 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, rainfallDataTy
         dispatch(requestRainfallDataFail(
           {
             requestId: requestId,
-            rainfallDataType,
+            contextType: contextType,
             results: {
               [sensor[0]]: false
             }
@@ -298,21 +305,8 @@ export function fetchRainfallDataFromApiV2(payload) {
 
   return function (dispatch) {
 
-    // // get the current set of fetchKwargs; use the payload if provided, 
-    // // otherwise get from the state tree
-    // let kwargs
-    // if (payload !== undefined) {
-    //   if (selectFetchKwargsKeys(store.getState()).every(k => has(payload, k))) {
-    //     kwargs = {...payload}
-    //   } else {
-    //     kwargs = {...store.getState().fetchKwargs}
-    //   }
-    // } else {
-    //   kwargs = {...store.getState().fetchKwargs}
-    // }
-
-    let rainfallDataType = payload
-    let kwargs = selectFetchKwargs(store.getState(), rainfallDataType)
+    let { contextType, rainfallDataType } = payload
+    let kwargs = selectFetchKwargs(store.getState(), contextType)
 
     // generate a unique ID, based on the hash of the kwargs
     // this will let us 1) update the correct object in fetchHistory
@@ -342,8 +336,7 @@ export function fetchRainfallDataFromApiV2(payload) {
       }
 
       // then deal with the IDs.
-
-      // little weird here: get the correct names used for various 
+      // It gets a little weird here: get the correct names used for various 
       // api params and state tree lookups
       // 0: api url endpoint and state tree path, 1: api param
       let sensor = (s == 'basin') ? ['pixel', 'pixels'] : ['gauge', 'gauges']
@@ -356,14 +349,13 @@ export function fetchRainfallDataFromApiV2(payload) {
       dispatch(requestRainfallData({
         fetchKwargs: kwargs,
         requestId: requestId,
-        rainfallDataType: rainfallDataType
-        // sensor: sensor[0]
+        contextType: contextType
       }))
 
       let url = `${process.env.REACT_APP_API_URL_ROOT}v2/${sensor[0]}/${rainfallDataType}/`
       let params = requestParams
 
-      _fetchRainfallDataFromApiV2(dispatch, requestId, sensor, rainfallDataType, url, params)
+      _fetchRainfallDataFromApiV2(dispatch, requestId, sensor, contextType, url, params)
 
     })
 
