@@ -51,6 +51,56 @@ Because engineers and planners addressing the wet weather issue need this level 
 
 The NEXRAD radar (located in Moon Township) data is calibrated with the rain gauge measurements collected during the same time period and rain event for every square kilometer in Allegheny County. The resulting rainfall data is equivalent in accuracy to having 2,276 rain gauges placed across the County.
 
+---
+
+## Real-time Rainfall Data
+
+Data from 33 rain gauges is collected and updated every 15 minutes to calibrate live weather radar to provide accurate, quality rainfall information as it is occurring.
+
+Rain gauge data also is available in this section for the most recent 30-to-60-day period, spanning from the first day of the previous month to the current date in the present month. (Example: If the date is November 15, data can be obtained for as little as one day up to 45 days—October 1-November 15. If it is the last day of the present month—November 30—a full 60 days of data is available).
+
+Fully calibrated rainfall data (older than 30 days with completed QA/QC) for any given month is available through the "Calibrated Radar Rainfall Data" section, generally within 15 days of the end of each month.
+
+Several options for data output are provided on the real-time site via simple links.
+
+* A bar graph and data table (in 15-min. increments) showing rainfall over the last 4 hours for a specified pixel on the map (2,276 pixels are available).
+* An animated map showing the rainfall over the last 2-hour, 4-hour or 6-hour time period.
+* A table recording the raw rainfall data for individual rain gauges over the last 30-60 days.
+* A cumulative color-coded map showing the amount of rainfall occurring over a specified period. Data can be accessed from the first day of the previous month to the current date. Be sure to specify the time period, and select the appropriate rainfall scale (.5 inch, 5 inches or 10 inches.) For particularly long periods of time or heavy rainfall periods, a higher scale will provide a better range of colors in the final map.
+* Rainfall amount collected over the most recent 4-hour period by an individual rain gauge. A bar graph and data table show the actual rainfall collected by the specific gauge in 15-min. increments. 
+
+## Historical Rain Gauge
+
+The data from 33 rain gauges is archived in this section. The data may be retrieved for any combination of the rain gauges during a specified time span. The data may also be displayed in 15-minute increments or compressed to hourly or daily data points. The data may be viewed on the page or downloaded into a comma-separated output format which may be saved and loaded into a spreadsheet or database that accepts comma-separated files.
+
+
+## Calibrated Radar Rainfall
+
+The calibrated radar rainfall section allows the retrieval of data for each of the 2313 pixels mapped by the radar cross-section.
+
+---
+
+## Querying Rainfall
+
+Select the start and end date/time, along with the interval. Rainfall data is collected and stored in 15-minute increments, which allows for 15-minute, hourly, and daily intervals as options for the selectable increment. Note that if a daily increment is selected, the start and end selections will begin at midnight and the start and end hour will be ignored.
+
+Querying results will listed in a panel below. The data output may be viewed and downloaded on the page by selecting the 'View and Download Results' Button 
+
+The output for each timestamp contains a gauge or pixel ID, a rainfall amount, and a source code. The amount is the rainfall in inches. The source can be found in the following table:
+
+| Source |	Description |
+| --- | --- |
+| R |	Calibrated radar rainfall data |
+| G-0 | No gauge or calibrated radar rainfall data is available, but not for the reasons given for N/D below |
+| G-1 |	Derived from inverse distance squared weighting based on one rain gauge |
+| G-2 |	Derived from inverse distance squared weighting based on two rain gauges |
+| G-3 |	Derived from inverse distance squared weighting based on three rain gauges |
+| N/D |	No data was collected for this data point. This may be because no data was collected at the time or the pixel may be outside of the data collection boundary. |
+| RTRR | Real-time radar rainfall. Data shown are provisional.|
+| RTRG | Real-time rain gauge data. Data shown are provisional. |
+
+
+Note that the source code only appears for the 15-minute increments because an hourly or daily increment may include many different sources.
           `
         },
         // LegendButton: {
