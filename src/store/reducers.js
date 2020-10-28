@@ -77,11 +77,17 @@ export const rootReducer = createReducer(
       state.progress.isFetching = action.payload.isFetching
     },
     [startThinking]: (state, action) => {
-      if (action.payload !== undefined) { console.log(action.payload) }
+      if (action.payload !== undefined) { 
+        console.log(action.payload) 
+        state.progress.messages.push(action.payload)
+      }
       state.progress.isThinking = state.progress.isThinking + 1
     },
     [stopThinking]: (state, action) => {
-      if (action.payload !== undefined) { console.log(action.payload) }
+      if (action.payload !== undefined) { 
+        console.log(action.payload)
+        state.progress.messages.push(action.payload)
+      }
       state.progress.isThinking = state.progress.isThinking - 1
     },
     /**
@@ -116,8 +122,8 @@ export const rootReducer = createReducer(
      */
     [pickRainfallEvent]: (state, action) => {
       // get the event from the list, set it's selected state to True
-      console.log(action.payload)
-      let {eventid, contextType } = action.payload
+      // console.log(action.payload)
+      let {eventid, contextType} = action.payload
       let rainfallEvent = selectEvent(state, eventid)
       rainfallEvent.selected = true
       // set the others to false
@@ -243,19 +249,19 @@ export const rootReducer = createReducer(
      */
     [pickDownload]: (state, action) => {
 
-      console.log(action.payload)
+      // console.log(action.payload)
       let { contextType, ...fetchHistoryItem } = action.payload
       let requestId = fetchHistoryItem.requestId
       let fetchKwargs = fetchHistoryItem.fetchKwargs
 
       // update the state of the item in the download list
       let thisFetch = selectFetchHistoryItemById(state, requestId, contextType)
-      console.log("thisFetch", thisFetch)
+      // console.log("thisFetch", thisFetch)
       thisFetch.isActive = true
 
-      let otherFetches = selectFetchHistoryItemsByIdInverse(state, requestId, contextType)
-      otherFetches.forEach((v) => v.isActive = false)
-      console.log("otherFetches", otherFetches)
+      // let otherFetches = selectFetchHistoryItemsByIdInverse(state, requestId, contextType)
+      // otherFetches.forEach((v) => v.isActive = false)
+      // console.log("otherFetches", otherFetches)
 
       // set the overall fetch kwargs to match those of the selected download
       let fk = selectFetchKwargs(state, contextType)

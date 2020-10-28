@@ -18,7 +18,8 @@ export const initialState = {
     // isThinking increments decrements with calls to start/stopThinking. E.g: 
     // Set at +1 so we're "thinking" on load, then after all start up tasks 
     // complete, -1 to get back to zero.
-    isThinking: 0, 
+    isThinking: 0,
+    messages: []
   },
   // fetchKwargs ------------------------------------------
   // Holds arguments for calling the API, e.g., sensor type, rollup, zerofill.

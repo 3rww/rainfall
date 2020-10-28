@@ -17,7 +17,8 @@ class ThinkingOverlay extends React.Component {
             <span className="fa-layers fa-fw">
                 <FontAwesomeIcon icon={faSpinner} pulse size="8x"/>
                 <FontAwesomeIcon icon={faCloudRain} size="4x" transform="right-8"/>
-              </span>            
+              </span>
+              
             {/* <Spinner
               animation="grow"
               variant="primary"
@@ -26,6 +27,7 @@ class ThinkingOverlay extends React.Component {
               <span className="sr-only">"Loading...</span>
             </Spinner> */}
           </div>
+          <p className="debug-messages">{this.props.message}</p>
         </div>
       )
     } else {
@@ -37,7 +39,11 @@ class ThinkingOverlay extends React.Component {
 }
 
 function mapStateToProps(state) {
-  return { isAppThinking: state.progress.isThinking > 0 }
+  let msgs = state.progress.messages
+  return { 
+    isAppThinking: state.progress.isThinking > 0,
+    message: msgs[msgs.length - 1]
+  }
 }
 
 export default connect(mapStateToProps)(ThinkingOverlay)
