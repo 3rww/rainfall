@@ -5,6 +5,7 @@ import { keys } from 'lodash-es'
 
 import DownloadItem from './downloadItem'
 import { pickDownload } from '../../store/actions'
+import { selectFetchHistory } from '../../store/selectors'
 
 import './downloadList.scss'
 
@@ -35,32 +36,36 @@ class DownloadsList extends React.Component {
               key={idx}
               // active={fetchHistoryItem.isActive}
               // action
-              as="div"              
+              as="div"
+              className="mx-0"
               // onClick={() => this.handleListClick(fetchHistoryItem)}
               variant={(fetchHistoryItem.isActive) ? ("primary"): ("")}
             >
 
               <Row noGutters>
-                <Col>
+                <Col sm={ fetchHistoryItem.isFetching ? (11) : (12) }>
                   <DownloadItem
                     fetchHistoryItem={fetchHistoryItem}
+                    contextType={this.props.contextType}
                     rainfallDataType={this.props.rainfallDataType}
+                    rainfallSensorType={this.props.rainfallSensorType}
                   />
                 </Col>
-                <Col sm={1}>
+                
                   {
                     fetchHistoryItem.isFetching ? (
-                      <Spinner
-                        animation="border"
-                        variant="primary"
-                      >
-                        <span className="sr-only">
-                          "Fetching rainfall data...
-                        </span>
-                      </Spinner>
+                      <Col sm={1}>
+                        <Spinner
+                          animation="border"
+                          variant="primary"
+                        >
+                          <span className="sr-only">
+                            "Fetching rainfall data...
+                          </span>
+                        </Spinner>
+                      </Col>
                     ) : (null)
                   }
-                </Col>
               </Row>
 
             </ListGroup.Item>
@@ -74,11 +79,10 @@ class DownloadsList extends React.Component {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  let hasSelections = keys(state.fetchKwargs[ownProps.rainfallDataType].sensorLocations).filter(k => state.fetchKwargs[ownProps.rainfallDataType].sensorLocations[k].length > 0)
+  let fh = selectFetchHistory(state, ownProps.contextType)
   return {
-    fetchHistory: state.fetchHistory[ownProps.rainfallDataType],
-    hasDownloads: state.fetchHistory[ownProps.rainfallDataType].length > 0,
-    hasKwargs: !hasSelections.length > 0,
+    fetchHistory: fh,
+    hasDownloads: fh.length > 0,
     rainfallDataType: ownProps.rainfallDataType
   }
 }
@@ -86,8 +90,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     pickDownload: payload => {
-      // jam the rainfallDataType along side of the fetchHistoryItem props (payload)
-      dispatch(pickDownload({...payload, rainfallDataType: ownProps.rainfallDataType}))
+      dispatch(pickDownload({...payload, contextType: ownProps.contextType}))
     }
   }
 }

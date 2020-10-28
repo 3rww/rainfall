@@ -2,17 +2,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import {
-  Accordion,
   Card,
   Button,
-  ButtonToolbar,
-  ButtonGroup,
-  ListGroup,
-  Row,
-  Col
 } from 'react-bootstrap'
-import moment from 'moment'
-import { keys, isEmpty } from 'lodash-es'
+import { isEmpty } from 'lodash-es'
 
 import DateTimePicker from './datetimePicker';
 import GeodataPicker from './geomPicker';
@@ -20,86 +13,80 @@ import IntervalPicker from './intervalPicker'
 import DownloadsList from './downloadList'
 
 import { fetchRainfallDataFromApiV2 } from '../../store/middleware'
-import { selectActiveFetches } from '../../store/selectors'
+import { selectSelectedSensors, selectFetchHistory } from '../../store/selectors'
 
 import './downloader.scss'
 
 
 class RainfallDownloader extends React.Component {
   constructor(props) {
-    super(props);
-
+    super();
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
   }
 
   handleDownloadClick() {
-    this.props.fetchRainfallData(
-      // rainfallDataType is either "historic" or "realtime"
-      this.props.rainfallDataType
-    )
+    this.props.fetchRainfallData({
+      rainfallDataType: this.props.rainfallDataType,
+      contextType: this.props.contextType
+    })
   }
-
-  toggleAccordion(e) {console.log(e.target)}
 
   render() {
     return (
-      <Accordion defaultActiveKey="0">
-
+      <div>
         <Card>
-          <Card.Header className="accordian-card-header">
-            <Accordion.Toggle as={Button} variant="link" eventKey="0">
-              When and Where
-            </Accordion.Toggle>
-          </Card.Header>
-          <Accordion.Collapse eventKey="0">
             <Card.Body>
-              <DateTimePicker rainfallDataType={this.props.rainfallDataType}/>
+              <DateTimePicker
+                rainfallDataType={this.props.rainfallDataType}
+                contextType={this.props.contextType}
+              />
               <hr></hr>
-              <GeodataPicker rainfallDataType={this.props.rainfallDataType}/>
+              <GeodataPicker
+                rainfallDataType={this.props.rainfallDataType}
+                contextType={this.props.contextType}
+              />
               <hr></hr>
-              <IntervalPicker rainfallDataType={this.props.rainfallDataType}/>
+              <IntervalPicker
+                rainfallDataType={this.props.rainfallDataType}
+                contextType={this.props.contextType}
+              />
               <hr></hr>
               <Button
                 onClick={this.handleDownloadClick}
-                disabled={this.props.hasKwargs}
+                disabled={!this.props.hasKwargs}
                 block
-              >Get Rainfall Data
+              >
+                Get Rainfall Data
               </Button>
             </Card.Body>
-          </Accordion.Collapse>
         </Card>
-
+        <br></br>
+        {this.props.hasDownloads ? (
         <Card>
-          <Card.Header className="accordian-card-header">
-            <Accordion.Toggle as={Button} variant="link" eventKey="1">
+          <Card.Header>
               Retrieved Rainfall Data
-            </Accordion.Toggle>
           </Card.Header>
-          <Accordion.Collapse eventKey="1">
             <Card.Body>
-              {this.props.hasDownloads ? (
-                <DownloadsList rainfallDataType={this.props.rainfallDataType}/>  
-              ) : (
-                <p>Fetched rainfall data will be available here.</p>
-              )}
+                <DownloadsList 
+                  contextType={this.props.contextType}
+                  rainfallDataType={this.props.rainfallDataType} 
+                /> 
             </Card.Body>
-          </Accordion.Collapse>
         </Card>
-
-      </Accordion>
-
+        ) : (null)}
+      </div>
     );
   }
 }
 
 function mapStateToProps(state, ownProps) {
 
-  let hasSelections = keys(state.fetchKwargs[ownProps.rainfallDataType].sensorLocations)
-    .filter(k => state.fetchKwargs[ownProps.rainfallDataType].sensorLocations[k].length > 0)
+  let selectedSensors = selectSelectedSensors(state, ownProps.contextType)
+  let downloadHistory = selectFetchHistory(state, ownProps.contextType)
 
   return {
-    hasDownloads: state.fetchHistory[ownProps.rainfallDataType].length > 0,
-    hasKwargs: !hasSelections.length > 0
+    hasKwargs: !isEmpty(selectedSensors), // if this is not empty, then we have kwargs
+    hasDownloads: downloadHistory.length > 0
   }
 }
 

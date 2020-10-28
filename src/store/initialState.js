@@ -1,7 +1,8 @@
 import {
   MAPBOX_TOKEN,
   MAPBOX_STYLE_BASEMAP,
-  RAINFALL_MIN_DATE
+  RAINFALL_MIN_DATE,
+  CONTEXT_TYPES
 } from './config'
 
 import { testFetchHistoryItems } from './data/test_events'
@@ -10,48 +11,66 @@ export const initialState = {
   // progress ---------------------------------------------
   // for storing indicators of global application state
   progress: {
-    tab: "legacy-realtime",
+    tab: CONTEXT_TYPES.legacyRealtime,
     mapLoaded: false,
     initialStyleLoaded: false,
     isFetching: true,
-    // isThinking increments decrements with calls to start/stopThinking. Set 
-    // at 1 so we're "thinking" on load. There will be one additional call to 
-    // stopThinking that's only hit after all start up tasks complete
+    // isThinking increments decrements with calls to start/stopThinking. E.g: 
+    // Set at +1 so we're "thinking" on load, then after all start up tasks 
+    // complete, -1 to get back to zero.
     isThinking: 0, 
   },
-
   // fetchKwargs ------------------------------------------
-  // holds arguments for calling the API, e.g., sensor type, rollup, zerofill
+  // Holds arguments for calling the API, e.g., sensor type, rollup, zerofill.
+  // Keys correspond to tabs in the UI, and each tab has both an active and history
+  // object for storing current parameters and past requests, respectively.
   fetchKwargs: {
-    realtime: {
-      startDt: null,
-      endDt: null,
-      sensorLocations: {
-        gauge: [],
-        basin: [],
-        pixel: []
+    [CONTEXT_TYPES.legacyRealtime] : {
+      active: {
+        startDt: null,
+        endDt: null,
+        sensorLocations: {
+          gauge: [],
+          basin: [],
+          pixel: []
+        },
+        rollup: "Total",
+        zerofill: true,
+        f: 'sensor'
       },
-      rollup: "Total",
-      zerofill: true,
-      f: 'sensor'
+      history: []
     },
-    historic: {
-      startDt: null,
-      endDt: null,
-      sensorLocations: {
-        gauge: [],
-        basin: [],
-        pixel: []
+    [CONTEXT_TYPES.legacyGauge] : {
+      active: {
+        startDt: null,
+        endDt: null,
+        sensorLocations: {
+          gauge: [],
+          basin: [],
+          pixel: []
+        },
+        rollup: "Total",
+        zerofill: true,
+        f: 'sensor'
       },
-      rollup: "Total",
-      zerofill: true,
-      f: 'sensor'
-    }
-  },
-  // fetchHistory is for storing requests to the API, *along with the received data*
-  fetchHistory: {
-    realtime: [],
-    historic: testFetchHistoryItems //[],
+      history: testFetchHistoryItems
+      // history: []
+    },
+    [CONTEXT_TYPES.legacyGarr] : {
+      active: {
+        startDt: null,
+        endDt: null,
+        sensorLocations: {
+          gauge: [],
+          basin: [],
+          pixel: []
+        },
+        rollup: "Total",
+        zerofill: true,
+        f: 'sensor'
+      },
+      history: []
+    }       
   },
   // EVENTS -----------------------------------------------  
   rainfallEvents: {

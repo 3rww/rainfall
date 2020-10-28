@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Row, Col, Button, ButtonToolbar, ButtonGroup } from 'react-bootstrap';
+import { Row, Col, Button, Card } from 'react-bootstrap';
 import moment from 'moment'
 
 import DownloadModal from './downloadModal'
@@ -30,7 +30,7 @@ class DownloadsItem extends React.Component {
   handleShow(e) {
     // console.log(e)
     this.setState({ show: true });
-    this.props.pickDownload()
+    this.props.dispatchPickDownload()
   }  
 
   render() {
@@ -47,8 +47,8 @@ class DownloadsItem extends React.Component {
 
         {/* Datetime Range */}
         <Row>
-          <Col>
-            <h5>{moment(fetchKwargs.startDt).format("DD MMM YYYY, h:mm a")} to {moment(fetchKwargs.endDt).format("DD MMM YYYY, h:mm a")}</h5>
+          <Col sm={12}>
+            <Card.Title>{moment(fetchKwargs.startDt).format("DD MMM YYYY, h:mm a")} to {moment(fetchKwargs.endDt).format("DD MMM YYYY, h:mm a")}</Card.Title>
             <hr></hr>
           </Col>
         </Row>
@@ -57,8 +57,8 @@ class DownloadsItem extends React.Component {
         {/* List Gauges used in the request*/}
         {(gauges.length > 0) ? (
           <Row>
-            <Col md={3}>
-              <p>Gauges:</p>
+            <Col sm={3}>
+              <p><strong></strong>Gauges:</p>
             </Col>
             <Col md={9}>
               <p>{gauges.map(g => g.label).join(", ")}</p>
@@ -139,8 +139,9 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    pickDownload: payload => {
-      let p = {...ownProps.fetchHistoryItem, rainfallDataType: ownProps.rainfallDataType}
+    dispatchPickDownload: payload => {
+      let p = {...ownProps.fetchHistoryItem, contextType: ownProps.contextType}
+      // console.log(p)
       dispatch(pickDownload(p))
     }
   }

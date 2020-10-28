@@ -8,7 +8,7 @@ import RainfallDownloader from './sidebar/downloader'
 import LegacyRealtimeRainfallPage from './sidebar/legacy/legacyRealtime'
 import ThinkingOverlay from './thinking/thinkingOverlay'
 
-import { RAINFALL_TYPES, CONTEXT_TYPES } from '../store/config'
+import { RAINFALL_TYPES, CONTEXT_TYPES, SENSOR_TYPES } from '../store/config'
 import { switchTab } from '../store/actions'
 
 import './layout.scss'
@@ -41,18 +41,42 @@ class Layout extends React.Component {
                 onSelect={this.props.switchTab}
               > */}
                 <TabContent>
-                  <TabPane active={this.props.tab == CONTEXT_TYPES.legacyRealtime} eventKey={CONTEXT_TYPES.legacyRealtime} title="Real-Time Rainfall">
+                  <TabPane
+                    active={this.props.tab == CONTEXT_TYPES.legacyRealtime} 
+                    eventKey={CONTEXT_TYPES.legacyRealtime} 
+                    title="Real-Time Rainfall"
+                  >
                     <LegacyRealtimeRainfallPage/>
-                    <RainfallDownloader rainfallDataType={RAINFALL_TYPES.realtime} />
+                    <RainfallDownloader
+                      contextType={CONTEXT_TYPES.legacyRealtime} 
+                      rainfallDataType={RAINFALL_TYPES.realtime}
+                      rainfallSensorTypes={[SENSOR_TYPES.gauge, SENSOR_TYPES.pixel]}
+                    />
                   </TabPane>
-                  <TabPane active={this.props.tab == CONTEXT_TYPES.legacyGauge} eventKey={CONTEXT_TYPES.legacyGauge} title="Historical Rain Gauge">
-                    <h1>Historical Rain Gauge Data</h1>
+                  <TabPane 
+                    active={this.props.tab == CONTEXT_TYPES.legacyGauge} 
+                    eventKey={CONTEXT_TYPES.legacyGauge} 
+                    title="Historical Rain Gauge"
+                  >
+                    <h1 className="data-type-header">Historical Rain Gauge Data</h1>
                     <p>Select the rain gauges and time span for output. A map of the rain gauge locations is below.</p>
-                    <RainfallDownloader rainfallDataType={RAINFALL_TYPES.historic} />
+                    <RainfallDownloader 
+                      contextType={CONTEXT_TYPES.legacyGauge} 
+                      rainfallDataType={RAINFALL_TYPES.historic}
+                      rainfallSensorTypes={[SENSOR_TYPES.gauge]}
+                    />
                   </TabPane>
-                  <TabPane active={this.props.tab == CONTEXT_TYPES.legacyGarr} eventKey={CONTEXT_TYPES.legacyGarr} title="Calibrated Radar Rainfall">
-                    <h1>Calibrated Radar Rainfall</h1>
-                    <RainfallDownloader rainfallDataType={RAINFALL_TYPES.historic} />
+                  <TabPane 
+                    active={this.props.tab == CONTEXT_TYPES.legacyGarr} 
+                    eventKey={CONTEXT_TYPES.legacyGarr}
+                    title="Calibrated Radar Rainfall"
+                  >
+                    <h1 className="data-type-header">Calibrated Radar Rainfall</h1>
+                    <RainfallDownloader 
+                      contextType={CONTEXT_TYPES.legacyGarr} 
+                      rainfallDataType={RAINFALL_TYPES.historic}
+                      rainfallSensorTypes={[SENSOR_TYPES.pixel]}
+                    />
                   </TabPane>
               </TabContent>
               {/* </TabContainer> */}

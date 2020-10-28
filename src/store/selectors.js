@@ -1,41 +1,99 @@
 import { has, isEmpty, keys, forEach } from 'lodash-es'
 
-export const selectEvent = (state, eventid) => (
-  state.rainfallEvents.list.find((e) => e.eventid === eventid)
+// ----------------------------------------------
+// selecting UI State
+
+export const selectContext = (state) => state.progress.tab
+
+// ----------------------------------------------
+// selecting rainfall data request parameters and history
+
+export const selectFetchKwargs = (state, contextType) => (
+  state.fetchKwargs[contextType].active
 )
 
-export const selectEventInverse = (state, eventid) => (
-  state.rainfallEvents.list.filter((e) => e.eventid !== eventid)
+export const selectActiveFetchKwargs = (state) => (
+  state.fetchKwargs[selectContext(state)].active
 )
 
-export const selectFetchKwargs = (state, rainfallDataType) => state.fetchKwargs[rainfallDataType]
+export const selectSelectedSensors = (state, contextType) => {
+  let selectedSensors = {}
+  forEach(
+    selectFetchKwargs(state, contextType).sensorLocations, 
+    (sensors, sensorType) => {
+      if (sensors.length > 0) {
+        selectedSensors[sensorType] = sensors
+      }
+    }
+  )
+  return selectedSensors
+}
 
-export const selectFetchHistory = (state, rainfallDataType) => state.fetchHistory[rainfallDataType]
+export const selectFetchHistory = (state, contextType) => {
+  return state.fetchKwargs[contextType].history
+}
 
-export const selectFetchHistoryItemById = (state, requestId) => {
+export const selectActiveFetchHistory = (state) => (
+  state.fetchKwargs[selectContext(state)].history
+)
+
+export const selectFetchHistoryItemById = (state, requestId, contextType) => {
+  console.log(requestId, contextType)
+  let r = selectFetchHistory(state, contextType).find(f => f.requestId == requestId)
+  console.log(r)
+  return r
+}
+
+export const selectFetchHistoryItemsById = (state, requestId, contextType) => (
+  selectFetchHistory(state, contextType)
+    .filter(f => f.requestId == requestId)
+)
+
+export const selectFetchHistoryItemsByIdInverse = (state, requestId, contextType) => (
+  selectFetchHistory(state, contextType)
+    .filter(f => f.requestId !== requestId)
+)
+
+export const selectAnyFetchHistoryItemById = (state, requestId) => {
   let i;
-  forEach(state.fetchHistory, (historyList, rainfallDataType) => {
-    let f = historyList.find(f => f.requestId == requestId)
-    if (f !== undefined) { i = f }
+  forEach(state.fetchKwargs, (contextData, contextType) => {
+    let found = contextData.history.find(f => f.requestId == requestId)
+    if (found !== undefined) { i = found }
   })
   return i
 }
 
-export const selectFetchHistoryItemsById = (state, requestId) => {
+export const selectAnyFetchHistoryItemsById = (state, requestId) => {
   let i = [];
-  forEach(state.fetchHistory, (historyList) => {
-    i = i.concat(historyList.filter(f => f.requestId == requestId))
+  forEach(state.fetchKwargs, (contextData, contextType) => {
+    i = i.concat(contextData.history.filter(f => f.requestId == requestId))
   })
   return i
 }
 
-export const selectFetchHistoryItemsByIdInverse = (state, requestId) => {
+export const selectAnyFetchHistoryItemsByIdInverse = (state, requestId) => {
   let i = [];
-  forEach(state.fetchHistory, (historyList) => {
-    i = i.concat(historyList.filter(f => f.requestId !== requestId))
+  forEach(state.fetchKwargs, (contextData, contextType) => {
+    i = i.concat(contextData.history.filter(f => f.requestId !== requestId))
   })
   return i
 }
+
+export const selectPickedSensors = (state, contextType, sensorLocationType) => {
+  return state.fetchKwargs[contextType].active.sensorLocations[sensorLocationType]
+}
+
+export const selectAnyActiveFetches = (state) => {
+  let i;
+  forEach(state.fetchKwargs, (contextData, contextType) => {
+    i = i.concat(contextData.history.filter(f => f.isFetching))
+  })
+  return i
+}
+
+// ----------------------------------------------
+// selecting from the Mapbox style sheet object 
+// and supporting geodata
 
 export const selectMapStyleSourceDataFeatures = (state, name) => {
   if (has(state.mapStyle, ['sources', name, 'data', 'features'])) {
@@ -63,13 +121,30 @@ export const selectPixelLookupsBasinsOnly = (state) => {
   }
 }
 
+// export const selectPixelsForBasin = (state, basin) => {
+//   if (has(state, ['refData', 'basinPixelLookup'])) {
+//     return state.refData.basinPixelLookup[basin]
+//   } else {
+//     return []
+//   }
+// }
+
+// ----------------------------------------------
+// selecting rainfall events data
+
 export const selectRainfallEvents = (state) => state.rainfallEvents
 
-export const selectSelectedEvent = (state) => selectRainfallEvents(state).list.find(e => e.selected)
+export const selectEvent = (state, eventid) => (
+  selectRainfallEvents(state).list.find((e) => e.eventid === eventid)
+)
 
-export const selectFetchKwargsKeys = (state) => {
-  return [...keys(state.fetchKwargs).map(k => k)]
-}
+export const selectEventInverse = (state, eventid) => (
+  selectRainfallEvents(state).list.filter((e) => e.eventid !== eventid)
+)
+
+export const selectSelectedEvent = (state) => (
+  selectRainfallEvents(state).list.find(e => e.selected)
+)
 
 export const eventIsSelected = (state) => {
   const s = selectSelectedEvent(state)
@@ -86,22 +161,3 @@ export const eventIsSelected = (state) => {
 
 export const selectEventStats = (state) => state.rainfallEvents.stats
 
-// export const selectPixelsForBasin = (state, basin) => {
-//   if (has(state, ['refData', 'basinPixelLookup'])) {
-//     return state.refData.basinPixelLookup[basin]
-//   } else {
-//     return []
-//   }
-// }
-
-export const selectPickedSensors = (state, rainfallDataType, sensorLocationType) => {
-  return state.fetchKwargs[rainfallDataType].sensorLocations[sensorLocationType]
-}
-
-export const selectActiveFetches = (state) => {
-  return state.fetchHistory.filter(fh => fh.isFetching)
-}
-
-export const selectContext = (state) => {
-  return state.progress.tab
-}
