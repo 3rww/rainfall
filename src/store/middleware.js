@@ -209,7 +209,7 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
 
   // console.log(dispatch, requestId, sensor, contextType, url, params)
 
-  // assemble the arguments for fetch w/ axios
+  // assemble the arguments for fetch
   let requestKwargs = {
     url: url,
     method: 'GET'
@@ -221,41 +221,34 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
     requestKwargs.params = params
   }
 
+  // make the request:
   axios(requestKwargs)
     .then(
       (response) => {
-        console.log(response) //.data.meta.records, "records retrieved")
-
+        console.log(response)
         // get the API's JSON response from the data prop of the ajax response obj
         let r = response.data
-
+        // log it
         console.log(`job ${r.meta.jobId} ${r.status}`, r)
-
-        // let processedData = []
-
         // if job status is queued or started:
         if (includes(['queued', 'started'], r.status)) {
-
           // wait, then check on status/results at the provided 'job-url'
           // this triggers a recurive call to _fetchRainfallDataFromApiV2
           setTimeout(
             () => _fetchRainfallDataFromApiV2(dispatch, requestId, sensor, contextType, r.meta.jobUrl, false),
-            Number(REQUEST_TIME_INTERVAL)
+            REQUEST_TIME_INTERVAL
           )
-          // if status is deferred or failed,
+        // if status is deferred or failed,
         } else if (includes(['deferred', 'failed'], r.status)) {
-
-          dispatch(requestRainfallDataFail(
-            {
-              requestId: requestId,
-              results: {
-                [sensor[0]]: false
-              },
-            }
-          ))
-
+          // Dispatch the job failed action for recording in state, 
+          // triggering ui, etc.
+          dispatch(requestRainfallDataFail({
+            requestId: requestId,
+            contextType: contextType,
+            results: {[sensor[0]]: false}
+          }))
+        // if the job finishes:
         } else if (r.status === 'finished') {
-
           // if (responseBody.data.length > 0) {
           //   processedData = responseBody.data.reduce(function(result, item) {
           //     let {id, ...attrs} = item
@@ -264,13 +257,12 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
           //     return result;
           //   }, {});
           // }
-
+          // dispatch the success action, which puts the data in the correct 
+          // places, updates the ui, etc.
           dispatch(requestRainfallDataSuccess({
             requestId: requestId,
             contextType: contextType,
-            results: {
-              [sensor[0]]: r.data
-            },
+            results: {[sensor[0]]: r.data},
             processedKwargs: r.args,
             // status: r.status,
             // messages: (r.messages.length > 0) ? (r.messages) : (false)
@@ -279,18 +271,14 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
         }
 
       },
+      // if the request itself errors out, we trigger dispatch the failure action
       (error) => {
         console.log('An error occurred.', error)
-
-        dispatch(requestRainfallDataFail(
-          {
-            requestId: requestId,
-            contextType: contextType,
-            results: {
-              [sensor[0]]: false
-            }
-          }
-        ))
+        dispatch(requestRainfallDataFail({
+          requestId: requestId,
+          contextType: contextType,
+          results: {[sensor[0]]: false}
+        }))
       }
     )
 
