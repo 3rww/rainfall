@@ -1,10 +1,12 @@
 import {createAction} from '@reduxjs/toolkit';
+import { create } from 'lodash-es';
 
 // --------------------------------------------------------
 // Map State
 export const mapLoaded = createAction('MAP_LOADED')
 export const setStyle = createAction('SET_STYLE')
 export const addLayers = createAction('LOAD_REF_LAYERS')
+export const setLayerStyle = createAction('SET_LAYER_STYLE')
 
 // --------------------------------------------------------
 // Context
@@ -32,8 +34,8 @@ export const pickRainfallDateTimeRange = createAction('PICK_DATETIME_RANGE')
 export const pickSensor = createAction('PICK_SENSOR')
 // pick the interval
 export const pickInterval = createAction('PICK_INTERVAL')
-// pick a rainfall data download (set params and set as active on the map)
-export const pickDownload = createAction('PICK_DOWNLOAD')
+// set the active result (used for displaying results on the map)
+export const setActiveResultItem = createAction('PICK_ACTIVE_RESULT')
 
 // --------------------------------------------------------
 // Rainfall data retrieval 

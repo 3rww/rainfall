@@ -4,7 +4,8 @@ import { Row, Col, Button, Card } from 'react-bootstrap';
 import moment from 'moment'
 
 import DownloadModal from './downloadModal'
-import { pickDownload } from '../../store/actions'
+import { pickDownload } from '../../store/middleware'
+// import { reFetchRainfallDataFromApiV2 } from '../../store/middleware'
 
 
 /**
@@ -31,7 +32,14 @@ class DownloadsItem extends React.Component {
     // console.log(e)
     this.setState({ show: true });
     this.props.dispatchPickDownload()
-  }  
+  }
+
+  // handleDownloadClick() {
+  //   this.props.fetchRainfallData({
+  //     rainfallDataType: this.props.rainfallDataType,
+  //     contextType: this.props.contextType
+  //   })
+  // }
 
   render() {
 
@@ -41,6 +49,11 @@ class DownloadsItem extends React.Component {
     let gauges = sensorLocations.gauge
     let pixels = sensorLocations.pixel
     let hasResults = this.props.fetchHistoryItem.results !== false
+
+    // let reGetButton = includes(
+    //   ['deferred', 'failed', "does not exist", 'error'], 
+    //   this.props.fetchHistoryItem.status
+    // )
 
     return (
       <div className="download-item-wrapper">
@@ -106,6 +119,7 @@ class DownloadsItem extends React.Component {
                 >
                   View and Download Results Table
                 </Button>
+
                 {/* <ButtonToolbar aria-label="Download and Playback Toolbar">
               <ButtonGroup className="mr-2" aria-label="First Group">
                <Button size="sm">View & Download</Button>
@@ -120,6 +134,21 @@ class DownloadsItem extends React.Component {
             </Row>
           ) : (null)
         }
+        {/* {
+          reGetButton ? (
+            <Row>
+              <Col>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  onClick={this.handleShow}
+                >
+                  View and Download Results Table
+                </Button>
+              </Col>
+            </Row>            
+          ) : (null)
+        } */}
 
         <DownloadModal
           show={this.state.show}
@@ -143,7 +172,10 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       let p = {...ownProps.fetchHistoryItem, contextType: ownProps.contextType}
       // console.log(p)
       dispatch(pickDownload(p))
-    }
+    },
+    // dispatchDownloadAgain: payload => {
+    //   dispatch(reFetchRainfallDataFromApiV2(payload))
+    // }
   }
 }
 

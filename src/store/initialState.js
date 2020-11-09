@@ -115,5 +115,6 @@ export const initialState = {
   },
   // mapStyle is where the MapboxGL map's style sheet is stored; changes here change the map
   // note that we're pre-populating some expected objects
-  mapStyle: {}
+  mapStyle: {},
+  mapLegend: {}
 } 

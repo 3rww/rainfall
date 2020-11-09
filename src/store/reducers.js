@@ -1,8 +1,15 @@
 import { createReducer } from '@reduxjs/toolkit'
 import moment from 'moment'
-import { set, get, forEach, keys, has } from 'lodash-es'
+import { set, get, forEach, keys, has, includes } from 'lodash-es'
 
 import { initialState } from './initialState'
+
+import { 
+  SENSOR_TYPES,
+  RAINFALL_BREAK_COUNT,
+  RAINFALL_COLOR_ARRAY,
+  RAINFALL_COLOR_MODE
+} from './config'
 
 import {
   switchTab,
@@ -13,7 +20,7 @@ import {
   pickRainfallDateTimeRange,
   pickSensor,
   pickInterval,
-  pickDownload,
+  setActiveResultItem,
   requestRainfallData,
   requestRainfallDataInvalid,
   requestRainfallDataSuccess,
@@ -26,7 +33,8 @@ import {
   setState,
   isFetching,
   startThinking,
-  stopThinking
+  stopThinking,
+  setLayerStyle
 } from './actions'
 
 import {
@@ -38,8 +46,15 @@ import {
   selectFetchHistoryItemsByIdInverse,
   selectAnyFetchHistoryItemById,
   selectRainfallEvents,
-  selectFetchHistory
+  selectFetchHistory,
+  selectLayersByIds,
+  selectLayersByStartsWithId
 } from './selectors'
+
+import {
+  minmaxTableAttr,
+  buildColorStyleExpression
+} from './utils'
 
 /**
  * root reducer
@@ -178,7 +193,7 @@ export const rootReducer = createReducer(
      */
     [requestRainfallData]: (state, action) => {
 
-      let { fetchKwargs, requestId, contextType } = action.payload
+      let { fetchKwargs, requestId, contextType, status, messages } = action.payload
 
       let currentFetch = selectFetchHistoryItemById(state, requestId, contextType)
       // creates a fetch history item, which includes all the parameters
@@ -189,116 +204,89 @@ export const rootReducer = createReducer(
           requestId: requestId,
           isFetching: 1,
           isActive: false,
-          results: false
+          results: false,
+          status: status
         })
       } else {
         currentFetch.isFetching = currentFetch.isFetching + 1
       }
 
     },
+    /**
+     * upon successful rainfall data request, turn off fetching status, save
+     * the data, save the fetch kwargs as processed, and save the API status.
+     */
     [requestRainfallDataSuccess]: (state, action) => {
 
-      console.log("request", action.payload, "succeeded")
-      let { requestId, contextType, results, processedKwargs } = action.payload
+      let { requestId, contextType, results, processedKwargs, status, messages } = action.payload
+      
+      console.log("request", requestId, status)
 
       // the current fetch:
       selectFetchHistoryItemsById(state, requestId, contextType).forEach(fetchItem => {
-        // set actively selected status to true
-        fetchItem.isActive = true
         // set fetching status to false
         fetchItem.isFetching = fetchItem.isFetching - 1
         // push the results
         fetchItem.results = { ...results, ...fetchItem.results }
         // save a copy of the request kwargs as interpreted by the API (useful for debugging)
         fetchItem.processedKwargs = processedKwargs
+        // save the API status message for good measure
+        fetchItem.status = status
 
         // then for each type of result (potentially: raingauge and/or pixel)
         // manipulate the map state by first adding the results to the geojson
-        keys(results).forEach(layerSource => {
+        // keys(results).forEach(layerSource => {
+        //   console.log(layerSource)
+        //   // find the corresponding geojson (original copy)
+        //   let thisGeoJson = { ...state.refData[layerSource].data }
+        //   // add the results to the properties in the corresponding geojson feature
+        //   let resultDataList = results[layerSource]
+        //   resultDataList.forEach((sensor) => {
+        //     thisGeoJson.features
+        //       .filter(f => f.id == sensor.id)
+        //       .forEach(f => {
+        //         let initialValue = 0;
+        //         f.properties = {
+        //           ...f.properties,
+        //           data: sensor.data,
+        //           total: (
+        //             sensor.data.length > 1 & sensor.data.length !== 0
+        //             ) ? (
+        //             sensor.data.map(i => i.val).reduce((totalValue, currentValue) => totalValue + currentValue, initialValue)
+        //             ) : (
+        //               sensor.data[0].val
+        //             )
+        //         }
+        //       })
+        //     // repalce the geojson in the style sheet with the updated version
+        //     state.mapStyle.sources[layerSource].data = thisGeoJson
+        //   })
 
-          // find the corresponding geojson (original copy)
-          let thisGeoJson = { ...state.refData[layerSource].data }
-          // add the results to the properties in the corresponding geojson feature
-          forEach(results[layerSource], (rainfallData, sensorId) => {
-            thisGeoJson.features
-              .filter(f => f.id == sensorId)
-              .forEach(f => {
-                f.properties = {
-                  ...f.properties,
-                  intervals: rainfallData.data,
-                  total: rainfallData.total,
-                  params: processedKwargs
-                }
-              })
-            // repalce the geojson in the style sheet with the updated version
-            state.mapStyle.sources[layerSource].data = thisGeoJson
-          })
-
-        })
+        // })
 
       })
-
-      // for all other fetches (if any), set isActive to false
-      selectFetchHistoryItemsByIdInverse(state, requestId, contextType)
-        .forEach(h => h.isActive = false)
 
     },
     /**
      * Similar to getRainfallSuccess, but used for selecting a previously
      * downloaded rainfall dataset
      */
-    [pickDownload]: (state, action) => {
 
-      // console.log(action.payload)
-      let { contextType, ...fetchHistoryItem } = action.payload
-      let requestId = fetchHistoryItem.requestId
-      let fetchKwargs = fetchHistoryItem.fetchKwargs
-
-      // update the state of the item in the download list
-      let thisFetch = selectFetchHistoryItemById(state, requestId, contextType)
-      // console.log("thisFetch", thisFetch)
-      thisFetch.isActive = true
-
-      // let otherFetches = selectFetchHistoryItemsByIdInverse(state, requestId, contextType)
-      // otherFetches.forEach((v) => v.isActive = false)
-      // console.log("otherFetches", otherFetches)
-
-      // set the overall fetch kwargs to match those of the selected download
-      let fk = selectFetchKwargs(state, contextType)
-      fk = thisFetch.fetchKwargs
-
-      // then for each type of result (potentially: raingauge and/or pixel)
-      // manipulate the map state by first adding the results to the geojson
-      keys(thisFetch.results).forEach(layerSource => {
-        // find the corresponding geojson (original copy)
-        let thisGeoJson = { ...state.refData[layerSource].data }
-        // add the results to the properties in the corresponding geojson feature
-        forEach(thisFetch.results[layerSource], (rainfallData, sensorId) => {
-          thisGeoJson.features
-            .filter(f => f.id == sensorId)
-            .forEach(f => {
-              f.properties = {
-                ...f.properties,
-                intervals: rainfallData.data,
-                total: rainfallData.total,
-                params: fetchKwargs
-              }
-            })
-          // repalce the geojson in the style sheet with the updated version
-          state.mapStyle.sources[layerSource].data = thisGeoJson
-        })
-
-      })
-
-    },
     [requestRainfallDataFail]: (state, action) => {
-      console.log("request", action.payload, "failed")
-      let { requestId, results } = action.payload
+      let { requestId, results, status, messages } = action.payload
+      console.log(requestId, status)
       let fetchItem = selectAnyFetchHistoryItemById(state, requestId)
       fetchItem.isFetching = fetchItem.isFetching - 1
+      fetchItem.status = status
       // fetchItem.results = {...results, ...fetchItem.results}
     },
-
+    [setActiveResultItem]: (state, action) => {
+      let {requestId, contextType} = action.payload
+      selectFetchHistoryItemsById(state, requestId, contextType)
+        .forEach(i => i.isActive = true)
+      selectFetchHistoryItemsByIdInverse(state, requestId, contextType)
+        .forEach(i => i.isActive = false)
+    },
     /**
      * set parameters used to filter list of rainfall events
      */
@@ -325,6 +313,11 @@ export const rootReducer = createReducer(
       }
       return state
     },
+    /**
+     * add mapbox layer styles to the style object in the state, optionally
+     * at a specified position.
+     * See `MAP_LAYERS` in ./config.js for an example of what is consumed here.
+     */
     [addLayers]: (state, action) => {
       forEach(action.payload, (v, k) => {
         // if an index is provided, use for layer order
@@ -355,6 +348,89 @@ export const rootReducer = createReducer(
         set(state, path, [...existing, ...data])
       }
     },
+    [setLayerStyle]: (state, action)  => {
 
+      // expand the payload
+      let { requestId, contextType } = action.payload
+
+      // get the source data used for styling the layer
+      let fetchHistoryItem = selectFetchHistoryItemById(state, requestId, contextType)
+      let sensors = keys(fetchHistoryItem.results)
+
+      let styleExp, legendContent;
+
+      // if fetchHistoryItem has style and legend props, we use those to set
+      // the style on the layer.
+      if (has(fetchHistoryItem, 'style') && has(fetchHistoryItem, 'legend')) {
+        styleExp = fetchHistoryItem.styleExp
+        legendContent = fetchHistoryItem.legendContent
+
+      // if they don't then this is the first time we're putting this on
+      // the map, and we need to calculate them.        
+      } else {
+        // we create a single style expression object from the composite of all
+        // sensor types present, since we want to show gauges and pixels
+        // on the same scale at the same time
+
+        // first put all the results into one array:
+        let allResults = [] 
+        sensors.forEach(s => {
+          allResults = allResults.concat(
+            fetchHistoryItem.results[s]
+            // .map(r => {
+            //   return {id: Number(r.id), data:r.data, total:r.total}
+            // })
+          )
+        })
+        console.log("allResults", allResults)
+        // calculate stats for that array
+        let minmax = minmaxTableAttr(allResults, 'total')
+        // build the style expression
+        let breaks = 7
+        let symbology = buildColorStyleExpression(
+          allResults,
+          'total',
+          'id',
+          RAINFALL_COLOR_ARRAY,
+          RAINFALL_COLOR_MODE,
+          RAINFALL_BREAK_COUNT,
+          'e',
+          minmax
+        )
+
+        styleExp = symbology.styleExp
+        legendContent = symbology.legendContent
+
+        // save the calc'd style and legend to the fetch history item
+        fetchHistoryItem.styleExp = styleExp
+        fetchHistoryItem.legendContent = legendContent
+        fetchHistoryItem.stats = minmax
+
+      }    
+
+      // update state:
+
+      // apply the style expression to the layers:
+      let lyrIdsToStyle = sensors.map(s => `${s}-results`)
+      let lyrIdsToNoteStyle = keys(SENSOR_TYPES).filter(st => !includes(sensors, st))
+      // find those layers and update their paint props
+      selectLayersByStartsWithId(state, lyrIdsToStyle)
+        .forEach(lyr => {
+          lyr.paint[`${lyr.type}-color`] = styleExp
+          lyr.paint[`${lyr.type}-opacity`] = 0.8
+        })
+
+      if (lyrIdsToNoteStyle.length > 0) {
+        selectLayersByStartsWithId(state, lyrIdsToNoteStyle)
+        .forEach(lyr => {
+          lyr.paint[`${lyr.type}-color`] = "#fff"
+          lyr.paint[`${lyr.type}-opacity`] = 0
+        })
+      }
+
+      // set the legend property
+      set(state, ['mapLegend'], legendContent)
+
+    },
   }
 )

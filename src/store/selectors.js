@@ -1,4 +1,6 @@
-import { has, isEmpty, keys, forEach } from 'lodash-es'
+import { has, isEmpty, keys, forEach, includes, startsWith } from 'lodash-es'
+
+import { LYR_HIGHLIGHT_PREFIX } from './config'
 
 // ----------------------------------------------
 // selecting UI State
@@ -95,6 +97,43 @@ export const selectAnyActiveFetches = (state) => {
 // selecting from the Mapbox style sheet object 
 // and supporting geodata
 
+/** -------------------------------------------------------
+ * selections for the Mapbox style-spec state object
+ */
+
+// the mapStyle object in the store provides layer state for the map
+export const selectLayers = (state) => state.mapStyle.layers
+
+// select a map layer by its ID
+export const selectLayerById = (state, layerId) => {
+  return selectLayers(state).find(lyr => lyr.id === layerId)
+}
+
+// select multiple map layers by multiple IDs
+export const selectLayersByIds = (state, layerIds) => {
+  // let allLayers = selectLayers(state)
+  // console.log(allLayers)
+  return selectLayers(state).filter(lyr => includes(layerIds, lyr.id))
+}
+
+// select a map layers using an ID
+export const selectLayersByStartsWithId = (state, layerId) => {
+  const mapLayers = selectLayers(state)
+  const matchingLayers = []
+  mapLayers.forEach(lyr => {
+    if (startsWith(lyr.id, layerId)) {
+      matchingLayers.push(lyr)
+    }
+  })
+  return matchingLayers
+}
+
+// get all map layers currently added to the map's style
+// that are prefixed with "HIGHLIGHT-"
+export const selectAllHighlightLayers = (state) => {
+  return selectLayers(state).filter((lyr) => startsWith(lyr.id, LYR_HIGHLIGHT_PREFIX))
+}
+
 export const selectMapStyleSourceDataFeatures = (state, name) => {
   if (has(state.mapStyle, ['sources', name, 'data', 'features'])) {
     return state.mapStyle.sources[name].data.features
@@ -160,4 +199,5 @@ export const eventIsSelected = (state) => {
 }
 
 export const selectEventStats = (state) => state.rainfallEvents.stats
+
 

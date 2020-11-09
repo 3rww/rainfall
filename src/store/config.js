@@ -69,14 +69,27 @@ export const HEADER_LABELS = {
 
 // rainfall layers + styles (mapbox style spec)
 
+export const LYR_HIGHLIGHT_PREFIX = 'HOVER'
+
 // Default Operational Layers + Styles --------------------
 // These are layer definitions per the Mapbox style-spec, with one exception: the INDEX property. 
 // When INDEX is used with the `addLayers` reducer, the layer will be inserted at that position 
 // in the style sheet, so that it renders in the correct order with the basemap elements
 export const MAP_LAYERS = [
   {
-    INDEX: 71,
-    'id': 'HOVER-pixel',
+    INDEX: 69,
+    'id': `pixel-results`,
+    'type': 'fill',
+    'source': 'pixel',
+    'layout': {},
+    'paint': {
+      'fill-color': '#fff',
+      'fill-opacity': 0,
+    }
+  },
+  {
+    INDEX: 70,
+    'id': `${LYR_HIGHLIGHT_PREFIX}-pixel`,
     'type': 'fill',
     'source': 'pixel',
     'layout': {},
@@ -85,14 +98,14 @@ export const MAP_LAYERS = [
       'fill-opacity': [
         'case',
         ['boolean', ['feature-state', 'hover'], false],
-        0.75,
+        0.25,
         0
       ]
     }
   },
   {
-    INDEX: 72,
-    "id": `HOVER-gauge-halo`,
+    INDEX: 71,
+    "id": `${LYR_HIGHLIGHT_PREFIX}-gauge-halo`,
     "type": "circle",
     "source": `gauge`,
     'layout': {},
@@ -109,8 +122,8 @@ export const MAP_LAYERS = [
     }
   },
   {
-    // INDEX: 73,
-    "id": `HOVER-gauge`,
+    INDEX: 72,
+    "id": `${LYR_HIGHLIGHT_PREFIX}-gauge`,
     "type": "circle",
     "source": `gauge`,
     "layout": {},
@@ -140,11 +153,33 @@ export const MAP_LAYERS = [
         0
       ]      
     }
-  }
+  },
+  {
+    INDEX: 73,
+    'id': `gauge-results`,
+    "type": "circle",
+    "source": `gauge`,
+    'layout': {},
+    "paint": {
+      "circle-radius": 30,
+      "circle-color": "#2196f3",
+      "circle-blur": 0.8,
+      "circle-opacity": [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        0.8,
+        0
+      ],
+    }
+  },  
 ]
 
 export const LAYERS_W_MOUSEOVER = [
-  ['HOVER-pixel', 'pixel'],
-  ['HOVER-gauge', 'gauge'],
-  ['HOVER-gauge-halo', 'gauge']
+  [`${LYR_HIGHLIGHT_PREFIX}-pixel`, 'pixel'],
+  [`${LYR_HIGHLIGHT_PREFIX}-gauge`, 'gauge'],
+  [`${LYR_HIGHLIGHT_PREFIX}-gauge-halo`, 'gauge']
 ]
+
+export const RAINFALL_COLOR_ARRAY = ['#fafa6e','#2A4858']
+export const RAINFALL_COLOR_MODE = 'lch'
+export const RAINFALL_BREAK_COUNT = 7

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { MD5 } from 'object-hash'
-import { includes } from 'lodash-es'
+import { includes, keys } from 'lodash-es'
 import moment from 'moment'
 
 import {
@@ -15,14 +15,20 @@ import {
   stopThinking,
   addLayers,
   pickRainfallDateTimeRange,
-  calcEventStats
+  calcEventStats,
+  setLayerStyle,
+  setActiveResultItem
 } from './actions'
 
 import {
-  selectFetchKwargs
+  selectFetchKwargs,
+  selectFetchHistoryItemById
 } from './selectors'
 
-import { transformEventsJSON, transformToMapboxSourceObject } from './utils'
+import { 
+  transformEventsJSON, 
+  transformRainfallGeodataToMapboxSourceObject 
+} from './utils'
 
 import {
   MAP_LAYERS,
@@ -36,6 +42,7 @@ import {
 
 
 import store from './index'
+import { distance } from 'chroma-js';
 
 /**
  * Request JSON from a URL; put response.data into store via props 
@@ -133,7 +140,7 @@ function promiseFetchReferenceDatasets(dispatch) {
       let result = dispatch(fetchJSON({
         url: URL_GAUGE_GEOJSON,
         pathArray: ["mapStyle", "sources", "gauge"],
-        transformer: transformToMapboxSourceObject,
+        transformer: transformRainfallGeodataToMapboxSourceObject,
         keepACopy: true
       }))
       resolve(result)
@@ -143,7 +150,7 @@ function promiseFetchReferenceDatasets(dispatch) {
       let result = dispatch(fetchJSON({
         url: URL_GARRD_GEOJSON,
         pathArray: ["mapStyle", "sources", "pixel"],
-        transformer: transformToMapboxSourceObject,
+        transformer: transformRainfallGeodataToMapboxSourceObject,
         keepACopy: true
       }))
       resolve(result)
@@ -205,6 +212,41 @@ export function initDataFetch(payload) {
   }
 }
 
+
+const _calc_rainfall_stats = (r) => {
+
+    // the API results don't come with rainfall total per sensor, 
+    // so we tabulate rainfall values from one for all observation 
+    // intervals for each sensor
+
+    r.data.forEach((s) => {
+
+      let initialValue = 0;
+      s.total = (
+        s.data.length > 1 & s.data.length !== 0
+      ) ? (
+        s.data.map(i => i.val).reduce((totalValue, currentValue) => totalValue + currentValue, initialValue)
+      ) : (
+        s.data[0].val
+      )
+
+    })
+  
+    return r
+
+}
+
+/**
+ * Recursive function for making calls to the API while the request is being
+ * processed. Calls itself, or success or fail actions depending on API 
+ * response. 
+ * @param {*} dispatch 
+ * @param {*} requestId 
+ * @param {*} sensor 
+ * @param {*} contextType 
+ * @param {*} url 
+ * @param {*} params 
+ */
 const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, url, params) => {
 
   // console.log(dispatch, requestId, sensor, contextType, url, params)
@@ -212,20 +254,21 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
   // assemble the arguments for fetch
   let requestKwargs = {
     url: url,
-    method: 'GET'
+    method: 'POST'
   }
   // if the request params are explicitly not `false`, then 
   // add them in; otherwise we've called this function in a recursive loop to
   // check on job status, and we don't want to include the params in that req.
   if (params !== false) {
-    requestKwargs.params = params
+    // requestKwargs.params = params
+    requestKwargs.data = params
   }
 
   // make the request:
   axios(requestKwargs)
     .then(
       (response) => {
-        console.log(response)
+        // console.log(response)
         // get the API's JSON response from the data prop of the ajax response obj
         let r = response.data
         // log it
@@ -245,29 +288,55 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
           dispatch(requestRainfallDataFail({
             requestId: requestId,
             contextType: contextType,
-            results: {[sensor[0]]: false}
+            results: {[sensor[0]]: false},
+            status: r.status,
+            messages: r.messages            
           }))
         // if the job finishes:
         } else if (r.status === 'finished') {
-          // if (responseBody.data.length > 0) {
-          //   processedData = responseBody.data.reduce(function(result, item) {
-          //     let {id, ...attrs} = item
-          //     attrs.total = attrs.data.map(i => i.val).reduce((a, b) => a + b, 0)
-          //     result[id] = attrs
-          //     return result;
-          //   }, {});
-          // }
+
+          // calculate totals and any stats
+          r = _calc_rainfall_stats(r)
+
           // dispatch the success action, which puts the data in the correct 
-          // places, updates the ui, etc.
+          // places, updates the status in the ui, etc.
           dispatch(requestRainfallDataSuccess({
             requestId: requestId,
             contextType: contextType,
             results: {[sensor[0]]: r.data},
             processedKwargs: r.args,
-            // status: r.status,
+            status: r.status,
+            style: r.style,
+            legend: r.legend
             // messages: (r.messages.length > 0) ? (r.messages) : (false)
           }))
+          // Set the result item to active by default. This will 
+          // highlight it in the history list for the context and put it 
+          // on the map for that context.
+          dispatch(setActiveResultItem({
+            requestId: requestId,
+            contextType: contextType            
+          }))
+          // Update the map layer style for the layers used to represent
+          // results. e.g., gauge-results, pixel-results. In the future 
+          // there could be others
+          dispatch(setLayerStyle({
+            requestId: requestId,
+            contextType: contextType,
+            lyrIds: [
+              `${sensor[0]}-results`
+            ]
+          }))
 
+        } else if (r.status === "does not exist") {
+          console.log("Job was cancelled.")
+          dispatch(requestRainfallDataFail({
+            requestId: requestId,
+            contextType: contextType,
+            results: {[sensor[0]]: false},
+            status: r.status,
+            messages: r.messages
+          }))
         }
 
       },
@@ -277,12 +346,15 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
         dispatch(requestRainfallDataFail({
           requestId: requestId,
           contextType: contextType,
-          results: {[sensor[0]]: false}
+          results: {[sensor[0]]: false},
+          status: "error",
+          messages: []
         }))
       }
     )
 
 }
+
 
 
 /**
@@ -349,5 +421,44 @@ export function fetchRainfallDataFromApiV2(payload) {
 
   }
 
+}
+
+export function pickDownload(payload) {
+
+  let { contextType, ...fetchHistoryItem } = payload
+
+  return function (dispatch) {
+    
+    let requestId = fetchHistoryItem.requestId
+
+    // Set the result item to active by default. This will 
+    // highlight it in the history list for the context and put it 
+    // on the map for that context.
+    dispatch(setActiveResultItem({
+      requestId: requestId,
+      contextType: contextType
+    }))
+    // Update the map layer style for the layers used to represent
+    // results. e.g., gauge-results, pixel-results.
+    dispatch(setLayerStyle({
+      requestId: requestId,
+      contextType: contextType
+    }))
+  }
+ 
+}
+
+/**
+ * function for re-running a previous download
+ * @param {*} payload 
+ */
+export function reFetchRainfallDataFromApiV2(payload) {
+
+  return function (dispatch) {
+    // select the current fetch item from the history via requestId
+    // dispatch a reducer that updates the fetchKwargs for the 
+    // context with that item.
+    // run fetchRainfallDataFromApiV2
+  }
 
 }
