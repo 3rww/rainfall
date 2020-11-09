@@ -5,3 +5,13 @@
 .mapboxgl-ctrl-attrib-inner {
     color: rgba(0, 0, 0, 0.75);
 }
+
+#features {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 50%;
+    overflow: auto;
+    background: rgba(255, 255, 255, 0.8);
+}

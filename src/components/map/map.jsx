@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';
 import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
-import { isEmpty } from 'lodash-es'
+import { isEmpty, includes } from 'lodash-es';
+import {ListGroup, Card } from 'react-bootstrap';
 
 import {
   setStyle,
@@ -23,14 +25,38 @@ import './map.scss'
 let DEBUG = true
 const MAPID = 'map'
 
+class Tooltip extends React.Component {
+  render() {
+    const { features } = this.props;
+    const c = features.filter(f => f.id !== undefined).length
+
+    const renderFeature = (feature, i) => {
+      return (
+        <ListGroup.Item key={i}>
+          <span className="small">{feature.id}</span>
+        </ListGroup.Item>
+      )
+    };
+
+    if (c > 0) {
+      return (
+        <Card style={{ width: '180px' }}>
+          <ListGroup variant="flush">
+            {features.filter(f => f.id !== undefined).map(renderFeature)}
+          </ListGroup>
+        </Card>
+      )
+    } else {
+      return null
+    }
+  }
+}
+
 class ReactMap extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      zoom: 0,
-      lng: 0,
-      lat: 0,
       features: [],
     };
   }
@@ -48,20 +74,20 @@ class ReactMap extends Component {
     this.updateMapStyle(nextProps.mapStyle)
   }
 
-  //   setTooltip(features) {
-  //     if (features.length) {
-  //       ReactDOM.render(
-  //         React.createElement(
-  //           Tooltip, {
-  //             features
-  //           }
-  //         ),
-  //         this.tooltipContainer
-  //       );
-  //     } else {
-  //     	ReactDOM.unmountComponentAtNode(this.tooltipContainer)
-  //     }
-  //   }
+  setTooltip(features) {
+    if (features.length) {
+      ReactDOM.render(
+        React.createElement(
+          Tooltip, {
+          features
+        }
+        ),
+        this.tooltipContainer
+      );
+    } else {
+      ReactDOM.unmountComponentAtNode(this.tooltipContainer)
+    }
+  }
 
   /**
    * run queryRenderedFeatures, using currentOverlays in redux store
@@ -99,31 +125,22 @@ class ReactMap extends Component {
   //     }
   //   }
 
-  /**
-   * store zoom and center in the local component state
-   */
-  //   handleMapMove(e) {
-  //     // console.log(e)
-  //     this.setState({
-  //       zoom: e.zoom,
-  //       lng: e.lng,
-  //       lat: e.lat
-  //     })
-  //   }
-
-  //   handleHover(e, tooltip) {
-  //     const layersToQuery = [...this.props.currentOverlays, ...this.props.refOverlays].filter(lyr => !includes(['ppt-concept-areas'], lyr))
-  //     // query tilesets with mouse hover
-  //     const features = this.webmap.queryRenderedFeatures(e.point, { 
-  //       layers: layersToQuery
-  //     });
-  //     tooltip.setLngLat(e.lngLat);
-  //     this.webmap.getCanvas().style.cursor = features.length ? 'pointer' : '';
-  //     this.setTooltip(features);
-  //     this.setState({
-  //       features: features
-  //     })
-  //   }
+    makeTooltipOnHover(e, tooltip) {
+      if (e === undefined ) {
+        return
+      }
+      const layersToQuery = ['HOVER-pixel', 'HOVER-gauge']
+      // query tilesets with mouse hover
+      const features = this.webmap.queryRenderedFeatures(e.point, { 
+        layers: layersToQuery
+      });
+      tooltip.setLngLat(e.lngLat);
+      this.webmap.getCanvas().style.cursor = features.length ? 'pointer' : '';
+      this.setTooltip(features);
+      this.setState({
+        features: features
+      })
+    }
 
 
   /**
@@ -143,6 +160,13 @@ class ReactMap extends Component {
 
     mapboxgl.accessToken = this.props.token;
     this.webmap = new mapboxgl.Map(mapConfig);
+
+    // setup the tooltip
+    // Container to put React generated content in.
+    this.tooltipContainer = document.createElement('div');
+    const tooltip = new mapboxgl.Marker(this.tooltipContainer, {
+      offset: [105, 0]
+    }).setLngLat([0,0]).addTo(this.webmap);
 
     this.webmap.on('load', () => {
 
@@ -214,6 +238,9 @@ class ReactMap extends Component {
       // When the user moves their mouse over the HOVER-* layer, we'll update the
       // feature state for the feature under the mouse.
       this.webmap.on('mousemove', lyrName, (e) => {
+
+        this.makeTooltipOnHover(e, tooltip)
+
         this.webmap.getCanvas().style.cursor = e.features.length ? 'pointer' : '';
         if (e.features.length > 0) {
           if (hoveredStateId[lyrName]) {
@@ -232,7 +259,10 @@ class ReactMap extends Component {
 
       // When the mouse leaves the HOVER-* layer, update the feature state of the
       // previously hovered feature.
-      this.webmap.on('mouseleave', lyrName, () => {
+      this.webmap.on('mouseleave', lyrName, (e) => {
+
+        this.makeTooltipOnHover(e, tooltip)
+
         this.webmap.getCanvas().style.cursor = '';
         if (hoveredStateId[lyrName]) {
           this.webmap.setFeatureState(
