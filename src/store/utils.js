@@ -29,13 +29,13 @@ export const transformToMapboxSourceObject = geojson => {
 }
 
 /**
- * takes the Rainfall geojson layer and nests it within an object expected
+ * takes the Rainfall pixels geojson layer and nests it within an object expected
  * within the Mapbox sources object. Additionally, this takes the geojson
  * feature id and copies it into the properties as a string, since the Rainfall
  * API returns the IDs as strings.
  * @param {*} geojson 
  */
-export const transformRainfallGeodataToMapboxSourceObject = geojson => {
+export const transformRainfallPixelsToMapboxSourceObject = geojson => {
   let features = geojson.features.map(f => ({
     properties: {
       id: f.id.toString(),
@@ -48,7 +48,37 @@ export const transformRainfallGeodataToMapboxSourceObject = geojson => {
   }))
   return {
     type: "geojson",
-    data: {type: "FeatureCollection", features: features}
+    data: { type: "FeatureCollection", features: features }
+  }
+}
+
+/**
+ * takes the Rainfall gauge geojson layer and nests it within an object expected
+ * within the Mapbox sources object. Additionally, this takes the geojson
+ * feature id and copies it into the properties as a string, and renames the
+ * existing 'id' property as dwid (datawise id) so there is no conflict.
+ * @param {*} geojson 
+ */
+export const transformRainfallGaugesToMapboxSourceObject = geojson => {
+
+  let features = geojson.features.map(f => {
+    let { id, ...props } = f.properties
+    return {
+      properties: {
+        id: f.id.toString(),
+        data: [],
+        total: null,
+        dwid: id,
+        ...props
+      },
+      id: f.id,
+      geometry: f.geometry
+    }
+  })
+
+  return {
+    type: "geojson",
+    data: { type: "FeatureCollection", features: features }
   }
 }
 
@@ -73,16 +103,21 @@ export const transformEventsJSON = (eventsJson) => {
 }
 
 export const minmaxTableAttr = (table, attr) => {
-  let values = table.map(row => row[attr])
+  let values = table
+    .map(row => row[attr])
+    .filter(v => v >= 0)
+
   return {
     maxValue: Math.max(...values),
-    minValue: Math.min(...values),    
+    minValue: Math.min(...values),
     maxRank: values.length
   }
+
 }
 
 /**
- * return a color style expression
+ * Given a table of data, return a color style expression.
+ * 
  * @param {*} data table data (rows).
  * @param {*} attr the data attribute of interest, for which the color expression will be built
  * @param {*} joinField the field used to join the *data* with the geojson, used to build the filter expression. This 
@@ -117,8 +152,15 @@ export const buildColorStyleExpression = (
     joinField = 'id'
   }
 
-  // build the first part of the style expression
+  // build the first part of the style expressions
   var styleExp = ['match', ['get', joinField]];
+  var heightExp = ['match', ['get', joinField]];
+  var opacityExp = [
+    'case',
+    ['boolean', [joinField, []], false],
+    1,
+    0.5
+  ]
   // create empty arrays, which will receive legend content
   let breakPoints = []
   let colors = []
@@ -127,6 +169,9 @@ export const buildColorStyleExpression = (
   // determine the min and max
   if (minMax === undefined) {
     minMax = minmaxTableAttr(data, attr)
+    console.log("minMax on the fly", minMax)
+  } else {
+    console.log("minMax provided", minMax)
   }
   maxValue = minMax.maxValue
   minValue = minMax.minValue
@@ -163,9 +208,23 @@ export const buildColorStyleExpression = (
       let t = breakPoints.indexOf(breakPoints.filter(b => row[attr] <= b)[0]) / (breakPoints.length)
       let color = chromaObj.classes(breaks)(t).brighten(0.25).saturate(0.25).hex('rgb')
       styleExp.push(row[joinField], color);
+
     })
 
   }
+
+  let opaque_ids = []
+  data.forEach(row => {
+    let height = row[attr] * 500
+    heightExp.push(row[joinField], height)
+  })
+
+  var opacityExp = [
+    'case',
+    ['boolean', [joinField, []], false],
+    1,
+    0.5
+  ]  
 
   // create content for the legend
 
@@ -176,12 +235,14 @@ export const buildColorStyleExpression = (
   }
 
   // Last value is the default, used where there is no data
-  // styleExp.push('rgba(0,0,0,0)');
-  styleExp.push('rgba(200,200,200,0.5)');
+  styleExp.push('rgba(255,255,255,0)');
+  // styleExp.push('rgba(200,200,200,0.1)');
+  heightExp.push(0)
 
   return {
     styleExp: styleExp,
-    legendContent: legendContent
+    legendContent: legendContent,
+    heightExp: heightExp
   }
 }
 

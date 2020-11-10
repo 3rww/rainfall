@@ -39,6 +39,10 @@ export const selectActiveFetchHistory = (state) => (
   state.fetchKwargs[selectContext(state)].history
 )
 
+export const selectActiveFetchHistoryItem = (state) => (
+  selectActiveFetchHistory(state).find(i => i.isActive === true)
+)
+
 export const selectFetchHistoryItemById = (state, requestId, contextType) => {
   // console.log(requestId, contextType)
   let r = selectFetchHistory(state, contextType).find(f => f.requestId == requestId)

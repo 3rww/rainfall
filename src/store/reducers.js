@@ -4,7 +4,7 @@ import { set, get, forEach, keys, has, includes } from 'lodash-es'
 
 import { initialState } from './initialState'
 
-import { 
+import {
   SENSOR_TYPES,
   RAINFALL_BREAK_COUNT,
   RAINFALL_COLOR_ARRAY,
@@ -34,6 +34,7 @@ import {
   isFetching,
   startThinking,
   stopThinking,
+  buildLayerStyle,
   setLayerStyle
 } from './actions'
 
@@ -67,6 +68,11 @@ export const rootReducer = createReducer(
   {
     [switchTab]: (state, action) => {
       state.progress.tab = action.payload
+
+      // unset any map styles
+
+      // set map styles per expression
+
     },
     /**
      * Request JSON (+success/fail)
@@ -92,14 +98,14 @@ export const rootReducer = createReducer(
       state.progress.isFetching = action.payload.isFetching
     },
     [startThinking]: (state, action) => {
-      if (action.payload !== undefined) { 
-        console.log(action.payload) 
+      if (action.payload !== undefined) {
+        console.log(action.payload)
         state.progress.messages.push(action.payload)
       }
       state.progress.isThinking = state.progress.isThinking + 1
     },
     [stopThinking]: (state, action) => {
-      if (action.payload !== undefined) { 
+      if (action.payload !== undefined) {
         console.log(action.payload)
         state.progress.messages.push(action.payload)
       }
@@ -138,7 +144,7 @@ export const rootReducer = createReducer(
     [pickRainfallEvent]: (state, action) => {
       // get the event from the list, set it's selected state to True
       // console.log(action.payload)
-      let {eventid, contextType} = action.payload
+      let { eventid, contextType } = action.payload
       let rainfallEvent = selectEvent(state, eventid)
       rainfallEvent.selected = true
       // set the others to false
@@ -219,7 +225,7 @@ export const rootReducer = createReducer(
     [requestRainfallDataSuccess]: (state, action) => {
 
       let { requestId, contextType, results, processedKwargs, status, messages } = action.payload
-      
+
       console.log("request", requestId, status)
 
       // the current fetch:
@@ -232,6 +238,8 @@ export const rootReducer = createReducer(
         fetchItem.processedKwargs = processedKwargs
         // save the API status message for good measure
         fetchItem.status = status
+
+
 
         // then for each type of result (potentially: raingauge and/or pixel)
         // manipulate the map state by first adding the results to the geojson
@@ -281,7 +289,7 @@ export const rootReducer = createReducer(
       // fetchItem.results = {...results, ...fetchItem.results}
     },
     [setActiveResultItem]: (state, action) => {
-      let {requestId, contextType} = action.payload
+      let { requestId, contextType } = action.payload
       selectFetchHistoryItemsById(state, requestId, contextType)
         .forEach(i => i.isActive = true)
       selectFetchHistoryItemsByIdInverse(state, requestId, contextType)
@@ -348,89 +356,134 @@ export const rootReducer = createReducer(
         set(state, path, [...existing, ...data])
       }
     },
-    [setLayerStyle]: (state, action)  => {
+    [buildLayerStyle]: (state, action) => {
 
-      // expand the payload
-      let { requestId, contextType } = action.payload
+      let { requestId, contextType, sensor } = action.payload
 
-      // get the source data used for styling the layer
       let fetchHistoryItem = selectFetchHistoryItemById(state, requestId, contextType)
       let sensors = keys(fetchHistoryItem.results)
 
-      let styleExp, legendContent;
+      // We calculate rainfall stats used for the style expression from the 
+      // composite of all sensor types present, since we want to show gauges 
+      // and pixels on the same scale at the same time. Note that this looks
+      // at all sensors in the results state available at the time, 
+      // so in cases where the request was for both pixels and gauges,
+      // the second one will update the style expression using stats calc'd 
+      // from both.
 
-      // if fetchHistoryItem has style and legend props, we use those to set
-      // the style on the layer.
-      if (has(fetchHistoryItem, 'style') && has(fetchHistoryItem, 'legend')) {
-        styleExp = fetchHistoryItem.styleExp
-        legendContent = fetchHistoryItem.legendContent
+      // first put all the results into one array:
+      let allResults = []
+      sensors.forEach(s => {
+        allResults = allResults.concat(fetchHistoryItem.results[s])
+      })
 
-      // if they don't then this is the first time we're putting this on
-      // the map, and we need to calculate them.        
-      } else {
-        // we create a single style expression object from the composite of all
-        // sensor types present, since we want to show gauges and pixels
-        // on the same scale at the same time
+      // calculate stats for that array
+      let minmax = minmaxTableAttr(allResults, 'total')
+      // For building the style expression, we need our
+      // min and max to be at least 0 for rainfall. This doesn't 
+      // affect the data download, only the the map symbology:
+      // minmax.maxValue = minmax.maxValue < 0 ? 0 : minmax.maxValue
+      // minmax.minValue = 0
 
-        // first put all the results into one array:
-        let allResults = [] 
-        sensors.forEach(s => {
-          allResults = allResults.concat(
-            fetchHistoryItem.results[s]
-            // .map(r => {
-            //   return {id: Number(r.id), data:r.data, total:r.total}
-            // })
-          )
-        })
-        console.log("allResults", allResults)
-        // calculate stats for that array
-        let minmax = minmaxTableAttr(allResults, 'total')
-        // build the style expression
-        let breaks = 7
-        let symbology = buildColorStyleExpression(
-          allResults,
-          'total',
-          'id',
-          RAINFALL_COLOR_ARRAY,
-          RAINFALL_COLOR_MODE,
-          RAINFALL_BREAK_COUNT,
-          'e',
-          minmax
-        )
+      console.log(minmax)
 
-        styleExp = symbology.styleExp
-        legendContent = symbology.legendContent
-
-        // save the calc'd style and legend to the fetch history item
-        fetchHistoryItem.styleExp = styleExp
-        fetchHistoryItem.legendContent = legendContent
-        fetchHistoryItem.stats = minmax
-
-      }    
+      // build the style expression
+      let symbology = buildColorStyleExpression(
+        allResults,
+        'total',
+        'id',
+        RAINFALL_COLOR_ARRAY,
+        RAINFALL_COLOR_MODE,
+        RAINFALL_BREAK_COUNT,
+        'e',
+        minmax
+      )
 
       // update state:
+      // save the calc'd style and legend to the fetch history item
+      set(fetchHistoryItem, ['styleExp', sensor], symbology.styleExp)
+      set(fetchHistoryItem, ['heightExp', sensor], symbology.heightExp)
+      // set(fetchHistoryItem, ['legendContent', sensor], symbology.legendContent)
 
-      // apply the style expression to the layers:
-      let lyrIdsToStyle = sensors.map(s => `${s}-results`)
-      let lyrIdsToNoteStyle = keys(SENSOR_TYPES).filter(st => !includes(sensors, st))
-      // find those layers and update their paint props
-      selectLayersByStartsWithId(state, lyrIdsToStyle)
-        .forEach(lyr => {
-          lyr.paint[`${lyr.type}-color`] = styleExp
-          lyr.paint[`${lyr.type}-opacity`] = 0.8
-        })
-
-      if (lyrIdsToNoteStyle.length > 0) {
-        selectLayersByStartsWithId(state, lyrIdsToNoteStyle)
-        .forEach(lyr => {
-          lyr.paint[`${lyr.type}-color`] = "#fff"
-          lyr.paint[`${lyr.type}-opacity`] = 0
-        })
-      }
-
-      // set the legend property
-      set(state, ['mapLegend'], legendContent)
+      fetchHistoryItem.stats = minmax
 
     },
+    /**
+     * Set the Mapbox layer's style for a given rainfall data query result.
+     * 
+     * This works on a single sensor, e.g., a pixel or sensor
+     * 
+     * NOTE: we do a little but of superficial data cleaning here so that
+     * negative values (which are erroneous for purely visual purposes) don't 
+     * skew the calculation of the breaks and colors. This doesn't affect the
+     * tabular/downloaded data.
+     */
+    [setLayerStyle]: (state, action) => {
+
+      // expand the payload
+      let { requestId, contextType, sensor } = action.payload
+
+      // get the source data used for styling the layer
+      let fetchHistoryItem = selectFetchHistoryItemById(state, requestId, contextType)
+      let sensorsToStyle = keys(fetchHistoryItem.results)
+      let sensorsToUnStyle = keys(SENSOR_TYPES).filter(st => !includes(sensorsToStyle, st))
+
+      // console.log("sensorsToStyle", sensorsToStyle)
+      // console.log("sensorsToUnStyle", sensorsToUnStyle)
+
+      // update state:
+      // Apply the style exp for the layers we have in the results object.
+      // If it's not there, then it gets un-styled.
+      sensorsToStyle.forEach(s => {
+        // if fetchHistoryItem has style and legend props, we use those to set
+        // the style on the layer.
+        if (
+          has(fetchHistoryItem, ['styleExp', s]) &&
+          has(fetchHistoryItem, ['heightExp', s])
+          // has(fetchHistoryItem, ['legendContent', s])
+        ) {
+
+          let styleExp = fetchHistoryItem.styleExp[s]
+          let heightExp = fetchHistoryItem.heightExp[s]
+
+          let lyrIdsToStyle = [`${s}-results`, `${s}-results-3d`]
+          // console.log("setting style for", lyrIdsToStyle)
+          selectLayersByIds(state, lyrIdsToStyle)
+            .forEach(lyr => {
+              lyr.paint[`${lyr.type}-color`] = styleExp
+  
+              if (lyr.type == "fill-extrusion") {
+                lyr.paint[`${lyr.type}-base`] = 0
+                lyr.paint[`${lyr.type}-height`] = heightExp
+                lyr.paint[`${lyr.type}-opacity`] = 1
+              } else {
+                lyr.paint[`${lyr.type}-opacity`] = 0.5
+              }
+
+            })
+          // set the legend property
+          // set(state, ['mapLegend', s], fetchHistoryItem.legendContent)
+        }
+        // if they don't then this is the first time we're putting this on
+        // the map, and we need to calculate them.        
+        else {
+          console.log("style and legend not previously calculated.")
+        }
+      })
+
+
+      sensorsToUnStyle.forEach(s => {
+        let lyrIdsToNotStyle = [`${s}-results`]
+        // console.log("clearing style for", lyrIdsToNotStyle)
+        selectLayersByIds(state, lyrIdsToNotStyle)
+          .forEach(lyr => {
+            lyr.paint[`${lyr.type}-color`] = "#fff"
+            lyr.paint[`${lyr.type}-opacity`] = 0
+          })
+      })
+
+
+    }
+
   }
 )

@@ -154,22 +154,37 @@ export const MAP_LAYERS = [
       ]      
     }
   },
+
   {
-    INDEX: 73,
+    INDEX: 69,
+    'id': `pixel-results-3d`,
+    'type': 'fill-extrusion',
+    'source': 'pixel',
+    'layout': {},
+    'paint': {
+      'fill-extrusion-base': 0,
+      'fill-extrusion-color': '#fff',
+      'fill-extrusion-opacity': 0,
+    }
+  },    
+  {
+    // INDEX: 73,
     'id': `gauge-results`,
     "type": "circle",
     "source": `gauge`,
     'layout': {},
     "paint": {
-      "circle-radius": 30,
-      "circle-color": "#2196f3",
-      "circle-blur": 0.8,
-      "circle-opacity": [
-        'case',
-        ['boolean', ['feature-state', 'hover'], false],
-        0.8,
-        0
+      "circle-radius": [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        7,
+        8,
+        18,
+        14
       ],
+      "circle-color": "#fff",
+      "circle-opacity": 0
     }
   },  
 ]

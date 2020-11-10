@@ -6,7 +6,6 @@ import { create } from 'lodash-es';
 export const mapLoaded = createAction('MAP_LOADED')
 export const setStyle = createAction('SET_STYLE')
 export const addLayers = createAction('LOAD_REF_LAYERS')
-export const setLayerStyle = createAction('SET_LAYER_STYLE')
 
 // --------------------------------------------------------
 // Context
@@ -48,6 +47,12 @@ export const requestRainfallDataFail = createAction('GETTING_RAINFALL_FAIL')
 
 // filter rainfall events
 export const filterEventByHours = createAction('FILTER_EVENT_BY_HOUR')
+
+// --------------------------------------------------------
+// Rainfall data symbology and interactivity
+export const setLayerStyle = createAction('SET_LAYER_STYLE')
+export const buildLayerStyle = createAction('BUILD_LAYER_STYLE')
+export const buildLegend = createAction('BUILD_LEGEND')
 
 // --------------------------------------------------------
 // Map Animation 

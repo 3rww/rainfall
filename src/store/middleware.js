@@ -16,18 +16,23 @@ import {
   addLayers,
   pickRainfallDateTimeRange,
   calcEventStats,
+  buildLayerStyle,
   setLayerStyle,
-  setActiveResultItem
+  setActiveResultItem,
+  switchTab
 } from './actions'
 
 import {
   selectFetchKwargs,
-  selectFetchHistoryItemById
+  selectFetchHistoryItemById,
+  selectActiveFetchHistory,
+  selectActiveFetchHistoryItem
 } from './selectors'
 
 import { 
   transformEventsJSON, 
-  transformRainfallGeodataToMapboxSourceObject 
+  transformRainfallGaugesToMapboxSourceObject,
+  transformRainfallPixelsToMapboxSourceObject
 } from './utils'
 
 import {
@@ -140,7 +145,7 @@ function promiseFetchReferenceDatasets(dispatch) {
       let result = dispatch(fetchJSON({
         url: URL_GAUGE_GEOJSON,
         pathArray: ["mapStyle", "sources", "gauge"],
-        transformer: transformRainfallGeodataToMapboxSourceObject,
+        transformer: transformRainfallGaugesToMapboxSourceObject,
         keepACopy: true
       }))
       resolve(result)
@@ -150,7 +155,7 @@ function promiseFetchReferenceDatasets(dispatch) {
       let result = dispatch(fetchJSON({
         url: URL_GARRD_GEOJSON,
         pathArray: ["mapStyle", "sources", "pixel"],
-        transformer: transformRainfallGeodataToMapboxSourceObject,
+        transformer: transformRainfallPixelsToMapboxSourceObject,
         keepACopy: true
       }))
       resolve(result)
@@ -222,15 +227,22 @@ const _calc_rainfall_stats = (r) => {
     r.data.forEach((s) => {
 
       let initialValue = 0;
-      s.total = (
+      let total = (
         s.data.length > 1 & s.data.length !== 0
       ) ? (
         s.data.map(i => i.val).reduce((totalValue, currentValue) => totalValue + currentValue, initialValue)
       ) : (
         s.data[0].val
       )
+      // we assign negative totals as null, so they don't later on skew the symbology.
+      // s.total = (total >= 0) ? total : null
+      s.total = total
 
     })
+
+    // let totals = r.data.map(row => row.total)
+    // r.maxValue = Math.max(...totals)
+    // r.minValue = Math.min(...totals)
   
     return r
 
@@ -272,7 +284,7 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
         // get the API's JSON response from the data prop of the ajax response obj
         let r = response.data
         // log it
-        console.log(`job ${r.meta.jobId} ${r.status}`, r)
+        console.log(`job ${r.meta.jobId} ${r.status} - ${sensor}`)
         // if job status is queued or started:
         if (includes(['queued', 'started'], r.status)) {
           // wait, then check on status/results at the provided 'job-url'
@@ -288,7 +300,7 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
           dispatch(requestRainfallDataFail({
             requestId: requestId,
             contextType: contextType,
-            results: {[sensor[0]]: false},
+            results: {[sensor]: false},
             status: r.status,
             messages: r.messages            
           }))
@@ -303,19 +315,19 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
           dispatch(requestRainfallDataSuccess({
             requestId: requestId,
             contextType: contextType,
-            results: {[sensor[0]]: r.data},
+            results: {[sensor]: r.data},
             processedKwargs: r.args,
             status: r.status,
-            style: r.style,
-            legend: r.legend
+            // stats: {
+            //   maxValue: r.maxValue,
+            //   minValue: r.minValue
+            // }
             // messages: (r.messages.length > 0) ? (r.messages) : (false)
           }))
-          // Set the result item to active by default. This will 
-          // highlight it in the history list for the context and put it 
-          // on the map for that context.
-          dispatch(setActiveResultItem({
+          dispatch(buildLayerStyle({
             requestId: requestId,
-            contextType: contextType            
+            contextType: contextType,
+            sensor: sensor
           }))
           // Update the map layer style for the layers used to represent
           // results. e.g., gauge-results, pixel-results. In the future 
@@ -323,9 +335,15 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
           dispatch(setLayerStyle({
             requestId: requestId,
             contextType: contextType,
-            lyrIds: [
-              `${sensor[0]}-results`
-            ]
+            sensor: sensor
+          }))
+
+          // Set the result item to active by default. This will 
+          // highlight it in the history list for the context and put it 
+          // on the map for that context.
+          dispatch(setActiveResultItem({
+            requestId: requestId,
+            contextType: contextType
           }))
 
         } else if (r.status === "does not exist") {
@@ -333,7 +351,7 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
           dispatch(requestRainfallDataFail({
             requestId: requestId,
             contextType: contextType,
-            results: {[sensor[0]]: false},
+            results: {[sensor]: false},
             status: r.status,
             messages: r.messages
           }))
@@ -346,12 +364,13 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
         dispatch(requestRainfallDataFail({
           requestId: requestId,
           contextType: contextType,
-          results: {[sensor[0]]: false},
+          results: {[sensor]: false},
           status: "error",
           messages: []
         }))
       }
     )
+    .finally(() => console.log("_fetchRainfallDataFromApiV2 completed"))
 
 }
 
@@ -380,6 +399,15 @@ export function fetchRainfallDataFromApiV2(payload) {
 
     // parse the props of selectedEvent to form the body of the API request
     let requestSensors = ['gauge', 'basin']
+
+    // return Promise.all([
+    //   // get the rainfall events json
+    //   new Promise((resolve, reject) => {
+
+    //   })
+    
+    // ])
+
     requestSensors.forEach((s, i) => {
 
       // skip if no selections
@@ -415,7 +443,7 @@ export function fetchRainfallDataFromApiV2(payload) {
       let url = `${process.env.REACT_APP_API_URL_ROOT}v2/${sensor[0]}/${rainfallDataType}/`
       let params = requestParams
 
-      _fetchRainfallDataFromApiV2(dispatch, requestId, sensor, contextType, url, params)
+      _fetchRainfallDataFromApiV2(dispatch, requestId, sensor[0], contextType, url, params)
 
     })
 
@@ -431,6 +459,8 @@ export function pickDownload(payload) {
     
     let requestId = fetchHistoryItem.requestId
 
+    let sensors = keys(fetchHistoryItem.results)
+
     // Set the result item to active by default. This will 
     // highlight it in the history list for the context and put it 
     // on the map for that context.
@@ -440,25 +470,48 @@ export function pickDownload(payload) {
     }))
     // Update the map layer style for the layers used to represent
     // results. e.g., gauge-results, pixel-results.
-    dispatch(setLayerStyle({
-      requestId: requestId,
-      contextType: contextType
-    }))
+    sensors.forEach(sensor => {
+      dispatch(setLayerStyle({
+        requestId: requestId,
+        contextType: contextType,
+        sensor: sensor,
+        recall: true
+      }))
+    })
+
   }
  
 }
 
-/**
- * function for re-running a previous download
- * @param {*} payload 
- */
-export function reFetchRainfallDataFromApiV2(payload) {
+// /**
+//  * function for re-running a previous download
+//  * @param {*} payload 
+//  */
+// export function reFetchRainfallDataFromApiV2(payload) {
 
-  return function (dispatch) {
-    // select the current fetch item from the history via requestId
-    // dispatch a reducer that updates the fetchKwargs for the 
-    // context with that item.
-    // run fetchRainfallDataFromApiV2
+//   return function (dispatch) {
+//     // select the current fetch item from the history via requestId
+//     // dispatch a reducer that updates the fetchKwargs for the 
+//     // context with that item.
+//     // run fetchRainfallDataFromApiV2
+//   }
+
+// }
+
+
+export function switchContext(payload) {
+  
+  return function(dispatch) {
+  
+    dispatch(switchTab(payload))
+    // select the active item in the context
+    let fhi = selectActiveFetchHistoryItem(store.getState())
+    // set the layer style on the map using the active item, if any
+    dispatch(setLayerStyle({
+      requestId: fhi.requestId,
+      contextType: payload,
+    }))
+
   }
 
 }
