@@ -130,7 +130,7 @@ export const MAP_LAYERS = [
     "source": `gauge`,
     'layout': {},
     "paint": {
-      "circle-radius": 30,
+      "circle-radius": 20,
       "circle-color": "#2196f3",
       "circle-blur": 0.8,
       "circle-opacity": [

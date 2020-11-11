@@ -21,7 +21,7 @@ import {
   pickRainfallDateTimeRange,
   pickSensor,
   pickInterval,
-  setActiveResultItem,
+  pickActiveResultItem,
   requestRainfallData,
   requestRainfallDataInvalid,
   requestRainfallDataSuccess,
@@ -37,7 +37,8 @@ import {
   stopThinking,
   buildLayerStyle,
   setLayerStyle,
-  applyColorStretch
+  applyColorStretch,
+  resetLayerSrcs
 } from './actions'
 
 import {
@@ -247,7 +248,7 @@ export const rootReducer = createReducer(
           // save the API status message for good measure
           fetchItem.status = status
 
-      })
+        })
 
     },
     /**
@@ -267,7 +268,7 @@ export const rootReducer = createReducer(
      * set a rainfall query result as active, and join its data into the 
      * corresponding layer
      */
-    [setActiveResultItem]: (state, action) => {
+    [pickActiveResultItem]: (state, action) => {
 
       let { requestId, contextType } = action.payload
 
@@ -280,22 +281,45 @@ export const rootReducer = createReducer(
 
       // take the results from this item and join them to the layer sources
       keys(i.results).forEach(sensor => {
-        
+
         // make a copy of the original layer, which we've kept for reference
         console.log(`getting reference ${sensor} layer`)
         let gj = cloneDeep(state.refData[sensor].data)
         let table = i.results[sensor]
-        
+
         // join the results to the geojson
         console.log(`joining ${sensor} results to layer`)
         let gjForMap = joinTabletoGeojson(gj, table, 'properties.id', 'id', false)
-        
+
         // push the geojson to the Mapbox source object
         console.log(`pushing udpated ${sensor} results layer to map`)
         selectLyrSrcByName(state, sensor).data = gjForMap
 
       })
-      
+    },
+    /**
+     * Swaps the layer source ref data into the mapbox style sheet layer object.
+     * If a list of names is provided, it will only do it for those layers;
+     * otherwise it does it for all of them.
+     */
+    [resetLayerSrcs]: (state, action) => {
+      let { lyrSrcNames } = action.payload
+
+      if (lyrSrcNames === undefined) {
+        lyrSrcNames = keys(SENSOR_TYPES)
+      }
+
+      if (lyrSrcNames.length > 0) {
+        lyrSrcNames.forEach(lyrSrcName => {
+          // get the original, clean geojson
+          let cleanGeojson = cloneDeep(state.refData[lyrSrcName].data)
+          // swap it into the version that's in the mapbox style source object
+          selectLyrSrcByName(state, lyrSrcName).data = cleanGeojson
+        })
+      }
+
+
+
     },
     /**
      * set parameters used to filter list of rainfall events
@@ -453,7 +477,7 @@ export const rootReducer = createReducer(
           selectLayersByIds(state, lyrIdsToStyle)
             .forEach(lyr => {
               lyr.paint[`${lyr.type}-color`] = styleExp
-  
+
               if (lyr.type == "fill-extrusion") {
                 lyr.paint[`${lyr.type}-base`] = 0
                 lyr.paint[`${lyr.type}-height`] = heightExp

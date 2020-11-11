@@ -1,9 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { Row, Col, Button, ButtonToolbar, ButtonGroup, Popover, OverlayTrigger, ListGroup, Card } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlay, faPause, faStop, faMap, faHandPointer } from '@fortawesome/free-solid-svg-icons'
+import { 
+  Row, Col, Button, 
+  // ButtonToolbar, ButtonGroup, 
+  Popover, OverlayTrigger, 
+  // ListGroup, Card 
+} from 'react-bootstrap';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+// import { faPlay, faPause, faStop, faMap, faHandPointer } from '@fortawesome/free-solid-svg-icons'
 
 import '../../layout.scss';
 

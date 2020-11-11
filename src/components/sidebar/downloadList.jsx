@@ -31,21 +31,23 @@ class DownloadsList extends React.Component {
 
         {this.props.fetchHistory.slice(0).reverse().map((i, idx) => {
 
-          let listColor = "" 
-          if (i.isActive & i.status ) {
+          let listColor
+          if (i.isActive && i.status === 'finished') {
             listColor = "primary"
           } else if (includes(['deferred', 'failed', "does not exist", 'error'], i.status)) {
             listColor = "danger"
+          } else {
+            listColor = ""
           }
 
           return (
             <ListGroup.Item
               key={idx}
               // active={i.isActive}
-              // action
               as="div"
               className="mx-0"
-              // onClick={() => this.handleListClick(i)}
+              action
+              onClick={() => this.handleListClick(i)}
               variant={listColor}
             >
 

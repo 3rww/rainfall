@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import {
   Modal,
   Button,
-  ButtonToolbar,
   InputGroup,
   FormControl,
   Row,
@@ -20,7 +19,7 @@ import { faCalendarAlt, faList } from '@fortawesome/free-solid-svg-icons'
 
 import EventsList from './eventsList';
 import { pickRainfallDateTimeRange } from '../../store/actions';
-import { selectSelectedEvent, selectEventStats, eventIsSelected, selectFetchKwargs } from '../../store/selectors'
+import {selectEventStats, selectFetchKwargs } from '../../store/selectors'
 import { RAINFALL_TYPES, RAINFALL_MIN_DATE } from '../../store/config'
 
 import 'bootstrap-daterangepicker/daterangepicker.css';
@@ -168,7 +167,7 @@ function mapStateToProps(state, ownProps) {
   let maxDate = false
   let ranges = {}
 
-  if (ownProps.rainfallDataType == RAINFALL_TYPES.historic && eventStats.maxDate !== null) {
+  if (ownProps.rainfallDataType === RAINFALL_TYPES.historic && eventStats.maxDate !== null) {
     maxDate = eventStats.maxDate
     ranges = {
       "Latest month": [moment(maxDate).startOf('month'), moment(maxDate)],
@@ -181,7 +180,7 @@ function mapStateToProps(state, ownProps) {
         moment(maxDate).subtract(1, "year").endOf("year")
       ],
     }
-  } else if (ownProps.rainfallDataType == RAINFALL_TYPES.realtime) {
+  } else if (ownProps.rainfallDataType === RAINFALL_TYPES.realtime) {
     let now = moment().toISOString()
     ranges = {
       "Past 2 hours": [moment(now).subtract(2, 'hour'), moment(now)],

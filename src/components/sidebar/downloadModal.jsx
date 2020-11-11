@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Modal, Button, Row, Col } from 'react-bootstrap';
 import moment from 'moment'
-import { unparse, parse } from 'papaparse'
+import { unparse } from 'papaparse'
 import { saveAs } from 'file-saver'
 import { keys } from 'lodash-es'
 
@@ -27,11 +27,9 @@ class DownloadModal extends React.Component {
   render() {
 
     let fetchKwargs = this.props.fetchHistoryItem.fetchKwargs
-    let itemId = this.props.fetchHistoryItem.requestId
     let sensorLocations = fetchKwargs.sensorLocations
     let gauges = sensorLocations.gauge
     let pixels = sensorLocations.pixel
-    let hasResults = this.props.fetchHistoryItem.results !== false
 
     /*
     // holders for data to be rendered in the download table

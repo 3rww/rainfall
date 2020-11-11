@@ -25,17 +25,19 @@ class DownloadsItem extends React.Component {
   }
 
   handleClose(e) {
-    
+    // console.log(e)
     this.setState({ show: false });
   }
 
   handleShow(e) {
-    
+
     this.setState({ show: true });
     if (!this.props.fetchHistoryItem.isActive) {
+      console.log(e)
+      console.log("Loading data from", this.props.fetchHistoryItem.requestId, "to the map")
       this.props.dispatchPickDownload()
     }
-    
+
   }
 
   // handleDownloadClick() {
@@ -46,14 +48,13 @@ class DownloadsItem extends React.Component {
   // }
 
   render() {
-
-    let fetchKwargs = this.props.fetchHistoryItem.fetchKwargs
-    let pKwargs = this.props.fetchHistoryItem.processedKwargs
-    let itemId = this.props.fetchHistoryItem.requestId
+    let fhi = this.props.fetchHistoryItem
+    let fetchKwargs = fhi.fetchKwargs
     let sensorLocations = fetchKwargs.sensorLocations
     let gauges = sensorLocations.gauge
     let pixels = sensorLocations.pixel
-    let hasResults = this.props.fetchHistoryItem.results !== false
+    let hasResults = fhi.results !== false
+    let pKwargs = fhi.processedKwargs
 
     // let reGetButton = includes(
     //   ['deferred', 'failed', "does not exist", 'error'], 
@@ -98,7 +99,7 @@ class DownloadsItem extends React.Component {
           </Row>
         ) : (
             null
-        )}
+          )}
 
         {/* Rollup method */}
         <Row>
@@ -110,14 +111,19 @@ class DownloadsItem extends React.Component {
           </Col>
         </Row>
 
-        <Row>
-          <Col lg={3}>
-            <p className="di-header">Date/time range queried:</p>
-          </Col>
-          <Col lg={9}>
-            <p>{pKwargs.start_dt}/{pKwargs.end_dt}</p>
-          </Col>
-        </Row>        
+        {(pKwargs === undefined) ? (
+          null
+        ) : (
+          <Row>
+            <Col lg={3}>
+              <p className="di-header">Date/time range queried:</p>
+            </Col>
+            <Col lg={9}>
+              <p>{pKwargs.start_dt}/{pKwargs.end_dt}</p>
+            </Col>
+          </Row>
+        )}
+
 
         {/* Download Buttons */}
         {
@@ -184,7 +190,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     dispatchPickDownload: payload => {
-      let p = {...ownProps.fetchHistoryItem, contextType: ownProps.contextType}
+      let p = { ...ownProps.fetchHistoryItem, contextType: ownProps.contextType }
       // console.log(p)
       dispatch(pickDownload(p))
     },

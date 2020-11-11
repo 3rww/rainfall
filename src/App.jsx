@@ -4,7 +4,7 @@ import {TabContainer} from 'react-bootstrap';
 import Navigation from './components/navigation/navigation';
 import Layout from './components/layout';
 import { CONTEXT_TYPES } from './store/config'
-import { switchTab } from './store/actions'
+import { switchContext } from './store/middleware'
 
 class App extends React.Component {
 
@@ -26,7 +26,7 @@ class App extends React.Component {
           defaultActiveKey={CONTEXT_TYPES.legacyRealtime}
           id="rainfall-tabs"
           // mountOnEnter={true}
-          onSelect={this.props.switchTab}
+          onSelect={this.props.switchContext}
         >
           <Navigation isloading={this.props.loading}/>
           <Layout />
@@ -44,9 +44,9 @@ function mapStateToProps(state) {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    switchTab: payload => {
+    switchContext: payload => {
       console.log("switching", payload)
-      dispatch(switchTab(payload))
+      dispatch(switchContext(payload))
     }
   }
 }

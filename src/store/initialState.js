@@ -5,7 +5,7 @@ import {
   CONTEXT_TYPES
 } from './config'
 
-import { testFetchHistoryItems } from './data/test_events'
+// import { testFetchHistoryItems } from './data/test_events'
 
 export const initialState = {
   // progress ---------------------------------------------

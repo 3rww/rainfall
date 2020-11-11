@@ -4,8 +4,7 @@ import { connect } from 'react-redux';
 import Immutable from 'immutable';
 import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
-import { isEmpty, includes } from 'lodash-es';
-import {ListGroup, Card } from 'react-bootstrap';
+import { isEmpty } from 'lodash-es';
 
 import {
   setStyle,

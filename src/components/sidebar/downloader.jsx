@@ -66,12 +66,10 @@ class RainfallDownloader extends React.Component {
           <Card.Header>
               Retrieved Rainfall Data
           </Card.Header>
-          <Card.Body>
-              <DownloadsList 
-                contextType={this.props.contextType}
-                rainfallDataType={this.props.rainfallDataType}
-              />
-          </Card.Body>
+          <DownloadsList 
+            contextType={this.props.contextType}
+            rainfallDataType={this.props.rainfallDataType}
+          />
         </Card>
         ) : (null)}
       </div>

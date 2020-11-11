@@ -4,14 +4,14 @@ import { Navbar, Nav, Button, Modal, Col, Row } from 'react-bootstrap';
 import ReactMarkdown from 'react-markdown/with-html'
 
 // icons
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSpinner, faCloudRain } from '@fortawesome/free-solid-svg-icons'
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+// import { faSpinner, faCloudRain } from '@fortawesome/free-solid-svg-icons'
 
 // import {legend} from '../data/legend'
 
-import { RAINFALL_TYPES, CONTEXT_TYPES } from '../../store/config'
+import { CONTEXT_TYPES } from '../../store/config'
 
-import { switchTab } from '../../store/actions'
+import { switchContext } from '../../store/middleware'
 
 import './navigation.scss';
 
@@ -24,8 +24,8 @@ class Navigation extends Component {
     this.handleClose = this.handleClose.bind(this);
 
     this.state = {
-      show: false,
-      showWhich: null,
+      show: true,
+      showWhich: "AboutButton",
       content: {
         AboutButton: {
           title: (
@@ -150,25 +150,25 @@ Note that the source code only appears for the 15-minute increments because an h
             <Nav variant="pills" className="mr-auto" defaultActiveKey={CONTEXT_TYPES.legacyRealtime}>
               <Nav.Item>
                 <Nav.Link
-                  active={this.props.tab == CONTEXT_TYPES.legacyRealtime}
+                  active={this.props.tab === CONTEXT_TYPES.legacyRealtime}
                   eventKey={CONTEXT_TYPES.legacyRealtime}
-                  onSelect={this.props.switchTab}
+                  onSelect={this.props.switchContext}
                 >
                   Real-Time Rainfall
                 </Nav.Link>
               </Nav.Item>
               <Nav.Item>
                 <Nav.Link
-                  active={this.props.tab == CONTEXT_TYPES.legacyGauge}
+                  active={this.props.tab === CONTEXT_TYPES.legacyGauge}
                   eventKey={CONTEXT_TYPES.legacyGauge}
-                  onSelect={this.props.switchTab}
+                  onSelect={this.props.switchContext}
                 >Historical Rain Gauge</Nav.Link>
               </Nav.Item>
               <Nav.Item>
                 <Nav.Link
-                  active={this.props.tab == CONTEXT_TYPES.legacyGarr}
+                  active={this.props.tab === CONTEXT_TYPES.legacyGarr}
                   eventKey={CONTEXT_TYPES.legacyGarr}
-                  onSelect={this.props.switchTab}
+                  onSelect={this.props.switchContext}
                 >Calibrated Radar Rainfall</Nav.Link>
               </Nav.Item>
             </Nav>
@@ -231,7 +231,7 @@ function mapStateToProps(state) {
 }
 
 const mapDispatchToProps = {
-  switchTab
+  switchContext
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Navigation);

@@ -12,11 +12,8 @@ export const Tooltip = ({ features }) => {
 
   const renderFeature = (feature, i) => {
     let p = feature.properties
-    let d = JSON.parse(p.data)
-    // console.log(p, typeof(p))
-    // console.log(p.total, typeof(p.total))
-    // console.log(p.data, typeof(p.data))
-    // console.log(d, typeof(d))
+    // let d = JSON.parse(p.data)
+
     return (
       <ListGroup.Item key={i}>
         <h6 className="tooltip-header">{p.label}</h6>

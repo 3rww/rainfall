@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Container, Row, Col, ListGroup, ProgressBar } from 'react-bootstrap';
+import { Row, Col, ListGroup, ProgressBar } from 'react-bootstrap';
 import moment from 'moment'
 // icons
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSpinner, faCloudRain } from '@fortawesome/free-solid-svg-icons'
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+// import { faSpinner, faCloudRain } from '@fortawesome/free-solid-svg-icons'
 
 // import EventFilterControls from './filters';
 

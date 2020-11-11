@@ -2,11 +2,9 @@ import axios from 'axios';
 import { MD5 } from 'object-hash'
 import { includes, keys } from 'lodash-es'
 import moment from 'moment'
-import * as chroma from 'chroma-js'
 
 import {
   requestRainfallData,
-  requestRainfallDataInvalid,
   requestRainfallDataSuccess,
   requestRainfallDataFail,
   asyncAction,
@@ -17,17 +15,15 @@ import {
   addLayers,
   pickRainfallDateTimeRange,
   calcEventStats,
-  buildLayerStyle,
-  setLayerStyle,
-  setActiveResultItem,
+  pickActiveResultItem,
   switchTab,
-  applyColorStretch
+  applyColorStretch,
+  resetLayerSrcs
 } from './actions'
 
 import {
   selectFetchKwargs,
   selectFetchHistoryItemById,
-  selectActiveFetchHistory,
   selectActiveFetchHistoryItem
 } from './selectors'
 
@@ -47,9 +43,10 @@ import {
   URL_GAUGE_GEOJSON,
   CONTEXT_TYPES,
   REQUEST_TIME_INTERVAL,
-  BREAKS_005,
+  // BREAKS_005,
   BREAKS_050,
-  BREAKS_100
+  // BREAKS_100,
+  SENSOR_TYPES
 } from './config'
 
 
@@ -305,25 +302,10 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
             // messages: (r.messages.length > 0) ? (r.messages) : (false)
           }))
 
-
-          // dispatch(buildLayerStyle({
-          //   requestId: requestId,
-          //   contextType: contextType,
-          //   sensor: sensor
-          // }))
-          // Update the map layer style for the layers used to represent
-          // results. e.g., gauge-results, pixel-results. In the future 
-          // there could be others
-          // dispatch(setLayerStyle({
-          //   requestId: requestId,
-          //   contextType: contextType,
-          //   sensor: sensor
-          // }))
-
           // Set the result item to active by default. This will 
           // highlight it in the history list for the context and put it 
           // on the map for that context.
-          dispatch(setActiveResultItem({
+          dispatch(pickActiveResultItem({
             requestId: requestId,
             contextType: contextType
           }))
@@ -364,20 +346,31 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
  */
 export function fetchRainfallDataFromApiV2(payload) {
 
+  let state = store.getState()
+
   return function (dispatch) {
 
     let { contextType, rainfallDataType } = payload
-    let kwargs = selectFetchKwargs(store.getState(), contextType)
+    // get the active batch of Fetch Kwargs
+    let kwargs = selectFetchKwargs(state, contextType)
 
     // generate a unique ID, based on the hash of the kwargs
     // this will let us 1) update the correct object in fetchHistory
     // with the results, and 2) not retrieve the same data twice
     let requestId = MD5(kwargs)
 
-    // TODO: return data from selectedEvent if it's available (previously been fetched)
+    let matchingRequest = selectFetchHistoryItemById(state, requestId, contextType)
 
-    // TODO: handle validation (here or in component)
-    // requestRainfallDataInvalid(s)
+    if (matchingRequest !== undefined) {
+      console.log("This exact request was already made. Keeping existing data from request", matchingRequest.requestId)
+      if (matchingRequest.isActive === false) {
+        dispatch(pickActiveResultItem({
+          requestId: matchingRequest.requestId,
+          contextType: contextType
+        }))
+      }
+
+    }
 
     // parse the props of selectedEvent to form the body of the API request
     let requestSensors = ['gauge', 'basin']
@@ -393,7 +386,7 @@ export function fetchRainfallDataFromApiV2(payload) {
     requestSensors.forEach((s, i) => {
 
       // skip if no selections
-      if (kwargs.sensorLocations[s].length == 0) {
+      if (kwargs.sensorLocations[s].length === 0) {
         return
       }
 
@@ -409,10 +402,9 @@ export function fetchRainfallDataFromApiV2(payload) {
       // It gets a little weird here: get the correct names used for various 
       // api params and state tree lookups
       // 0: api url endpoint and state tree path, 1: api param
-      let sensor = (s == 'basin') ? ['pixel', 'pixels'] : ['gauge', 'gauges']
+      let sensor = (s === 'basin') ? ['pixel', 'pixels'] : ['gauge', 'gauges']
 
       requestParams[sensor[1]] = kwargs.sensorLocations[sensor[0]].map(i => i.value).join(",")
-
 
       // indicate that the request is proceeding in the UI
       // stores the fetchKwargs from the state in the history object.
@@ -445,15 +437,17 @@ export function pickDownload(payload) {
     
     let requestId = fetchHistoryItem.requestId
 
-    let sensors = keys(fetchHistoryItem.results)
+    // let sensors = keys(fetchHistoryItem.results)
+    if (!fetchHistoryItem.isActive) {
+      // Set the result item to active by default. This will 
+      // highlight it in the history list for the context and put it 
+      // on the map for that context.
+      dispatch(pickActiveResultItem({
+        requestId: requestId,
+        contextType: contextType
+      }))
+    }
 
-    // Set the result item to active by default. This will 
-    // highlight it in the history list for the context and put it 
-    // on the map for that context.
-    dispatch(setActiveResultItem({
-      requestId: requestId,
-      contextType: contextType
-    }))
     // Update the map layer style for the layers used to represent
     // results. e.g., gauge-results, pixel-results.
     // sensors.forEach(sensor => {
@@ -491,21 +485,22 @@ export function switchContext(payload) {
   
   return function(dispatch) {
   
+    // switch the tab
     dispatch(switchTab(contextType))
-    // select the active item in the context
+
+    // select the active item in the context (which we just set above)
     let fhi = selectActiveFetchHistoryItem(store.getState())
 
-    let requestId
     if (fhi === undefined) {
-      requestId = false
+      dispatch(resetLayerSrcs({lyrSrcNames: keys(SENSOR_TYPES)}))
     } else {
-      requestId = fhi.requestId
+      dispatch(pickActiveResultItem({
+        requestId: fhi.requestId,
+        contextType: contextType
+      }))      
     }
-    
-    dispatch(setActiveResultItem({
-      requestId: requestId,
-      contextType: contextType
-    }))
+    // set the active result
+
 
     // set the layer style on the map using the active item, if any
     // dispatch(setLayerStyle({

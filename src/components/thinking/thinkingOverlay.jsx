@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import Spinner from 'react-bootstrap/Spinner';
+// import Spinner from 'react-bootstrap/Spinner';
 // icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSpinner, faCloudRain } from '@fortawesome/free-solid-svg-icons'

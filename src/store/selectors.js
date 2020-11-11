@@ -1,4 +1,4 @@
-import { has, isEmpty, keys, forEach, includes, startsWith, get } from 'lodash-es'
+import { has, isEmpty, keys, forEach, includes, startsWith } from 'lodash-es'
 
 import { LYR_HIGHLIGHT_PREFIX } from './config'
 
@@ -83,6 +83,14 @@ export const selectAnyFetchHistoryItemsByIdInverse = (state, requestId) => {
     i = i.concat(contextData.history.filter(f => f.requestId !== requestId))
   })
   return i
+}
+
+// select all/any active fetch history items across contexts
+export const selectAnyActiveFetchHistoryItems = (state) => {
+  let i = [];
+  forEach(state.fetchKwargs, (contextData, contextType) => {
+    i = i.concat(contextData.history.filter(f => f.isActive == true))
+  })
 }
 
 export const selectPickedSensors = (state, contextType, sensorLocationType) => {

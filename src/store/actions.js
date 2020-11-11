@@ -1,5 +1,4 @@
 import {createAction} from '@reduxjs/toolkit';
-import { create } from 'lodash-es';
 
 // --------------------------------------------------------
 // Map State
@@ -34,7 +33,7 @@ export const pickSensor = createAction('PICK_SENSOR')
 // pick the interval
 export const pickInterval = createAction('PICK_INTERVAL')
 // set the active result (used for displaying results on the map)
-export const setActiveResultItem = createAction('PICK_ACTIVE_RESULT')
+export const pickActiveResultItem = createAction('PICK_ACTIVE_RESULT')
 
 // --------------------------------------------------------
 // Rainfall data retrieval 
@@ -54,6 +53,7 @@ export const applyColorStretch = createAction('APPLY_COLOR_STRETCH')
 export const setLayerStyle = createAction('SET_LAYER_STYLE')
 export const buildLayerStyle = createAction('BUILD_LAYER_STYLE')
 export const buildLegend = createAction('BUILD_LEGEND')
+export const resetLayerSrcs = createAction('RESET_LAYER_SRCS')
 
 // --------------------------------------------------------
 // Map Animation 
