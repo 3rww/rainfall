@@ -296,6 +296,16 @@ export const rootReducer = createReducer(
         selectLyrSrcByName(state, sensor).data = gjForMap
 
       })
+
+      // for any others, empty them out.
+      keys(SENSOR_TYPES)
+        .filter(s => !includes(keys(i.results), s))
+        .forEach(s => {
+          console.log(s)
+          let cleanGeojson = cloneDeep(state.refData[s].data)
+          selectLyrSrcByName(state, s).data = cleanGeojson
+        })
+
     },
     /**
      * Swaps the layer source ref data into the mapbox style sheet layer object.

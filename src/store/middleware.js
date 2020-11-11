@@ -490,6 +490,7 @@ export function switchContext(payload) {
 
     // select the active item in the context (which we just set above)
     let fhi = selectActiveFetchHistoryItem(store.getState())
+    console.log(fhi)
 
     if (fhi === undefined) {
       dispatch(resetLayerSrcs({lyrSrcNames: keys(SENSOR_TYPES)}))
