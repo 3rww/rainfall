@@ -53,7 +53,15 @@ The NEXRAD radar (located in Moon Township) data is calibrated with the rain gau
 
 ---
 
-## Real-time Rainfall Data
+## Available Datasets
+
+Currently, this site offers rainfall data in three buckets:
+
+* Real-time Rainfall data: provisional rainfall data for both gauges and radar pixels
+* Historical Rain Gauge data: QA/QC'd rain gauge data, usually available within 30-60 days.
+* Calibrated Radar Rainfall data: QA/QC'd, gauge-adjusted radar rainfall observations, typically available within 30-60 days.
+
+### Real-time Rainfall Data
 
 Data from 33 rain gauges is collected and updated every 15 minutes to calibrate live weather radar to provide accurate, quality rainfall information as it is occurring.
 
@@ -69,12 +77,12 @@ Several options for data output are provided on the real-time site via simple li
 * A cumulative color-coded map showing the amount of rainfall occurring over a specified period. Data can be accessed from the first day of the previous month to the current date. Be sure to specify the time period, and select the appropriate rainfall scale (.5 inch, 5 inches or 10 inches.) For particularly long periods of time or heavy rainfall periods, a higher scale will provide a better range of colors in the final map.
 * Rainfall amount collected over the most recent 4-hour period by an individual rain gauge. A bar graph and data table show the actual rainfall collected by the specific gauge in 15-min. increments. 
 
-## Historical Rain Gauge
+### Historical Rain Gauge
 
 The data from 33 rain gauges is archived in this section. The data may be retrieved for any combination of the rain gauges during a specified time span. The data may also be displayed in 15-minute increments or compressed to hourly or daily data points. The data may be viewed on the page or downloaded into a comma-separated output format which may be saved and loaded into a spreadsheet or database that accepts comma-separated files.
 
 
-## Calibrated Radar Rainfall
+### Calibrated Radar Rainfall
 
 The calibrated radar rainfall section allows the retrieval of data for each of the 2313 pixels mapped by the radar cross-section.
 
