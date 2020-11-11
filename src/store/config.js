@@ -5,7 +5,7 @@
  * components by middleware
  */
 
-import moment from 'moment'
+
 
 // Seed data --------------------------------------------
 // import RAINFALL_EVENTS from '../data/events.json'
@@ -83,8 +83,28 @@ export const MAP_LAYERS = [
     'source': 'pixel',
     'layout': {},
     'paint': {
-      'fill-color': '#fff',
-      'fill-opacity': 0,
+      'fill-color': [
+        "match",
+        ["get", "total"],
+        "",
+        "#fff",
+        [
+          "interpolate",
+          ["linear"],
+          ["get", "total"],
+          0,
+          '#fafa6e',
+          10,
+          '#2A4858',
+        ]
+      ],
+      'fill-opacity': [
+        "match",
+        ["get", "total"],
+        "",
+        0,
+        0.8
+      ]
     }
   },
   {
@@ -151,22 +171,29 @@ export const MAP_LAYERS = [
         ['boolean', ['feature-state', 'hover'], false],
         1,
         0
-      ]      
+      ]
     }
   },
 
-  {
-    INDEX: 69,
-    'id': `pixel-results-3d`,
-    'type': 'fill-extrusion',
-    'source': 'pixel',
-    'layout': {},
-    'paint': {
-      'fill-extrusion-base': 0,
-      'fill-extrusion-color': '#fff',
-      'fill-extrusion-opacity': 0,
-    }
-  },    
+  // {
+  //   INDEX: 69,
+  //   'id': `pixel-results-3d`,
+  //   'type': 'fill-extrusion',
+  //   'source': 'pixel',
+  //   'layout': {},
+  //   'paint': {
+  //     'fill-extrusion-base': 0,
+  //     'fill-extrusion-color': '#fff',
+  //     'fill-extrusion-opacity': 0.9, 
+  //     // 'fill-extrusion-translate': [
+  //     //   "match",
+  //     //   ["get", "total"],
+  //     //   "",
+  //     //   [0, -10],
+  //     //   [0, 0]
+  //     // ]
+  //   }
+  // },    
   {
     // INDEX: 73,
     'id': `gauge-results`,
@@ -183,10 +210,39 @@ export const MAP_LAYERS = [
         18,
         14
       ],
-      "circle-color": "#fff",
-      "circle-opacity": 0
+      "circle-stroke-color": "#fff",
+      "circle-stroke-width": 2,      
+      'circle-color': [
+        "match",
+        ["get", "total"],
+        "",
+        "#fff",
+        [
+          "interpolate",
+          ["linear"],
+          ["get", "total"],
+          0,
+          '#fafa6e',
+          10,
+          '#2A4858',
+        ]
+      ],
+      'circle-opacity': [
+        "match",
+        ["get", "total"],
+        "",
+        0,
+        1
+      ],
+      'circle-stroke-opacity': [
+        "match",
+        ["get", "total"],
+        "",
+        0,
+        1
+      ]      
     }
-  },  
+  },
 ]
 
 export const LAYERS_W_MOUSEOVER = [
@@ -195,6 +251,66 @@ export const LAYERS_W_MOUSEOVER = [
   [`${LYR_HIGHLIGHT_PREFIX}-gauge-halo`, 'gauge']
 ]
 
-export const RAINFALL_COLOR_ARRAY = ['#fafa6e','#2A4858']
+export const LAYERS_W_RESULTS = [
+  'pixel-results',
+  'gauge-results',
+  // 'pixel-results-3d',
+]
+
+export const RAINFALL_COLOR_ARRAY = ["#fde725", "#5dc962" ,"#20908d", "#3a528b", "#440154"]
 export const RAINFALL_COLOR_MODE = 'lch'
 export const RAINFALL_BREAK_COUNT = 7
+
+export const BREAKS_005 = [
+  0.01,
+  0.02,
+  0.04,
+  0.06,
+  0.08,
+  0.10,
+  0.12,
+  0.15,
+  0.20,
+  0.25,
+  0.30,
+  0.35,
+  0.40,
+  0.45,
+  0.50
+]
+
+export const BREAKS_050 = [
+  0.1,
+  0.2,
+  0.4,
+  0.6,
+  0.8,
+  1.0,
+  1.5,
+  2.0,
+  2.5,
+  3.0,
+  3.5,
+  4.0,
+  4.5,
+  5.0
+]
+
+export const BREAKS_100 = [
+  0.2,
+  0.4,
+  0.8,
+  1.0,
+  1.2,
+  1.6,
+  2.0,
+  2.4,
+  3.0,
+  4.0,
+  5.0,
+  6.0,
+  7.0,
+  8.0,
+  9.0,
+  10
+]

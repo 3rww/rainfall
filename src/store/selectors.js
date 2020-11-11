@@ -1,4 +1,4 @@
-import { has, isEmpty, keys, forEach, includes, startsWith } from 'lodash-es'
+import { has, isEmpty, keys, forEach, includes, startsWith, get } from 'lodash-es'
 
 import { LYR_HIGHLIGHT_PREFIX } from './config'
 
@@ -104,6 +104,10 @@ export const selectAnyActiveFetches = (state) => {
 /** -------------------------------------------------------
  * selections for the Mapbox style-spec state object
  */
+
+ export const selectLyrSrcs = (state) => state.mapStyle.sources
+
+ export const selectLyrSrcByName = (state, name) => selectLyrSrcs(state)[name]
 
 // the mapStyle object in the store provides layer state for the map
 export const selectLayers = (state) => state.mapStyle.layers

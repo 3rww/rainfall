@@ -1,6 +1,6 @@
 import { createReducer } from '@reduxjs/toolkit'
 import moment from 'moment'
-import { set, get, forEach, keys, has, includes } from 'lodash-es'
+import { set, get, forEach, keys, has, includes, cloneDeep } from 'lodash-es'
 
 import { initialState } from './initialState'
 
@@ -8,7 +8,8 @@ import {
   SENSOR_TYPES,
   RAINFALL_BREAK_COUNT,
   RAINFALL_COLOR_ARRAY,
-  RAINFALL_COLOR_MODE
+  RAINFALL_COLOR_MODE,
+  LAYERS_W_RESULTS,
 } from './config'
 
 import {
@@ -35,7 +36,8 @@ import {
   startThinking,
   stopThinking,
   buildLayerStyle,
-  setLayerStyle
+  setLayerStyle,
+  applyColorStretch
 } from './actions'
 
 import {
@@ -49,13 +51,18 @@ import {
   selectRainfallEvents,
   selectFetchHistory,
   selectLayersByIds,
-  selectLayersByStartsWithId
+  selectLyrSrcByName,
+  selectLayerById
 } from './selectors'
 
 import {
   minmaxTableAttr,
-  buildColorStyleExpression
-} from './utils'
+  buildColorStyleExpression,
+  buildRainfallColorStyleExp
+} from './utils/mb'
+import {
+  joinTabletoGeojson
+} from './utils/transformers'
 
 /**
  * root reducer
@@ -229,48 +236,16 @@ export const rootReducer = createReducer(
       console.log("request", requestId, status)
 
       // the current fetch:
-      selectFetchHistoryItemsById(state, requestId, contextType).forEach(fetchItem => {
-        // set fetching status to false
-        fetchItem.isFetching = fetchItem.isFetching - 1
-        // push the results
-        fetchItem.results = { ...results, ...fetchItem.results }
-        // save a copy of the request kwargs as interpreted by the API (useful for debugging)
-        fetchItem.processedKwargs = processedKwargs
-        // save the API status message for good measure
-        fetchItem.status = status
-
-
-
-        // then for each type of result (potentially: raingauge and/or pixel)
-        // manipulate the map state by first adding the results to the geojson
-        // keys(results).forEach(layerSource => {
-        //   console.log(layerSource)
-        //   // find the corresponding geojson (original copy)
-        //   let thisGeoJson = { ...state.refData[layerSource].data }
-        //   // add the results to the properties in the corresponding geojson feature
-        //   let resultDataList = results[layerSource]
-        //   resultDataList.forEach((sensor) => {
-        //     thisGeoJson.features
-        //       .filter(f => f.id == sensor.id)
-        //       .forEach(f => {
-        //         let initialValue = 0;
-        //         f.properties = {
-        //           ...f.properties,
-        //           data: sensor.data,
-        //           total: (
-        //             sensor.data.length > 1 & sensor.data.length !== 0
-        //             ) ? (
-        //             sensor.data.map(i => i.val).reduce((totalValue, currentValue) => totalValue + currentValue, initialValue)
-        //             ) : (
-        //               sensor.data[0].val
-        //             )
-        //         }
-        //       })
-        //     // repalce the geojson in the style sheet with the updated version
-        //     state.mapStyle.sources[layerSource].data = thisGeoJson
-        //   })
-
-        // })
+      selectFetchHistoryItemsById(state, requestId, contextType)
+        .forEach(fetchItem => {
+          // set fetching status to false
+          fetchItem.isFetching = fetchItem.isFetching - 1
+          // push the results
+          fetchItem.results = { ...results, ...fetchItem.results }
+          // save a copy of the request kwargs as interpreted by the API (useful for debugging)
+          fetchItem.processedKwargs = processedKwargs
+          // save the API status message for good measure
+          fetchItem.status = status
 
       })
 
@@ -288,12 +263,39 @@ export const rootReducer = createReducer(
       fetchItem.status = status
       // fetchItem.results = {...results, ...fetchItem.results}
     },
+    /**
+     * set a rainfall query result as active, and join its data into the 
+     * corresponding layer
+     */
     [setActiveResultItem]: (state, action) => {
+
       let { requestId, contextType } = action.payload
-      selectFetchHistoryItemsById(state, requestId, contextType)
-        .forEach(i => i.isActive = true)
+
+      // turn off all other items
       selectFetchHistoryItemsByIdInverse(state, requestId, contextType)
         .forEach(i => i.isActive = false)
+      // turn on this item
+      let i = selectFetchHistoryItemById(state, requestId, contextType)
+      i.isActive = true
+
+      // take the results from this item and join them to the layer sources
+      keys(i.results).forEach(sensor => {
+        
+        // make a copy of the original layer, which we've kept for reference
+        console.log(`getting reference ${sensor} layer`)
+        let gj = cloneDeep(state.refData[sensor].data)
+        let table = i.results[sensor]
+        
+        // join the results to the geojson
+        console.log(`joining ${sensor} results to layer`)
+        let gjForMap = joinTabletoGeojson(gj, table, 'properties.id', 'id', false)
+        
+        // push the geojson to the Mapbox source object
+        console.log(`pushing udpated ${sensor} results layer to map`)
+        selectLyrSrcByName(state, sensor).data = gjForMap
+
+      })
+      
     },
     /**
      * set parameters used to filter list of rainfall events
@@ -483,7 +485,15 @@ export const rootReducer = createReducer(
       })
 
 
+    },
+    [applyColorStretch]: (state, action) => {
+      let { breaks } = action.payload
+      let styleExp = buildRainfallColorStyleExp('total', breaks)
+      LAYERS_W_RESULTS.forEach(lyrId => {
+        let lyr = selectLayerById(state, lyrId)
+        lyr.paint[`${lyr.type}-color`] = styleExp
+      })
     }
 
   }
-)
+) 

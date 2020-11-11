@@ -15,8 +15,9 @@ import {
 } from '../../store/actions';
 import { initDataFetch } from '../../store/middleware';
 import { LAYERS_W_MOUSEOVER } from '../../store/config'
-
 import diffStyles from '../../utilities/styleSpecDiff';
+
+import { Tooltip } from './tooltip'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
@@ -24,33 +25,6 @@ import './map.scss'
 
 let DEBUG = true
 const MAPID = 'map'
-
-class Tooltip extends React.Component {
-  render() {
-    const { features } = this.props;
-    const c = features.filter(f => f.id !== undefined).length
-
-    const renderFeature = (feature, i) => {
-      return (
-        <ListGroup.Item key={i}>
-          <span className="small">{feature.id}</span>
-        </ListGroup.Item>
-      )
-    };
-
-    if (c > 0) {
-      return (
-        <Card style={{ width: '180px' }}>
-          <ListGroup variant="flush">
-            {features.filter(f => f.id !== undefined).map(renderFeature)}
-          </ListGroup>
-        </Card>
-      )
-    } else {
-      return null
-    }
-  }
-}
 
 class ReactMap extends Component {
 
@@ -88,42 +62,6 @@ class ReactMap extends Component {
       ReactDOM.unmountComponentAtNode(this.tooltipContainer)
     }
   }
-
-  /**
-   * run queryRenderedFeatures, using currentOverlays in redux store
-   */
-  //   handleMapClick(e) {
-  //     // set bbox as 5px reactangle area around clicked point
-  //     const bbox = [[e.point.x - 5, e.point.y - 5], [e.point.x + 5, e.point.y + 5]];
-
-  //     /**
-  //      * query rendered features
-  //      */
-  //     let features = this.webmap.queryRenderedFeatures(bbox, { layers: this.props.activeOverlays });
-  //     // if we've hit a feature from currentOverlays
-  //     if (features.length > 0) {
-  //       // console.log('querying rendered features')
-  //       features.forEach(f => {
-  //         this.props.makeChoiceOnMapClick({ layerId: f.layer.id, ...f.properties })
-  //       })
-  //     } else {
-  //       // console.log('querying highlights instead')
-  //       // if we didn't hit a feature from currentOverlays but did hit a feature from currentHighlights...
-  //       // (this happens where we have selections and filtering on the map, and we don't want to lose
-  //       // the selections across filters)
-  //       features = this.webmap.queryRenderedFeatures(bbox, { layers: this.props.currentHighlights });
-  //       if (features.length > 0) {
-  //         // we use that layer to figure out what our base layer was, and trigger the map click that way.
-  //         features
-  //           .filter(f => (f.layer.id.startsWith(LYR_HIGHLIGHT_PREFIX) && !f.layer.id.endsWith(LYR_HIGHLIGHT_SUFFIX)))
-  //           .forEach(f => {
-  //             const layerId = getBaseLayerIdFromHighlightLayerId(f.layer.id)
-  //             // console.log(f.layer.id, layerId)
-  //             this.props.makeChoiceOnMapClick({ layerId: layerId, ...f.properties })
-  //           })
-  //       }
-  //     }
-  //   }
 
     makeTooltipOnHover(e, tooltip) {
       if (e === undefined ) {

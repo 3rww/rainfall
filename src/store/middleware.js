@@ -2,6 +2,7 @@ import axios from 'axios';
 import { MD5 } from 'object-hash'
 import { includes, keys } from 'lodash-es'
 import moment from 'moment'
+import * as chroma from 'chroma-js'
 
 import {
   requestRainfallData,
@@ -19,7 +20,8 @@ import {
   buildLayerStyle,
   setLayerStyle,
   setActiveResultItem,
-  switchTab
+  switchTab,
+  applyColorStretch
 } from './actions'
 
 import {
@@ -32,8 +34,10 @@ import {
 import { 
   transformEventsJSON, 
   transformRainfallGaugesToMapboxSourceObject,
-  transformRainfallPixelsToMapboxSourceObject
-} from './utils'
+  transformRainfallPixelsToMapboxSourceObject,
+  transformRainfallResults
+} from './utils/transformers'
+
 
 import {
   MAP_LAYERS,
@@ -42,12 +46,14 @@ import {
   URL_GARRD_GEOJSON,
   URL_GAUGE_GEOJSON,
   CONTEXT_TYPES,
-  REQUEST_TIME_INTERVAL
+  REQUEST_TIME_INTERVAL,
+  BREAKS_005,
+  BREAKS_050,
+  BREAKS_100
 } from './config'
 
 
 import store from './index'
-import { distance } from 'chroma-js';
 
 /**
  * Request JSON from a URL; put response.data into store via props 
@@ -178,8 +184,13 @@ export function initDataFetch(payload) {
     // get all the core datsets and layers and add them to the store (in parallel), then...
     promiseFetchReferenceDatasets(dispatch)
       .then((r) => {
+        
         // add additional map layer styles
         dispatch(addLayers(MAP_LAYERS))
+        
+        // apply style defaults to the default results map layers
+        dispatch(applyColorStretch({breaks: BREAKS_050}))
+
         // calculate event stats
         // TODO: make an API endpoint for a database view that does this calc 
         // to save some time here
@@ -215,37 +226,6 @@ export function initDataFetch(payload) {
       )
 
   }
-}
-
-
-const _calc_rainfall_stats = (r) => {
-
-    // the API results don't come with rainfall total per sensor, 
-    // so we tabulate rainfall values from one for all observation 
-    // intervals for each sensor
-
-    r.data.forEach((s) => {
-
-      let initialValue = 0;
-      let total = (
-        s.data.length > 1 & s.data.length !== 0
-      ) ? (
-        s.data.map(i => i.val).reduce((totalValue, currentValue) => totalValue + currentValue, initialValue)
-      ) : (
-        s.data[0].val
-      )
-      // we assign negative totals as null, so they don't later on skew the symbology.
-      // s.total = (total >= 0) ? total : null
-      s.total = total
-
-    })
-
-    // let totals = r.data.map(row => row.total)
-    // r.maxValue = Math.max(...totals)
-    // r.minValue = Math.min(...totals)
-  
-    return r
-
 }
 
 /**
@@ -308,7 +288,7 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
         } else if (r.status === 'finished') {
 
           // calculate totals and any stats
-          r = _calc_rainfall_stats(r)
+          r = transformRainfallResults(r)
 
           // dispatch the success action, which puts the data in the correct 
           // places, updates the status in the ui, etc.
@@ -324,19 +304,21 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
             // }
             // messages: (r.messages.length > 0) ? (r.messages) : (false)
           }))
-          dispatch(buildLayerStyle({
-            requestId: requestId,
-            contextType: contextType,
-            sensor: sensor
-          }))
+
+
+          // dispatch(buildLayerStyle({
+          //   requestId: requestId,
+          //   contextType: contextType,
+          //   sensor: sensor
+          // }))
           // Update the map layer style for the layers used to represent
           // results. e.g., gauge-results, pixel-results. In the future 
           // there could be others
-          dispatch(setLayerStyle({
-            requestId: requestId,
-            contextType: contextType,
-            sensor: sensor
-          }))
+          // dispatch(setLayerStyle({
+          //   requestId: requestId,
+          //   contextType: contextType,
+          //   sensor: sensor
+          // }))
 
           // Set the result item to active by default. This will 
           // highlight it in the history list for the context and put it 
@@ -370,7 +352,7 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
         }))
       }
     )
-    .finally(() => console.log("_fetchRainfallDataFromApiV2 completed"))
+    // .finally(() => console.log("_fetchRainfallDataFromApiV2 completed"))
 
 }
 
@@ -451,6 +433,10 @@ export function fetchRainfallDataFromApiV2(payload) {
 
 }
 
+/**
+ * 
+ * @param {*} payload 
+ */
 export function pickDownload(payload) {
 
   let { contextType, ...fetchHistoryItem } = payload
@@ -470,14 +456,14 @@ export function pickDownload(payload) {
     }))
     // Update the map layer style for the layers used to represent
     // results. e.g., gauge-results, pixel-results.
-    sensors.forEach(sensor => {
-      dispatch(setLayerStyle({
-        requestId: requestId,
-        contextType: contextType,
-        sensor: sensor,
-        recall: true
-      }))
-    })
+    // sensors.forEach(sensor => {
+    //   dispatch(setLayerStyle({
+    //     requestId: requestId,
+    //     contextType: contextType,
+    //     sensor: sensor,
+    //     recall: true
+    //   }))
+    // })
 
   }
  
@@ -500,17 +486,32 @@ export function pickDownload(payload) {
 
 
 export function switchContext(payload) {
+
+  let contextType = payload
   
   return function(dispatch) {
   
-    dispatch(switchTab(payload))
+    dispatch(switchTab(contextType))
     // select the active item in the context
     let fhi = selectActiveFetchHistoryItem(store.getState())
-    // set the layer style on the map using the active item, if any
-    dispatch(setLayerStyle({
-      requestId: fhi.requestId,
-      contextType: payload,
+
+    let requestId
+    if (fhi === undefined) {
+      requestId = false
+    } else {
+      requestId = fhi.requestId
+    }
+    
+    dispatch(setActiveResultItem({
+      requestId: requestId,
+      contextType: contextType
     }))
+
+    // set the layer style on the map using the active item, if any
+    // dispatch(setLayerStyle({
+    //   requestId: fhi.requestId,
+    //   contextType: payload,
+    // }))
 
   }
 

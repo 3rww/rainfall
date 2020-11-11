@@ -7,6 +7,7 @@ import DownloadModal from './downloadModal'
 import { pickDownload } from '../../store/middleware'
 // import { reFetchRainfallDataFromApiV2 } from '../../store/middleware'
 
+import './downloadItem.scss'
 
 /**
 * Downloads Item Component. 
@@ -24,14 +25,17 @@ class DownloadsItem extends React.Component {
   }
 
   handleClose(e) {
-    // console.log(e)
+    
     this.setState({ show: false });
   }
 
   handleShow(e) {
-    // console.log(e)
+    
     this.setState({ show: true });
-    this.props.dispatchPickDownload()
+    if (!this.props.fetchHistoryItem.isActive) {
+      this.props.dispatchPickDownload()
+    }
+    
   }
 
   // handleDownloadClick() {
@@ -44,6 +48,7 @@ class DownloadsItem extends React.Component {
   render() {
 
     let fetchKwargs = this.props.fetchHistoryItem.fetchKwargs
+    let pKwargs = this.props.fetchHistoryItem.processedKwargs
     let itemId = this.props.fetchHistoryItem.requestId
     let sensorLocations = fetchKwargs.sensorLocations
     let gauges = sensorLocations.gauge
@@ -70,10 +75,10 @@ class DownloadsItem extends React.Component {
         {/* List Gauges used in the request*/}
         {(gauges.length > 0) ? (
           <Row>
-            <Col sm={3}>
-              <p><strong></strong>Gauges:</p>
+            <Col lg={3}>
+              <p className="di-header">Gauges:</p>
             </Col>
-            <Col md={9}>
+            <Col lg={9}>
               <p>{gauges.map(g => g.label).join(", ")}</p>
             </Col>
           </Row>
@@ -84,28 +89,35 @@ class DownloadsItem extends React.Component {
         {/* List Pixels used in the request*/}
         {(pixels.length > 0) ? (
           <Row>
-            <Col md={3}>
-              <p>Pixels:</p>
+            <Col lg={3}>
+              <p className="di-header">Pixels:</p>
             </Col>
-            <Col md={9}>
+            <Col lg={9}>
               <p>{pixels.length} pixels queried</p>
             </Col>
           </Row>
         ) : (
             null
-          )}
+        )}
 
         {/* Rollup method */}
         <Row>
-          <Col md={3}>
-            <p>Interval:</p>
+          <Col lg={3}>
+            <p className="di-header">Aggregation:</p>
           </Col>
-          <Col md={9}>
+          <Col lg={9}>
             <p>{fetchKwargs.rollup}</p>
           </Col>
         </Row>
-        <p></p>
 
+        <Row>
+          <Col lg={3}>
+            <p className="di-header">Date/time range queried:</p>
+          </Col>
+          <Col lg={9}>
+            <p>{pKwargs.start_dt}/{pKwargs.end_dt}</p>
+          </Col>
+        </Row>        
 
         {/* Download Buttons */}
         {
@@ -163,7 +175,10 @@ class DownloadsItem extends React.Component {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  return {}
+  return {
+    ...ownProps,
+
+  }
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {

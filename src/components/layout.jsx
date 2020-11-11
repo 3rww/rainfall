@@ -32,7 +32,7 @@ class Layout extends React.Component {
         </Row>
 
         <Row className="fill no-gutters">
-          <Col sm={5} className="scrolling-column">
+          <Col sm={6} className="scrolling-column">
             <Container className="sidebar">
               {/* <TabContainer
                 defaultActiveKey={CONTEXT_TYPES.legacyRealtime}
@@ -83,7 +83,7 @@ class Layout extends React.Component {
             </Container>
           </Col>
 
-          <Col sm={7} className="map-column">
+          <Col sm={6} className="map-column">
             <ReactMap
               token={this.props.token}
               styleUrl={this.props.styleId}

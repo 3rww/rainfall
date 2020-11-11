@@ -54,8 +54,8 @@ export const initialState = {
         zerofill: true,
         f: 'sensor'
       },
-      history: testFetchHistoryItems
-      // history: []
+      // history: testFetchHistoryItems
+      history: []
     },
     [CONTEXT_TYPES.legacyGarr] : {
       active: {
