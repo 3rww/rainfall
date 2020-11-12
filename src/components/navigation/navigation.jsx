@@ -57,44 +57,43 @@ The NEXRAD radar (located in Moon Township) data is calibrated with the rain gau
 
 Currently, this site offers rainfall data in three buckets:
 
-* Real-time Rainfall data: provisional rainfall data for both gauges and radar pixels
-* Historical Rain Gauge data: QA/QC'd rain gauge data, usually available within 30-60 days.
-* Calibrated Radar Rainfall data: QA/QC'd, gauge-adjusted radar rainfall observations, typically available within 30-60 days.
+* Real-time Rainfall data: provisional rainfall data for rain gauges and radar pixels
+* Historical Rain Gauge data: QA/QC'd rain gauge data, usually available within 30-60 days
+* Calibrated Radar Rainfall data: QA/QC'd, gauge-adjusted radar rainfall observations, typically available within 30-60 days
 
 ### Real-time Rainfall Data
 
-Data from 33 rain gauges is collected and updated every 15 minutes to calibrate live weather radar to provide accurate, quality rainfall information as it is occurring.
+Provisional data from 3RWW's 33 rain gauges is collected and updated every 15 minutes to provide accurate, quality rainfall information as it is occurring. This includes both gauge and radar rainfall data. 
 
-Rain gauge data also is available in this section for the most recent 30-to-60-day period, spanning from the first day of the previous month to the current date in the present month. (Example: If the date is November 15, data can be obtained for as little as one day up to 45 days—October 1-November 15. If it is the last day of the present month—November 30—a full 60 days of data is available).
-
-Fully calibrated rainfall data (older than 30 days with completed QA/QC) for any given month is available through the "Calibrated Radar Rainfall Data" section, generally within 15 days of the end of each month.
-
-Several options for data output are provided on the real-time site via simple links.
-
-* A bar graph and data table (in 15-min. increments) showing rainfall over the last 4 hours for a specified pixel on the map (2,276 pixels are available).
-* An animated map showing the rainfall over the last 2-hour, 4-hour or 6-hour time period.
-* A table recording the raw rainfall data for individual rain gauges over the last 30-60 days.
-* A cumulative color-coded map showing the amount of rainfall occurring over a specified period. Data can be accessed from the first day of the previous month to the current date. Be sure to specify the time period, and select the appropriate rainfall scale (.5 inch, 5 inches or 10 inches.) For particularly long periods of time or heavy rainfall periods, a higher scale will provide a better range of colors in the final map.
-* Rainfall amount collected over the most recent 4-hour period by an individual rain gauge. A bar graph and data table show the actual rainfall collected by the specific gauge in 15-min. increments. 
+Data users are cautioned to consider carefully the provisional nature of the information before using it for decisions. Information concerning the accuracy and appropriate uses of these data or concerning other hydrologic data may be obtained from the 3RWW.
 
 ### Historical Rain Gauge
 
-The data from 33 rain gauges is archived in this section. The data may be retrieved for any combination of the rain gauges during a specified time span. The data may also be displayed in 15-minute increments or compressed to hourly or daily data points. The data may be viewed on the page or downloaded into a comma-separated output format which may be saved and loaded into a spreadsheet or database that accepts comma-separated files.
+The data from 33 rain gauges is archived in this section. The data may be retrieved for any combination of the rain gauges during a specified time span. The data may also be displayed in 15-minute increments or aggregated to hourly or daily data points.
 
 
 ### Calibrated Radar Rainfall
 
-The calibrated radar rainfall section allows the retrieval of data for each of the 2313 pixels mapped by the radar cross-section.
+The calibrated radar rainfall section allows the retrieval of archived gauge-adjusted radar rainfall data for each of the 2313 pixels mapped by the NEXRAD radar cross-section. Calibration is performed by <a href="https://www.vieuxinc.com/" target="_blank">Vieux Associates</a>.
 
 ---
 
 ## Querying Rainfall
 
-Select the start and end date/time, along with the interval. Rainfall data is collected and stored in 15-minute increments, which allows for 15-minute, hourly, and daily intervals as options for the selectable increment. Note that if a daily increment is selected, the start and end selections will begin at midnight and the start and end hour will be ignored.
+Select the start and end date/time, along with the interval and the gauges or basins (for radar pixels). Press "Get Rainfall Data" button to get the data.
 
-Querying results will listed in a panel below. The data output may be viewed and downloaded on the page by selecting the 'View and Download Results' Button 
+Rainfall data is collected and stored in 15-minute increments, which allows for 15-minute, hourly, and daily aggregations to be calculated. Note that if a daily interval is selected, the start and end selections will begin at midnight and the start and end hour will be ignored.
 
-The output for each timestamp contains a gauge or pixel ID, a rainfall amount, and a source code. The amount is the rainfall in inches. The source can be found in the following table:
+Query results will be listed in a panel below on each page and shown on the map. The tabular data output may be viewed and downloaded on the page by selecting the 'View and Download Results' Button. Download formats currently include a CSV tabular format, for use in spreadsheet software. Spatial formats will be included in the future.
+
+The output table for each query result contains:
+
+* a gauge or pixel ID
+* a date/time of the observation (presented as standard ISO 8061 datetime text). For hourly and daily aggregations, the start and end time of the observation is indicated using the standard ISO 8061 datetime range format, with start and end delimited by a "/".
+* a rainfall amount (in inches) 
+* a source code, which indicates where the rainfall measurement came from.
+
+The source code can be found in the following table:
 
 | Source |	Description |
 | --- | --- |
@@ -107,8 +106,14 @@ The output for each timestamp contains a gauge or pixel ID, a rainfall amount, a
 | RTRR | Real-time radar rainfall. Data shown are provisional.|
 | RTRG | Real-time rain gauge data. Data shown are provisional. |
 
-
 Note that the source code only appears for the 15-minute increments because an hourly or daily increment may include many different sources.
+
+---
+
+## 3RWW Data API
+
+The rainfall data is served up from 3RWW's Data API. Currently, a few low-level API functions are documented and accessible through [${process.env.REACT_APP_API_URL_ROOT}](${process.env.REACT_APP_API_URL_ROOT}).
+
           `
         },
         // LegendButton: {
@@ -135,12 +140,12 @@ Note that the source code only appears for the 15-minute increments because an h
         <Navbar bg="primary" variant="dark" expand="md">
 
           <Navbar.Brand className="d-none d-sm-block">
-            <img className="nav-brand-logo" src="/static/assets/3rww_logo_full_inverse_transparent.png" alt="3RWW Logo" />&nbsp;
+            <img className="nav-brand-logo" src={`${ROOT}static/assets/3rww_logo_full_inverse_transparent.png`} alt="3RWW Logo" />&nbsp;
             Rainfall
             {/* <small className="text-muted d-none d-lg-inline">by 3 Rivers Wet Weather</small> */}
           </Navbar.Brand>
           <Navbar.Brand className="d-block d-sm-none" style={{ fontSize: 0.9 + 'rem' }}>
-            <img className="nav-brand-logo-xs" src="/static/assets/3rww_logo_full_inverse_transparent.png" alt="3RWW Logo" />&nbsp;
+            <img className="nav-brand-logo-xs" src={`${ROOT}static/assets/3rww_logo_full_inverse_transparent.png`} alt="3RWW Logo" />&nbsp;
             Rainfall
           </Navbar.Brand>
           {/* <Navbar.Text>
