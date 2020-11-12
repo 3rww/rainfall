@@ -9,7 +9,7 @@
 
 // Seed data --------------------------------------------
 // import RAINFALL_EVENTS from '../data/events.json'
-const ROOT = window.location.href
+export const ROOT = window.location.href
 
 
 // Mapbox constants -------------------------------------
@@ -17,12 +17,10 @@ export const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN
 export const MAPBOX_STYLE_BASEMAP = process.env.REACT_APP_MAPBOX_STYLE_BASEMAP
 
 // Service URLs -----------------------------------------
-// export const URL_GARRD_GEOJSON = "https://services6.arcgis.com/dMKWX9NPCcfmaZl3/arcgis/rest/services/garrd/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&returnExceededLimitFeatures=true&f=pgeojson"
-// export const URL_GAUGE_GEOJSON = "https://services6.arcgis.com/dMKWX9NPCcfmaZl3/arcgis/rest/services/3RWWRG/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&returnExceededLimitFeatures=true&f=pgeojson"
-export const EVENTS_JSON_URL = "/static/data/events.json"
-export const URL_GARRD_GEOJSON = "/static/data/pixels.geojson"
-export const URL_GAUGE_GEOJSON = "/static/data/gauges.geojson"
-export const URL_BASIN_PIXEL_LOOKUP = "/static/data/basin-lookup-pixel.json"
+export const EVENTS_JSON_URL = ROOT + "static/data/events.json"
+export const URL_GARRD_GEOJSON = ROOT + "static/data/pixels.geojson"
+export const URL_GAUGE_GEOJSON = ROOT + "static/data/gauges.geojson"
+export const URL_BASIN_PIXEL_LOOKUP = ROOT + "static/data/basin-lookup-pixel.json"
 
 // Service Parms -----------------------------------------
 // export const REQUEST_TIME_INTERVAL = `${process.env.API_REQUEST_INTERVAL_MS}`

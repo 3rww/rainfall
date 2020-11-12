@@ -9,7 +9,7 @@ import ReactMarkdown from 'react-markdown/with-html'
 
 // import {legend} from '../data/legend'
 
-import { CONTEXT_TYPES } from '../../store/config'
+import { CONTEXT_TYPES, ROOT } from '../../store/config'
 
 import { switchContext } from '../../store/middleware'
 
@@ -36,7 +36,7 @@ class Navigation extends Component {
               </Col>
               <Col>
                 <small>A project by </small>
-                <br></br><img className="brand-logo" src="/static/assets/3rww_logo_full_inverse_transparent_blue.png" placeholder="3 River Wet Weather" alt="3RWW Logo" />
+                <br></br><img className="brand-logo" src={`${ROOT}static/assets/3rww_logo_full_inverse_transparent_blue.png`} placeholder="3 River Wet Weather" alt="3RWW Logo" />
               </Col>
             </Row>
           ),
