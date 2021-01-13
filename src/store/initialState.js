@@ -93,6 +93,10 @@ export const initialState = {
       // month: null
     },    
   },
+  // EVENTS -----------------------------------------------
+  stats: {
+    latest: {}
+  },
   // refData --------------------------------------------------
   // reference data
   refData: {},

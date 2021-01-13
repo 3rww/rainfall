@@ -84,6 +84,23 @@ export const transformEventsJSON = (eventsJson) => {
     .filter(e => e.hours > 0)
 }
 
+export const transformDataApiEventsJSON = (eventsJson) => {
+  return eventsJson
+    .map((e, i) => ({
+      ...e,
+      startDt: e.start_dt,
+      endDt: e.end_dt,
+      hours: e.duration,
+      isFetching: false,
+      selected: false
+    }))
+    .map((e) => {
+      let { start_dt, end_dt, duration, ...event } = e
+      return event
+    })
+    .filter(e => e.hours > 0)
+}
+
 // export const join_tables = (t1, t2, on) => (
 //   _map(t1, (item) => _extend(item, _find(t2, { id: item[on] })))
 // )

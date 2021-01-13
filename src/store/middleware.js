@@ -24,11 +24,14 @@ import {
 import {
   selectFetchKwargs,
   selectFetchHistoryItemById,
-  selectActiveFetchHistoryItem
+  selectActiveFetchHistoryItem,
+  selectLatestlegacyGarrTS,
+  selectLatestlegacyGaugeTS
 } from './selectors'
 
 import { 
-  transformEventsJSON, 
+  // transformEventsJSON, 
+  transformDataApiEventsJSON,
   transformRainfallGaugesToMapboxSourceObject,
   transformRainfallPixelsToMapboxSourceObject,
   transformRainfallResults
@@ -37,7 +40,9 @@ import {
 
 import {
   MAP_LAYERS,
-  EVENTS_JSON_URL,
+  // EVENTS_JSON_URL,
+  EVENTS_API_URL,
+  TIMESTAMPS_API_URL,
   URL_BASIN_PIXEL_LOOKUP,
   URL_GARRD_GEOJSON,
   URL_GAUGE_GEOJSON,
@@ -124,15 +129,36 @@ function promiseFetchReferenceDatasets(dispatch) {
 
   return Promise.all([
     // get the rainfall events json
+    // new Promise((resolve, reject) => {
+    //   let result = dispatch(fetchJSON({
+    //     url: EVENTS_JSON_URL,
+    //     pathArray: ["rainfallEvents", "list"],
+    //     transformer: transformEventsJSON,
+    //     keepACopy: false
+    //   }))
+    //   resolve(result)
+    // }),
+    //get the rainfall events json from the API
     new Promise((resolve, reject) => {
       let result = dispatch(fetchJSON({
-        url: EVENTS_JSON_URL,
+        url: EVENTS_API_URL,
         pathArray: ["rainfallEvents", "list"],
-        transformer: transformEventsJSON,
+        transformer: transformDataApiEventsJSON,
         keepACopy: false
       }))
       resolve(result)
-    }),
+    }),    
+    
+    // get the rainfall events json
+    new Promise((resolve, reject) => {
+      let result = dispatch(fetchJSON({
+        url: TIMESTAMPS_API_URL,
+        pathArray: ["stats", "latest"],
+        transformer: false,
+        keepACopy: false
+      }))
+      resolve(result)
+    }),        
     // get the pixel-basin lookup json
     new Promise((resolve, reject) => {
       let result = dispatch(fetchJSON({
@@ -191,14 +217,12 @@ export function initDataFetch(payload) {
         // calculate event stats
         // TODO: make an API endpoint for a database view that does this calc 
         // to save some time here
-        dispatch(calcEventStats())
+        // dispatch(calcEventStats())
 
       })
       .then(() => {
 
         // set the default date/time range for all the contexts
-
-        let maxDate = store.getState().rainfallEvents.stats.maxDate
 
         dispatch(pickRainfallDateTimeRange({
           contextType: CONTEXT_TYPES.legacyRealtime,
@@ -206,16 +230,20 @@ export function initDataFetch(payload) {
           endDt: moment().toISOString()
         }))
 
+        let maxDateLegacyGauge = selectLatestlegacyGaugeTS(store.getState())
         dispatch(pickRainfallDateTimeRange({
           contextType: CONTEXT_TYPES.legacyGauge,
-          startDt: moment(maxDate).startOf('month').toISOString(),
-          endDt: maxDate
+          // startDt: moment(maxDateLegacyGauge).startOf('month').toISOString(),
+          startDt: moment(maxDateLegacyGauge).subtract(1, 'month').toISOString(),
+          endDt: maxDateLegacyGauge
         }))
 
+        let maxDateLegacyGarr = selectLatestlegacyGarrTS(store.getState())
         dispatch(pickRainfallDateTimeRange({
           contextType: CONTEXT_TYPES.legacyGarr,
-          startDt: moment(maxDate).startOf('month').toISOString(),
-          endDt: maxDate
+          // startDt: moment(maxDateLegacyGarr).startOf('month').toISOString(),
+          startDt: moment(maxDateLegacyGarr).subtract(1, 'month').toISOString(),
+          endDt: maxDateLegacyGarr
         }))
 
       })
@@ -490,7 +518,6 @@ export function switchContext(payload) {
 
     // select the active item in the context (which we just set above)
     let fhi = selectActiveFetchHistoryItem(store.getState())
-    console.log(fhi)
 
     if (fhi === undefined) {
       dispatch(resetLayerSrcs({lyrSrcNames: keys(SENSOR_TYPES)}))

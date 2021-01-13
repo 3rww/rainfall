@@ -216,4 +216,8 @@ export const eventIsSelected = (state) => {
 
 export const selectEventStats = (state) => state.rainfallEvents.stats
 
+export const selectLatestTimestamps = (state) => state.stats.latest
 
+export const selectLatestlegacyGaugeTS = (state) => selectLatestTimestamps(state)['calibrated-gauge']
+
+export const selectLatestlegacyGarrTS = (state) => selectLatestTimestamps(state)['calibrated-radar']

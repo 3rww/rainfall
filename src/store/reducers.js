@@ -322,9 +322,11 @@ export const rootReducer = createReducer(
       if (lyrSrcNames.length > 0) {
         lyrSrcNames.forEach(lyrSrcName => {
           // get the original, clean geojson
-          let cleanGeojson = cloneDeep(state.refData[lyrSrcName].data)
-          // swap it into the version that's in the mapbox style source object
-          selectLyrSrcByName(state, lyrSrcName).data = cleanGeojson
+          if (has(state.refData, lyrSrcName)) {
+            let cleanGeojson = cloneDeep(state.refData[lyrSrcName].data)
+            // swap it into the version that's in the mapbox style source object
+            selectLyrSrcByName(state, lyrSrcName).data = cleanGeojson
+          }
         })
       }
 

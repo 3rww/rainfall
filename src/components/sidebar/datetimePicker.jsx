@@ -18,8 +18,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCalendarAlt, faList } from '@fortawesome/free-solid-svg-icons'
 
 import EventsList from './eventsList';
+import PaginatedEventsList from './paginatedEventsList'
 import { pickRainfallDateTimeRange } from '../../store/actions';
-import {selectEventStats, selectFetchKwargs } from '../../store/selectors'
+import {
+  selectEventStats, 
+  selectFetchKwargs,
+  selectLatestlegacyGaugeTS,
+  selectLatestlegacyGarrTS
+} from '../../store/selectors'
 import { RAINFALL_TYPES, RAINFALL_MIN_DATE } from '../../store/config'
 
 import 'bootstrap-daterangepicker/daterangepicker.css';
@@ -74,6 +80,7 @@ class DateTimePicker extends React.Component {
               contextType={this.props.contextType}
               handleClose={this.handleClose}
             />
+            {/* <PaginatedEventsList/> */}
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={this.handleClose}>
@@ -159,16 +166,23 @@ class DateTimePicker extends React.Component {
 
 function mapStateToProps(state, ownProps) {
   let currentKwargs = selectFetchKwargs(state, ownProps.contextType)
-  let eventStats = selectEventStats(state)
 
   // calculate different available ranges, start, and endtimes, depending on rainfall data type
   let startDt = moment(currentKwargs.startDt)
   let endDt = moment(currentKwargs.endDt)
   let maxDate = false
   let ranges = {}
+  
 
-  if (ownProps.rainfallDataType === RAINFALL_TYPES.historic && eventStats.maxDate !== null) {
-    maxDate = eventStats.maxDate
+  if (ownProps.contextType === "legacyGarr") {
+    maxDate = selectLatestlegacyGarrTS(state)
+  } else if (ownProps.contextType === "legacyGauge") {
+    maxDate = selectLatestlegacyGaugeTS(state)
+  } else {
+    maxDate = moment().toISOString() // right now
+  }
+
+  if (ownProps.rainfallDataType === RAINFALL_TYPES.historic) {
     ranges = {
       "Latest month": [moment(maxDate).startOf('month'), moment(maxDate)],
       "Latest 3 months": [moment(maxDate).subtract(2, 'month').startOf('month'), moment(maxDate)],
@@ -196,15 +210,13 @@ function mapStateToProps(state, ownProps) {
       "Past month": [moment(now).subtract(1, "month").startOf('day'), moment(now)],
       "Past 3 months": [moment(now).subtract(3, "month").startOf('month'), moment(now)],
     }
-    maxDate = moment()
-
   } else {
     maxDate = false
     startDt = false
     endDt = false
     ranges = {}
   }
-
+  
   let p = {
     local: { format: "MM/DD/YYYY hh:mm A" },
     startDt: startDt,
@@ -216,7 +228,7 @@ function mapStateToProps(state, ownProps) {
     ranges: ranges,
     rainfallDataType: ownProps.rainfallDataType,
   }
-  // console.log(ownProps.contextType, ownProps.rainfallDataType, p)
+  
   return p
 }
 

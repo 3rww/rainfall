@@ -14,9 +14,6 @@ import { selectRainfallEvents } from '../../store/selectors'
 import './eventsList.scss'
 
 
-/**
-* Layout Component. Everything on the page under the Nav: Controls and Map.
-*/
 class EventsList extends React.Component {
 
   constructor(props) {
