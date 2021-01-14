@@ -69,7 +69,7 @@ class Layout extends React.Component {
                     title="Historical Rain Gauge"
                   >
                     <h1 className="data-type-header">Historical Rain Gauge Data</h1>
-                    <p>Historic rain gauge data has been through a QA/QC process by ALCOSAN and 3RWW, where data errors caused by the hardware have been addressed.</p>
+                    <p>Historic rain gauge data has been through a QA/QC process with ALCOSAN and 3RWW in which any data errors caused by the gauge hardware have been addressed.</p>
                     <RainfallDownloader 
                       contextType={CONTEXT_TYPES.legacyGauge} 
                       rainfallDataType={RAINFALL_TYPES.historic}
@@ -84,7 +84,7 @@ class Layout extends React.Component {
                     <h1 className="data-type-header">Calibrated Radar Rainfall</h1>
                     <p>Calibrated radar rainfall data is NEXRAD radar rainfall data adjusted using our rain gauge network. Calibration is performed by <a href="https://www.vieuxinc.com/" target="_blank">Vieux Associates</a>.</p>
                     <Alert variant='warning'>
-                      <strong>Please note:</strong> We are currently migrating historic calibrated radar rainfall data to a new database; consequently rainfall data downloaded here will be incomplete.
+                      <strong>Please note:</strong> We are currently migrating historic calibrated radar rainfall data to a new database; consequently you may find that rainfall data downloaded here for dates prior to July 2020 will be incomplete.
                       </Alert>
                     <RainfallDownloader 
                       contextType={CONTEXT_TYPES.legacyGarr} 

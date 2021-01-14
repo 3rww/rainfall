@@ -37,6 +37,7 @@ export default class LegacyRealtimeRainfallPage extends React.Component {
               </OverlayTrigger>
             </small>
           </h1>
+          <p>Real-time rainfall measurements are available from the rain gauge network and NEXRAD radar. This data is updated every 15 minutes.</p>
           {/* <br></br>
           <Card>
             <Card.Header as="h2">Map Provisional Data</Card.Header>
