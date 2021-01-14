@@ -31,8 +31,19 @@ class Layout extends React.Component {
         </Row>
 
         <Row className="fill no-gutters">
-          <Col sm={5} className="scrolling-column">
-            <Container className="sidebar">
+
+        <Col sm={7} className="map-column">
+            <ReactMap
+              token={this.props.token}
+              styleUrl={this.props.styleId}
+              latitude={this.props.latitude}
+              longitude={this.props.longitude}
+              zoom={this.props.zoom}
+            />
+          </Col>
+
+          <Col sm={5} className="sidebar-column">
+            <Container className="sidebar mt-3">
               {/* <TabContainer
                 defaultActiveKey={CONTEXT_TYPES.legacyRealtime}
                 id="rainfall-data-type-tabs"
@@ -86,15 +97,7 @@ class Layout extends React.Component {
             </Container>
           </Col>
 
-          <Col sm={7} className="map-column">
-            <ReactMap
-              token={this.props.token}
-              styleUrl={this.props.styleId}
-              latitude={this.props.latitude}
-              longitude={this.props.longitude}
-              zoom={this.props.zoom}
-            />
-          </Col>
+
         </Row>
       </div>
       // </Container>

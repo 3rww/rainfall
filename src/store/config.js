@@ -257,9 +257,17 @@ export const LAYERS_W_RESULTS = [
   // 'pixel-results-3d',
 ]
 
+export const symbolBinLookup = {
+  'q': 'Quantile',
+  'e': 'Equal Interval',
+  'l': 'Linear',
+}
+
 export const RAINFALL_COLOR_ARRAY = ["#fde725", "#5dc962" ,"#20908d", "#3a528b", "#440154"]
 export const RAINFALL_COLOR_MODE = 'lch'
 export const RAINFALL_BREAK_COUNT = 7
+
+
 
 export const BREAKS_005 = [
   0.01,
@@ -314,3 +322,10 @@ export const BREAKS_100 = [
   9.0,
   10
 ]
+
+
+export const LEGEND_BREAKS = {
+  "breaks_005": BREAKS_005,
+  "breaks_050": BREAKS_050,
+  "breaks_100": BREAKS_100
+}

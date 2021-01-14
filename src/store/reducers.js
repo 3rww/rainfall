@@ -395,6 +395,7 @@ export const rootReducer = createReducer(
       }
     },
     [buildLayerStyle]: (state, action) => {
+      // NOTE: Not in use
 
       let { requestId, contextType, sensor } = action.payload
 
@@ -441,7 +442,7 @@ export const rootReducer = createReducer(
       // save the calc'd style and legend to the fetch history item
       set(fetchHistoryItem, ['styleExp', sensor], symbology.styleExp)
       set(fetchHistoryItem, ['heightExp', sensor], symbology.heightExp)
-      // set(fetchHistoryItem, ['legendContent', sensor], symbology.legendContent)
+      set(fetchHistoryItem, ['legendContent', sensor], symbology.legendContent)
 
       fetchHistoryItem.stats = minmax
 
@@ -523,12 +524,18 @@ export const rootReducer = createReducer(
 
     },
     [applyColorStretch]: (state, action) => {
+
       let { breaks } = action.payload
-      let styleExp = buildRainfallColorStyleExp('total', breaks)
+
+      let {colorExp, legendContent} = buildRainfallColorStyleExp('total', breaks)
+
       LAYERS_W_RESULTS.forEach(lyrId => {
         let lyr = selectLayerById(state, lyrId)
-        lyr.paint[`${lyr.type}-color`] = styleExp
+        lyr.paint[`${lyr.type}-color`] = colorExp
       })
+
+      state.mapLegend.content = legendContent
+
     }
 
   }

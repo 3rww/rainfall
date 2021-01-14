@@ -17,6 +17,7 @@ import { LAYERS_W_MOUSEOVER } from '../../store/config'
 import diffStyles from '../../utilities/styleSpecDiff';
 
 import { Tooltip } from './tooltip'
+import MapLegend from './legend'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
@@ -274,7 +275,12 @@ class ReactMap extends Component {
   render() {
 
     return (
-      <div className="map" id={MAPID}></div>
+      <div className="map-and-legend-container">
+        <div className="map" id={MAPID}></div>
+        <div className="legend-container container-fluid">
+          <MapLegend/>
+        </div>
+    </div>
     );
   }
 

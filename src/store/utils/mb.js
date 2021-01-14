@@ -73,13 +73,22 @@ export const buildRainfallColorStyleExp = (attr, breaks, chromaScaleObj, colors,
       [method],
       ["get", attr]
     ]
+    let legendContent = []
   
     breaks.forEach(brk => {
+      var clr = colorFx(brk).hex('rgb')
+
       colorExp.push(brk)
-      colorExp.push(colorFx(brk).hex('rgb'))
+      colorExp.push(clr)
+
+      legendContent.push([brk, clr])
+
     })
   
-    return colorExp
+    return {
+      colorExp: colorExp,
+      legendContent: legendContent
+    }
   
   }
 

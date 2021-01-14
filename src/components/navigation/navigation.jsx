@@ -30,7 +30,7 @@ class Navigation extends Component {
         AboutButton: {
           title: (
             <Row>
-              <Col sm={9}>
+              <Col lg={9}>
                 <h1>Make It Rain <small><em>beta</em></small></h1>
                 <h2><small>Hyper-local rainfall data for Allegheny County</small></h2>
               </Col>
