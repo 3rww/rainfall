@@ -4,7 +4,7 @@ dependencies:
   '@fortawesome/react-fontawesome': 0.1.11_e91d230af880419f914c1e9d225c6864
   '@mapbox/mapbox-gl-geocoder': 4.6.0_mapbox-gl@1.11.1
   '@reduxjs/toolkit': 1.4.0
-  axios: 0.19.2
+  axios: 0.21.1
   babel-polyfill: 6.26.0
   bootstrap: 4.5.0_jquery@3.5.1
   bootstrap-daterangepicker: 3.1.0
@@ -3127,12 +3127,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-3YDiu347mtVtjpyV3u5kVqQLP242c06zwDOgpeRnybmXlYYsLbtTrUBUm8i8srONt+FWobl5aibnU1030PeeuA==
-  /axios/0.19.2:
+  /axios/0.21.1:
     dependencies:
-      follow-redirects: 1.5.10
+      follow-redirects: 1.12.1
     dev: false
     resolution:
-      integrity: sha512-fjgm5MvRHLhx+osE2xoekY70AhARk3a6hkN+3Io1jc00jtquGvxYlKlsFUhmUET0V5te6CcZI7lcv2Ym61mjHA==
+      integrity: sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA==
   /axobject-query/2.2.0:
     dev: false
     resolution:
@@ -4688,12 +4688,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==
-  /debug/3.1.0:
-    dependencies:
-      ms: 2.0.0
-    dev: false
-    resolution:
-      integrity: sha512-OX8XqP7/1a9cqkxYw2yXss15f26NKWBpDXQd0/uK/KPqdQhxbPa994hnzjcE2VqQpDslf55723cKPUOGSmMY3g==
   /debug/3.2.6:
     dependencies:
       ms: 2.1.2
@@ -5929,14 +5923,6 @@ packages:
       node: '>=4.0'
     resolution:
       integrity: sha512-tmRv0AVuR7ZyouUHLeNSiO6pqulF7dYa3s19c6t+wz9LD69/uSzdMxJ2S91nTI9U3rt/IldxpzMOFejp6f0hjg==
-  /follow-redirects/1.5.10:
-    dependencies:
-      debug: 3.1.0
-    dev: false
-    engines:
-      node: '>=4.0'
-    resolution:
-      integrity: sha512-0V5l4Cizzvqt5D44aTXbFZz+FtyXV1vrDN6qrelxtfYQKW0KO0W2T/hkE8xvGa/540LkZlkaUjO4ailYTFtHVQ==
   /for-in/0.1.8:
     dev: false
     engines:
@@ -13582,7 +13568,7 @@ specifiers:
   '@fortawesome/react-fontawesome': ^0.1.11
   '@mapbox/mapbox-gl-geocoder': ^4.6.0
   '@reduxjs/toolkit': ^1.4.0
-  axios: ^0.19.2
+  axios: ^0.21.1
   babel-polyfill: ^6.26.0
   bootstrap: ^4.5.0
   bootstrap-daterangepicker: ^3.1.0
