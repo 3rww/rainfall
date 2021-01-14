@@ -1,5 +1,25 @@
-.map, .map-container {
-    height: 100% !important;
+.map-and-legend-container {
+    height: 300px;
+}
+
+.map {
+    height: 220px;
+}
+
+.legend-container {
+    height: 80px;
+}
+
+@media (min-width: 576px) { 
+    .map-and-legend-container {
+        height: 100% !important;
+    }    
+    .map {
+        height: 90% !important;
+    }
+    .legend-container {
+        height: 10% !important;
+    }    
 }
 
 .mapboxgl-ctrl-attrib-inner {
@@ -15,3 +35,5 @@
     overflow: auto;
     background: rgba(255, 255, 255, 0.8);
 }
+
+
