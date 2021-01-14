@@ -10,23 +10,34 @@ Because engineers and planners addressing the wet weather issue need this level 
 
 The NEXRAD radar (located in Moon Township) data is calibrated with the rain gauge measurements collected during the same time period and rain event for every square kilometer in Allegheny County. The resulting rainfall data is equivalent in accuracy to having 2,276 rain gauges placed across the County.
 
-## Available Datasets
+## Functionality
 
-Currently, this site offers rainfall data in three buckets:
+Currently, this site offers search, download, and mapping capability for rainfall data in three buckets:
 
-* Real-time Rainfall data: provisional rainfall data for both gauges and radar pixels
-* Historical Rain Gauge data: QA/QC'd rain gauge data, usually available within 30-60 days.
-* Calibrated Radar Rainfall data: QA/QC'd, gauge-adjusted radar rainfall observations, typically available within 30-60 days.
+* **Real-time Rainfall data**: provisional rainfall data for both rain gauges and radar pixels. Real-time gauge data is sourced from [Datawise](https://datawise.software/),and pixels are sourced from [Vieux Associates](https://www.vieuxinc.com/). This data is updated every 15 minutes.
+* **Historical Rain Gauge data**: QA/QC'd rain gauge data, usually available within 30-60 days. QA/QC is performed by [ALCOSAN](https://www.alcosan.org/) and 3RWW.
+* **Calibrated Radar Rainfall data**: QA/QC'd, gauge-adjusted radar rainfall observations, typically available within 30-60 days. Calibration is performed by [Vieux Associates](https://www.vieuxinc.com/).
+
+### Powered By *The 3RWW Data API*
+
+The rainfall data is served up from [3RWW's Data API](https://github.com/3rww/data-api). Currently a few low-level API functions are documented and accessible through https://trwwapi.herokuapp.com/rainfall/.
+
 
 ## Status
 
-This project is a work-in-progress. We're currently looking to replicate the workflows of the original rainfall downloads site. In the future and with feedback, we'll build out new ways to explore and view the rainfall data.
+This project is a work-in-progress. We're currently looking to replicate the workflows of the original rainfall downloads site. In the future and with feedback, we'll build out new ways to explore and view the rainfall data. We'll also provide resources for helping you integrate this data into your workflows and use it in your tools.
 
 ## Some notes on development
 
-(to be completed)
-
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+Use Node NPM, Yarn, or PNPM to install dependencies. While we use PNPM, the commands shown the sections below are the same with any of those tools.
+
+### Clone and Installation
+
+Run `git clone https://github.com/3rww/rainfall.git` to clone this codebase.
+
+Running `pnpm install` will install dependencies.
 
 ### Available Scripts
 
@@ -50,10 +61,15 @@ See the section about [running tests](https://facebook.github.io/create-react-ap
 Builds the app for production to the `build` folder.<br />
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+The build is minified and the filenames include the hashes.<br /> Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+#### `pnpm serve`
+
+Locally serves the **built** site  [http://localhost:3000](http://localhost:3000). 
+
+#### `pnpm deploy`
+
+Runs the `build` script and commits the changes the `gh-pages` branch, and pushes it to GitHub pages.
 
 #### `pnpm eject`
 
