@@ -94,7 +94,11 @@ export const selectAnyActiveFetchHistoryItems = (state) => {
 }
 
 export const selectPickedSensors = (state, contextType, sensorLocationType) => {
-  return state.fetchKwargs[contextType].active.sensorLocations[sensorLocationType]
+  let v = state.fetchKwargs[contextType].active.sensorLocations[sensorLocationType]
+  if (v === undefined) {
+    return []
+  }
+  return v
 }
 
 export const selectAnyActiveFetches = (state) => {

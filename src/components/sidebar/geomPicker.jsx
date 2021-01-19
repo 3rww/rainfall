@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import {
   Row,
   Col,
+  Badge
 } from 'react-bootstrap'
 
 import Select from 'react-select';
@@ -21,6 +22,9 @@ import {
 import {
   pickSensor
 } from '../../store/actions'
+import {
+  pluralize
+} from '../../store/utils/index'
 
 import { CONTEXT_TYPES } from '../../store/config'
 
@@ -67,6 +71,8 @@ class GeodataPicker extends React.Component {
 
   render() {
     // const { selectedGauges, selectedBasin } = this.state;
+    let gaugeCount = this.props.gaugeCount
+    let pixelCount = this.props.pixelCount
     return (
       <div>
         <Row noGutters>
@@ -77,10 +83,10 @@ class GeodataPicker extends React.Component {
 
         {(this.props.context !== CONTEXT_TYPES.legacyGarr) ? (
         <Row noGutters>
-          <Col md={3}>
+          <Col md={2}>
             <small>Rain Gauges</small>
           </Col>
-          <Col md={9}>
+          <Col md={8}>
             <Select
               isMulti
               value={this.props.selectedGauges}
@@ -90,6 +96,16 @@ class GeodataPicker extends React.Component {
               isClearable
             />
           </Col>
+          <Col md={2}>
+            {(gaugeCount > 0) ? (
+              <span className="mx-1 my-1"><Badge pill variant="primary">
+                {`${gaugeCount} ${pluralize(gaugeCount, 'gauge', 'gauges')}`}
+              </Badge>
+              </span>
+            ) : (
+              null
+            )}
+          </Col>
         </Row>
         ):(
           null
@@ -97,10 +113,10 @@ class GeodataPicker extends React.Component {
 
       {(this.props.context !== CONTEXT_TYPES.legacyGauge) ? (
         <Row noGutters>
-          <Col md={3}>
-            <small>Pixels (by Basin)</small>
+          <Col md={2}>
+            <small>Radar Pixels</small>
           </Col>
-          <Col md={9}>
+          <Col md={8}>
             <Select
               value={this.props.selectedBasin}
               onChange={this.handleSelectBasin}
@@ -109,6 +125,16 @@ class GeodataPicker extends React.Component {
               isClearable
             />
           </Col>
+          <Col md={2}>
+          {(pixelCount > 0) ? (
+              <span className="mx-1 my-1"><Badge pill variant="primary">
+                {`${pixelCount} ${pluralize(pixelCount, 'pixel', 'pixels')}`}
+              </Badge>
+              </span>
+            ) : (
+              null
+            )}
+          </Col>          
         </Row>
         ):(
           null
@@ -121,13 +147,19 @@ class GeodataPicker extends React.Component {
 }
 
 function mapStateToProps(state, ownProps) {
+  var selectedPixels = selectPickedSensors(state, ownProps.contextType, 'pixel')
+  var selectedRainGauges = selectPickedSensors(state, ownProps.contextType, 'gauge')
+
   return {
     raingaugeOpts: selectMapStyleSourceDataFeatures(state, 'gauge')
       .map(i => ({ value: i.id, label: `${i.id}: ${i.properties.name}` })),
     basinOpts: selectPixelLookupsBasinsOnly(state)
       .map(i => ({ value: i.value, label: i.value })),
     selectedBasin: selectPickedSensors(state, ownProps.contextType, 'basin'),
-    selectedRaingauges: selectPickedSensors(state, ownProps.contextType, 'raingauge'),
+    selectedRaingauges: selectedPixels,
+    selectedPixels: selectedPixels,
+    pixelCount: selectedPixels.length,
+    gaugeCount: selectedRainGauges.length,
     context: selectContext(state)
   }
 }
