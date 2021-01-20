@@ -30,9 +30,9 @@ class Navigation extends Component {
         AboutButton: {
           title: (
             <Row>
-              <Col lg={9}>
+              <Col lg={8}>
                 <h1>Make It Rain <small><em>beta</em></small></h1>
-                <h2><small>Hyper-local rainfall data for Allegheny County</small></h2>
+                <h2><small>Map and download hyper-local rainfall measurements for Allegheny County</small></h2>
               </Col>
               <Col>
                 <small>A project by </small>
@@ -141,12 +141,12 @@ The rainfall data is served up from 3RWW's Data API. Currently, a few low-level 
 
           <Navbar.Brand className="d-none d-sm-block">
             <img className="nav-brand-logo" src={`${ROOT}static/assets/3rww_logo_full_inverse_transparent.png`} alt="3RWW Logo" />&nbsp;
-            Rainfall
+            Make It Rain <small><em>beta</em></small>
             {/* <small className="text-muted d-none d-lg-inline">by 3 Rivers Wet Weather</small> */}
           </Navbar.Brand>
           <Navbar.Brand className="d-block d-sm-none" style={{ fontSize: 0.9 + 'rem' }}>
             <img className="nav-brand-logo-xs" src={`${ROOT}static/assets/3rww_logo_full_inverse_transparent.png`} alt="3RWW Logo" />&nbsp;
-            Rainfall
+            Make It Rain <small><em>beta</em></small>
           </Navbar.Brand>
           {/* <Navbar.Text>
             &nbsp;&nbsp;
