@@ -92,10 +92,11 @@ export const transformDataApiEventsJSON = (eventsJson) => {
       endDt: e.end_dt,
       hours: e.duration,
       isFetching: false,
-      selected: false
+      selected: false,
+      eventid: e.event_label
     }))
     .map((e) => {
-      let { start_dt, end_dt, duration, ...event } = e
+      let { start_dt, end_dt, event_label, duration, ...event } = e
       return event
     })
     .filter(e => e.hours > 0)

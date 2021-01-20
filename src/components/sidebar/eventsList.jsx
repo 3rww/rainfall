@@ -23,8 +23,8 @@ class EventsList extends React.Component {
     this.handleListClick = this.handleListClick.bind(this);
   }
 
-  handleListClick(eventid) {
-    this.props.dispatchPickRainfallEvent(eventid)
+  handleListClick(e) {
+    this.props.dispatchPickRainfallEvent(e.eventid)
   }
 
   render() {
@@ -46,7 +46,7 @@ class EventsList extends React.Component {
                 return (
                   <ListGroup.Item
                     action
-                    onClick={() => this.handleListClick(e.eventid)}
+                    onClick={() => this.handleListClick(e)}
                     key={i}
                     eventKey={e.eventid}
                     // variant={hasData ? "primary" : ""}
@@ -110,6 +110,7 @@ function mapStateToProps(state) {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     dispatchPickRainfallEvent: eventid => {
+      // console.log({ eventid: eventid, contextType: ownProps.contextType })
       dispatch(pickRainfallEvent({ eventid: eventid, contextType: ownProps.contextType }))
       // ownProps.handleClose()
     }
