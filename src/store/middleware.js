@@ -18,7 +18,9 @@ import {
   pickActiveResultItem,
   switchTab,
   applyColorStretch,
-  resetLayerSrcs
+  resetLayerSrcs,
+  highlightSensor,
+  pickSensor
 } from './actions'
 
 import {
@@ -312,31 +314,67 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
         // if the job finishes:
         } else if (r.status === 'finished') {
 
-          // calculate totals and any stats
-          r = transformRainfallResults(r)
+          try {
 
-          // dispatch the success action, which puts the data in the correct 
-          // places, updates the status in the ui, etc.
-          dispatch(requestRainfallDataSuccess({
-            requestId: requestId,
-            contextType: contextType,
-            results: {[sensor]: r.data},
-            processedKwargs: r.args,
-            status: r.status,
-            // stats: {
-            //   maxValue: r.maxValue,
-            //   minValue: r.minValue
-            // }
-            // messages: (r.messages.length > 0) ? (r.messages) : (false)
-          }))
 
-          // Set the result item to active by default. This will 
-          // highlight it in the history list for the context and put it 
-          // on the map for that context.
-          dispatch(pickActiveResultItem({
-            requestId: requestId,
-            contextType: contextType
-          }))
+            // handle scenarios where the job technically finished but returned
+            // no results
+            if (r.data === null) {
+
+              console.log('No data was returned.')
+              dispatch(requestRainfallDataFail({
+                requestId: requestId,
+                contextType: contextType,
+                results: {[sensor]: false},
+                status: "error",
+                messages: r.messages
+              }))
+
+            } else {
+
+              // calculate totals and any stats
+              r = transformRainfallResults(r)
+
+              // dispatch the success action, which puts the data in the correct 
+              // places, updates the status in the ui, etc.
+              dispatch(requestRainfallDataSuccess({
+                requestId: requestId,
+                contextType: contextType,
+                results: {[sensor]: r.data},
+                processedKwargs: r.args,
+                status: r.status,
+                messages: r.messages
+                // stats: {
+                //   maxValue: r.maxValue,
+                //   minValue: r.minValue
+                // }
+                // messages: (r.messages.length > 0) ? (r.messages) : (false)
+              }))
+
+              // Set the result item to active by default. This will 
+              // highlight it in the history list for the context and put it 
+              // on the map for that context.
+              dispatch(pickActiveResultItem({
+                requestId: requestId,
+                contextType: contextType
+              }))              
+
+            }
+
+
+
+          } catch (e) {
+            // this handles any server-side request errors.
+            console.log('An error occurred processing the result.', e)
+            dispatch(requestRainfallDataFail({
+              requestId: requestId,
+              contextType: contextType,
+              results: {[sensor]: false},
+              status: "error",
+              messages: r.messages
+            }))
+
+          }
 
         } else if (r.status === "does not exist") {
           console.log("Job was cancelled.")
@@ -358,10 +396,20 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
           contextType: contextType,
           results: {[sensor]: false},
           status: "error",
-          messages: []
+          messages: ['An error occurred when trying to fetch the rainfall data.', error]
         }))
       }
     )
+    .catch(error => {
+      console.error('An error occurred.', error)
+      dispatch(requestRainfallDataFail({
+        requestId: requestId,
+        contextType: contextType,
+        results: {[sensor]: false},
+        status: "error",
+        messages: ['An error occurred when trying to fetch the rainfall data.', error]
+      }))      
+    });
     // .finally(() => console.log("_fetchRainfallDataFromApiV2 completed"))
 
 }
@@ -535,6 +583,29 @@ export function switchContext(payload) {
     //   requestId: fhi.requestId,
     //   contextType: payload,
     // }))
+
+  }
+
+}
+
+/******************************************************************************
+ * ACTIONS THAT FIRE MULTIPLE REDUCERS
+ */
+
+/**
+ * Dispatch pickTract and highlightTract when clicking a tract on the map.
+ * Use when the tract's geojson feature is the source of the tract ID.
+ * @param {*} payload 
+ */
+export function pickSensorFromMap(payload) {
+
+  const sensorFeature = { ...payload }
+  console.log(sensorFeature)
+
+  return function (dispatch) {
+
+    // dispatch(pickSensor({ tid: tid }))
+    dispatch(highlightSensor(sensorFeature))
 
   }
 

@@ -49,6 +49,7 @@ export const filterEventByHours = createAction('FILTER_EVENT_BY_HOUR')
 
 // --------------------------------------------------------
 // Rainfall data symbology and interactivity
+export const highlightSensor = createAction('HIGHLIGHT_SENSOR')
 export const applyColorStretch = createAction('APPLY_COLOR_STRETCH')
 export const setLayerStyle = createAction('SET_LAYER_STYLE')
 export const buildLayerStyle = createAction('BUILD_LAYER_STYLE')

@@ -69,7 +69,8 @@ export const HEADER_LABELS = {
 
 // rainfall layers + styles (mapbox style spec)
 
-export const LYR_HIGHLIGHT_PREFIX = 'HOVER'
+export const LYR_HOVER_PREFIX = 'HOVER'
+export const LYR_HIGHLIGHT_PREFIX = 'HIGHLIGHT'
 
 // Default Operational Layers + Styles --------------------
 // These are layer definitions per the Mapbox style-spec, with one exception: the INDEX property. 
@@ -109,7 +110,7 @@ export const MAP_LAYERS = [
   },
   {
     INDEX: 70,
-    'id': `${LYR_HIGHLIGHT_PREFIX}-pixel`,
+    'id': `${LYR_HOVER_PREFIX}-pixel`,
     'type': 'fill',
     'source': 'pixel',
     'layout': {},
@@ -125,7 +126,7 @@ export const MAP_LAYERS = [
   },
   {
     INDEX: 71,
-    "id": `${LYR_HIGHLIGHT_PREFIX}-gauge-halo`,
+    "id": `${LYR_HOVER_PREFIX}-gauge-halo`,
     "type": "circle",
     "source": `gauge`,
     'layout': {},
@@ -143,7 +144,7 @@ export const MAP_LAYERS = [
   },
   {
     INDEX: 72,
-    "id": `${LYR_HIGHLIGHT_PREFIX}-gauge`,
+    "id": `${LYR_HOVER_PREFIX}-gauge`,
     "type": "circle",
     "source": `gauge`,
     "layout": {},
@@ -246,9 +247,9 @@ export const MAP_LAYERS = [
 ]
 
 export const LAYERS_W_MOUSEOVER = [
-  [`${LYR_HIGHLIGHT_PREFIX}-pixel`, 'pixel'],
-  [`${LYR_HIGHLIGHT_PREFIX}-gauge`, 'gauge'],
-  [`${LYR_HIGHLIGHT_PREFIX}-gauge-halo`, 'gauge']
+  [`${LYR_HOVER_PREFIX}-pixel`, 'pixel'],
+  [`${LYR_HOVER_PREFIX}-gauge`, 'gauge'],
+  [`${LYR_HOVER_PREFIX}-gauge-halo`, 'gauge']
 ]
 
 export const LAYERS_W_RESULTS = [

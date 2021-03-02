@@ -1,7 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Row, Col, Button, Card } from 'react-bootstrap';
+import { Row, Col, Button, Card, Alert } from 'react-bootstrap';
 import moment from 'moment'
+import { includes } from 'lodash-es'
 
 import DownloadModal from './downloadModal'
 import { pickDownload } from '../../store/middleware'
@@ -55,6 +56,7 @@ class DownloadsItem extends React.Component {
     let pixels = sensorLocations.pixel
     let hasResults = fhi.results !== false
     let pKwargs = fhi.processedKwargs
+    let failedJob = includes(['deferred', 'failed', "does not exist", 'error'], fhi.status)
 
     // let reGetButton = includes(
     //   ['deferred', 'failed', "does not exist", 'error'], 
@@ -151,7 +153,17 @@ class DownloadsItem extends React.Component {
               </Col>
             </Row>
           ) : (null)
+          
         }
+        {/* Error Alerts */}
+        {
+          failedJob ? (
+            fhi.messages.map((m, i) => <Alert dismissible key={i} variant="danger"><small>{m}</small></Alert> )
+          ) : (
+            null
+          )
+        }
+
         {/* {
           reGetButton ? (
             <Row>

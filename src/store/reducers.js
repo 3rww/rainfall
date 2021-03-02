@@ -38,7 +38,8 @@ import {
   buildLayerStyle,
   setLayerStyle,
   applyColorStretch,
-  resetLayerSrcs
+  resetLayerSrcs,
+  highlightSensor
 } from './actions'
 
 import {
@@ -53,7 +54,8 @@ import {
   selectFetchHistory,
   selectLayersByIds,
   selectLyrSrcByName,
-  selectLayerById
+  selectLayerById,
+  
 } from './selectors'
 
 import {
@@ -192,6 +194,16 @@ export const rootReducer = createReducer(
       }
 
     },
+    [highlightSensor]: (state, action) => {
+      console.log(action.payload)
+      // let { joinAttr } = action.payload
+      // const tracts = state.selections.tracts.length !== 0 ? state.selections.tracts : ["none"]
+      // selectAllHighlightLayers(state).forEach(lyr => {
+      //   let lyrFilter = ['match', ['get', joinAttr], tracts, true, false]
+      //   // console.log(lyr.id, lyrFilter)
+      //   lyr.filter = lyrFilter
+      // })
+    },
     /**
      * pick the interval used for rainfall summation: 15-min, hourly, etc.
      */
@@ -219,7 +231,8 @@ export const rootReducer = createReducer(
           isFetching: 1,
           isActive: false,
           results: false,
-          status: status
+          status: status,
+          messages: messages
         })
       } else {
         currentFetch.isFetching = currentFetch.isFetching + 1
@@ -247,6 +260,8 @@ export const rootReducer = createReducer(
           fetchItem.processedKwargs = processedKwargs
           // save the API status message for good measure
           fetchItem.status = status
+          // save the messages as well
+          fetchItem.messages = messages
 
         })
 
@@ -262,6 +277,7 @@ export const rootReducer = createReducer(
       let fetchItem = selectAnyFetchHistoryItemById(state, requestId)
       fetchItem.isFetching = fetchItem.isFetching - 1
       fetchItem.status = status
+      fetchItem.messages = messages
       // fetchItem.results = {...results, ...fetchItem.results}
     },
     /**
@@ -536,7 +552,8 @@ export const rootReducer = createReducer(
 
       state.mapLegend.content = legendContent
 
-    }
+    },
+
 
   }
 ) 

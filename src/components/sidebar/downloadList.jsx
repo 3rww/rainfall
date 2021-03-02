@@ -25,16 +25,20 @@ class DownloadsList extends React.Component {
 
   render() {
 
+    console.log(this.props)
+
     return (
 
       <ListGroup variant="flush">
 
         {this.props.fetchHistory.slice(0).reverse().map((i, idx) => {
 
+          let failedJob = includes(['deferred', 'failed', "does not exist", 'error'], i.status)
+
           let listColor
           if (i.isActive && i.status === 'finished') {
             listColor = "primary"
-          } else if (includes(['deferred', 'failed', "does not exist", 'error'], i.status)) {
+          } else if (failedJob) {
             listColor = "danger"
           } else {
             listColor = ""
@@ -76,7 +80,7 @@ class DownloadsList extends React.Component {
                     ) : (null)
                   }
               </Row>
-
+              
             </ListGroup.Item>
           )
         })}

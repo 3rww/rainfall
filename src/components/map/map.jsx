@@ -12,7 +12,7 @@ import {
   startThinking,
   stopThinking
 } from '../../store/actions';
-import { initDataFetch } from '../../store/middleware';
+import { initDataFetch, pickSensorFromMap } from '../../store/middleware';
 import { LAYERS_W_MOUSEOVER } from '../../store/config'
 import diffStyles from '../../utilities/styleSpecDiff';
 
@@ -25,6 +25,7 @@ import './map.scss'
 
 let DEBUG = true
 const MAPID = 'map'
+const LAYERS_W_SELECT = LAYERS_W_MOUSEOVER.map(i => i[0])
 
 class ReactMap extends Component {
 
@@ -63,22 +64,44 @@ class ReactMap extends Component {
     }
   }
 
-    makeTooltipOnHover(e, tooltip) {
-      if (e === undefined ) {
-        return
-      }
-      const layersToQuery = ['HOVER-pixel', 'HOVER-gauge']
-      // query tilesets with mouse hover
-      const features = this.webmap.queryRenderedFeatures(e.point, { 
-        layers: layersToQuery
-      });
-      tooltip.setLngLat(e.lngLat);
-      this.webmap.getCanvas().style.cursor = features.length ? 'pointer' : '';
-      this.setTooltip(features);
-      this.setState({
-        features: features
+  makeTooltipOnHover(e, tooltip) {
+    if (e === undefined) {
+      return
+    }
+    const layersToQuery = ['HOVER-pixel', 'HOVER-gauge']
+    // query tilesets with mouse hover
+    const features = this.webmap.queryRenderedFeatures(e.point, {
+      layers: layersToQuery
+    });
+    tooltip.setLngLat(e.lngLat);
+    this.webmap.getCanvas().style.cursor = features.length ? 'pointer' : '';
+    this.setTooltip(features);
+    this.setState({
+      features: features
+    })
+  }
+
+  /**
+   * run queryRenderedFeatures, using currentOverlays in redux store
+   */
+  handleMapClick(e) {
+    // set bbox as 5px reactangle area around clicked point
+    const bbox = [[e.point.x - 1, e.point.y - 1], [e.point.x + 1, e.point.y + 1]];
+
+    /**
+     * query rendered features
+     */
+    let features = this.webmap.queryRenderedFeatures(bbox, { layers: LAYERS_W_SELECT });
+    
+    // filter = ['in', 'id']
+    if (features.length > 0) {
+      features.forEach(f => {
+        console.log(f)
+        this.props.makeChoiceOnMapClick({ layerId: f.layer.id, ...f.properties })
       })
     }
+
+  }  
 
 
   /**
@@ -104,7 +127,7 @@ class ReactMap extends Component {
     this.tooltipContainer = document.createElement('div');
     const tooltip = new mapboxgl.Marker(this.tooltipContainer, {
       offset: [105, 0]
-    }).setLngLat([0,0]).addTo(this.webmap);
+    }).setLngLat([0, 0]).addTo(this.webmap);
 
     this.webmap.on('load', () => {
 
@@ -164,7 +187,9 @@ class ReactMap extends Component {
     });
 
     // ----------------------------------------------
-    // LAYER INTERACTIVITY
+    // BIND LAYER INTERACTIVITY MAP EVENTS TO ACTIONS
+
+    this.webmap.on('click', (e) => this.handleMapClick(e))
 
     let hoveredStateId = {};
 
@@ -278,9 +303,9 @@ class ReactMap extends Component {
       <div className="map-and-legend-container">
         <div className="map" id={MAPID}></div>
         <div className="legend-container container-fluid">
-          <MapLegend/>
+          <MapLegend />
         </div>
-    </div>
+      </div>
     );
   }
 
@@ -307,7 +332,10 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     initFetchData: payload => {
       return dispatch(initDataFetch(payload))
-    }
+    },
+    makeChoiceOnMapClick: payload => {
+      dispatch(pickSensorFromMap(payload))
+    },    
   }
 }
 
