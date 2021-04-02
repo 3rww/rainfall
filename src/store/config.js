@@ -25,8 +25,8 @@ export const URL_GAUGE_GEOJSON = ROOT + "static/data/gauges.geojson"
 export const URL_BASIN_PIXEL_LOOKUP = ROOT + "static/data/basin-lookup-pixel.json"
 
 // Service Parms -----------------------------------------
-// export const REQUEST_TIME_INTERVAL = `${process.env.API_REQUEST_INTERVAL_MS}`
-export const REQUEST_TIME_INTERVAL = 1000
+// export const REQUEST_TIME_INTERVAL = 2000
+export const REQUEST_TIME_INTERVAL = Number(process.env.REACT_APP_API_REQUEST_INTERVAL_MS)
 
 
 // rainfall data constants ----------------------------------
