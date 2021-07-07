@@ -1,6 +1,8 @@
 import React from "react";
-import { Tabs, Tab } from "react-bootstrap";
+import { Tabs, Tab, Row, Col, Image, Card } from "react-bootstrap";
 import ReactMarkdown from "react-markdown/with-html";
+
+import { ROOT } from '../../store/config'
 
 import "./aboutContent.scss";
 
@@ -14,8 +16,6 @@ Neither measurement technique is perfect, but when the two are combined—when r
 Because engineers and planners addressing the wet weather issue need this level of accuracy, 3 Rivers Wet Weather created the calibrated radar rainfall system in 2001. Communities throughout Allegheny County use this data—provided in both real-time and historical formats—to design more cost-effective solutions to reduce or eliminate sewage overflows and improve stormwater management.
 
 The NEXRAD radar (located in Moon Township) data is calibrated with the rain gauge measurements collected during the same time period and rain event for every square kilometer in Allegheny County. The resulting rainfall data is equivalent in accuracy to having 2,276 rain gauges placed across the County.
-
----   
 `;
 const what2 = `
 Currently, this site offers rainfall data in three buckets:
@@ -78,6 +78,14 @@ const how2 = `
 ## 3RWW Data API
 
 The rainfall data is served up from 3RWW's Data **A**pplication **P**rogramming **I**nterface (API). Currently a few functions are documented and available through [${process.env.REACT_APP_API_URL_ROOT}](${process.env.REACT_APP_API_URL_ROOT}).
+
+## Project Roadmap
+
+You can view the project roadmap on [Github](https://github.com/3rww/rainfall/projects/1). 
+
+Encounter a bug or want to make a feature request? Submit an [issue](https://github.com/3rww/rainfall/issues) or email [3rww@civicmapper.com](mailto:3rww@civicmapper.com)
+
+
 `;
 
 export const AboutContent = () => {
@@ -91,6 +99,14 @@ export const AboutContent = () => {
       <Tab eventKey="what1" title="Overview">
         <div className="about-body">
           <ReactMarkdown children={what1} />
+          <Card body className="about-logo-background">
+          <p>This app is made possible with support from:</p>
+          <Row >
+            <Col sm={5}><Image className="about-logo mx-auto" src={`${ROOT}static/assets/vieux-logo-white-300.png`} placeholder="Vieux Associates" alt="Vieux Associates" fluid/></Col>
+            <Col sm={2}><Image className="about-logo mx-auto" src={`${ROOT}static/assets/alcosan-logo.svg`} placeholder="ALCOSAN" alt="ALCOSAN" fluid/></Col>
+            <Col sm={5}><Image className="about-logo mx-auto" src={`${ROOT}static/assets/DataWise.png`} placeholder="DataWise" alt="DataWise" fluid/></Col>
+          </Row>
+          </Card>
         </div>               
       </Tab>
       <Tab eventKey="what2" title="Available Datasets">
@@ -107,12 +123,12 @@ export const AboutContent = () => {
         <div className="about-body">
           <h2>Learn more!</h2>
           <p>Our January 2021 webinar provides an overview of the rainfall system and a how-to for using this site.</p>
-          <div class="embed-responsive embed-responsive-16by9">
-            <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/mwOu2QRx6oU" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>  
+          <div className="embed-responsive embed-responsive-16by9">
+            <iframe className="embed-responsive-item" src="https://www.youtube.com/embed/mwOu2QRx6oU" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>  
           </div> 
         </div>
       </Tab>
-      <Tab eventKey="how2" title="3RWW Data API">
+      <Tab eventKey="how2" title="Under the hood">
         <div className="about-body">
           <ReactMarkdown children={how2} />
         </div>
