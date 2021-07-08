@@ -23,7 +23,7 @@ class IntervalPicker extends React.Component {
           <Form>
             {INTERVAL_OPTIONS.map((opt, i) => (
               <Form.Check
-                defaultChecked={opt == "Total" ? true : false}
+                defaultChecked={opt == "15-minute" ? true : false}
                 inline
                 // custom
                 key={`interval-${opt}-${i}-${this.props.rainfallDataType}`}
