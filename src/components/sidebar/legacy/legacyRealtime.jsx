@@ -30,8 +30,8 @@ export default class LegacyRealtimeRainfallPage extends React.Component {
 
       <Row>
         <Col>
-          <h1 className="data-type-header">Real-time Rainfall</h1>
-          <p>Real-time, provisional rainfall measurements are available from the rain gauge network and NEXRAD radar. This data is updated every 15 minutes.
+          <h1 className="data-type-header">Get Real-time Rainfall Data</h1>
+          <p>Download real-time, provisional rainfall measurements are available from the rain gauge network and NEXRAD radar. This data is updated every 15 minutes.
             <small className="my-3">
               <OverlayTrigger trigger="click" placement="bottom" overlay={popover}>
                 <Button variant="light" size="sm">Provisional Data Disclaimer</Button>

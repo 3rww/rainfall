@@ -33,7 +33,7 @@ class Navigation extends Component {
             <Row>
               <Col lg={8}>
                 <h1>Make It Rain <small><em>beta</em></small></h1>
-                <h2><small>Map and download hyper-local rainfall measurements for Allegheny County</small></h2>
+                <p className="lead">Map and download hyper-local rainfall measurements for Allegheny County</p>
               </Col>
               <Col>
                 <small>A project by </small>
