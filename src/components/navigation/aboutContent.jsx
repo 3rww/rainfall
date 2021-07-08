@@ -38,6 +38,12 @@ The data from 33 rain gauges, which typically is updated to include data points 
 ### Calibrated Radar Rainfall
 
 The calibrated radar rainfall section allows the retrieval of archived gauge-adjusted radar rainfall data for each of the 2313 pixels mapped by the NEXRAD radar cross-section. Calibration is performed by [Vieux Associates](https://www.vieuxinc.com/).
+
+---
+
+# Need something more powerful?
+
+For technical users requiring a more powerful visualization, querying, and data exploration capability, Vieux Associates provides an advanced internal tool at [vip.vieuxinc.com](https://vip.vieuxinc.com/). To request access, please email [aquinn@3rww.org](mailto:aquinn@3rww.org).
 `;
 
 const how1 = `
@@ -102,7 +108,7 @@ export const AboutContent = () => {
       <Tab eventKey="what2" title="Overview">
         <div className="about-body">
           <p className="big-lead my-5">
-            <strong>3RWW Rainfall</strong> provides high-resolution rainfall data downloads from gauges system and NEXRAD radar to support engineers and planners addressing wet weather issues in Allegheny County.
+            <strong>3RWW Rainfall</strong> provides public access to high-resolution rainfall data downloads from gauges system and NEXRAD radar to support engineers and planners addressing wet weather issues in Allegheny County.
           </p>
           <Card body className="about-logo-background mb-5">
             <p>This app is made possible with support from:</p>
