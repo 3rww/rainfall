@@ -35,7 +35,7 @@ export const initialState = {
           basin: [],
           pixel: []
         },
-        rollup: "Total",
+        rollup: "15-minute",
         zerofill: true,
         f: 'sensor'
       },
@@ -50,7 +50,7 @@ export const initialState = {
           basin: [],
           pixel: []
         },
-        rollup: "Total",
+        rollup: "15-minute",
         zerofill: true,
         f: 'sensor'
       },
@@ -66,7 +66,7 @@ export const initialState = {
           basin: [],
           pixel: []
         },
-        rollup: "Total",
+        rollup: "15-minute",
         zerofill: true,
         f: 'sensor'
       },
