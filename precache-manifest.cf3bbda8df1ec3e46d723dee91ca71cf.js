@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "39c13420a110602baf0832deb2e2cd38",
+    "revision": "505dc415802d7b75edfbb0402b5f48c5",
     "url": "/rainfall/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/rainfall/static/css/2.88d3eeac.chunk.css"
   },
   {
-    "revision": "c03ebec5fe7ef4878e00",
+    "revision": "fd3f94ee5ee3540685be",
     "url": "/rainfall/static/css/main.c1579abc.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/rainfall/static/js/2.3cc69d98.chunk.js"
   },
   {
-    "revision": "c03ebec5fe7ef4878e00",
-    "url": "/rainfall/static/js/main.b6161fca.chunk.js"
+    "revision": "fd3f94ee5ee3540685be",
+    "url": "/rainfall/static/js/main.19f0e20d.chunk.js"
   },
   {
     "revision": "2086ca3a0520246a4b20",
