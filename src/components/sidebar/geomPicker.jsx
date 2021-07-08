@@ -87,7 +87,7 @@ class GeodataPicker extends React.Component {
     let pixelCount = this.props.pixelCount
     return (
       <div>
-        <Row noGutters>
+        <Row noGutters className="mb-2">
           <Col>
             <strong>Where</strong>
           </Col>
@@ -97,7 +97,7 @@ class GeodataPicker extends React.Component {
           <Col>
           
             <Tabs defaultActiveKey="sensor" id="geomPickerTypes">
-              <Tab eventKey="sensor" title="Sensor" className="my-5">
+              <Tab eventKey="sensor" title="By Sensor" className="my-4">
 
 
                 {(this.props.context !== CONTEXT_TYPES.legacyGarr) ? (
@@ -172,8 +172,8 @@ class GeodataPicker extends React.Component {
                 )}
 
               </Tab>
-              <Tab eventKey="geography" title="Geography" className="my-5">
-                <p className="small"><em>Coming soon: select gauges and pixels by watershed or municipality</em></p>
+              <Tab eventKey="geography" title="By Geography" className="my-4">
+                <p className="small"><em>Coming soon: select watersheds and/or municipalities to select gauges and pixels</em></p>
               </Tab>
             </Tabs>
         

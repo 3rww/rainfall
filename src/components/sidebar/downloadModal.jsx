@@ -1,12 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Modal, Button, Row, Col } from 'react-bootstrap';
+import { Modal, Button, Row, Col, Tabs, Tab } from 'react-bootstrap';
 import moment from 'moment'
 import { unparse } from 'papaparse'
 import { saveAs } from 'file-saver'
 import { keys } from 'lodash-es'
 
 import { ResultsTable } from './resultsTable'
+
+const TABLE_ROW_LIMIT = 50
 
 /**
 * Modal for Individual Data Downloads
@@ -123,25 +125,35 @@ class DownloadModal extends React.Component {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {/* DOWNLOAD BUTTONS */}
-          <Row>
-            <Col sm={3}>
-              <p>Download as: </p>
-            </Col>
-            <Col sm={3}>
-              <Button block variant="outline-primary" size={'sm'} onClick={this.handleDownloadClick}>
-                CSV
-              </Button>
-              {/* <Button block variant="outline-primary" onClick={this.props.onHide}>
-                GeoJSON
-              </Button> */}
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              <ResultsTable rows={this.props.rows} header={this.props.header}/>
-            </Col>
-          </Row>
+          <Tabs defaultActiveKey="results-table" id="results-types" variant="pills" mountOnEnter={true}>
+            <Tab eventKey="results-table" title="Table" className="my-3">
+              {/* DOWNLOAD BUTTONS */}
+              <Row>
+                <Col sm={3}>
+                  <p>Download as: </p>
+                </Col>
+                <Col sm={3}>
+                  <Button block variant="outline-primary" size={'sm'} onClick={this.handleDownloadClick}>
+                    CSV
+                  </Button>
+                  {/* <Button block variant="outline-primary" onClick={this.props.onHide}>
+                    GeoJSON
+                  </Button> */}
+                </Col>
+              </Row>
+              {/* RESULTS TABLE */}
+              <Row>
+                <Col>
+                  <p className="small"><em>{`${this.props.rows.length} total records, showing ${TABLE_ROW_LIMIT}`}</em></p>
+                  <ResultsTable rows={this.props.rows.slice(0,TABLE_ROW_LIMIT)} header={this.props.header}/>
+                  <p className="small"><em></em></p>
+                </Col>
+              </Row>
+            </Tab>
+            <Tab eventKey="results-graph" title="Graph" className="my-3">
+              <p className="small"><em>Coming soon: results in an interactive graph</em></p>
+            </Tab>
+          </Tabs>          
         </Modal.Body>
         <Modal.Footer>
           <Button variant="outline-secondary" onClick={this.props.onHide}>

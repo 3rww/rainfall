@@ -84,9 +84,9 @@ class Layout extends React.Component {
                   >
                     <h1 className="data-type-header">Calibrated Radar Rainfall</h1>
                     <p>Calibrated radar rainfall data is NEXRAD radar rainfall data adjusted using our rain gauge network. Calibration is performed by <a href="https://www.vieuxinc.com/" target="_blank">Vieux Associates</a>.</p>
-                    <Alert variant='warning'>
+                    {/* <Alert variant='warning'>
                       <strong>Please note:</strong> We are currently migrating historic calibrated radar rainfall data to a new database; consequently you may find that rainfall data downloaded here for dates prior to July 2020 will be incomplete.
-                      </Alert>
+                    </Alert> */}
                     <RainfallDownloader 
                       contextType={CONTEXT_TYPES.legacyGarr} 
                       rainfallDataType={RAINFALL_TYPES.historic}

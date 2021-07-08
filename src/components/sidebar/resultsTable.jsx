@@ -12,6 +12,16 @@ export const ResultsTable = ({ rows, header }) => {
   // return (
   //   <code>{JSON.stringify(results)}</code>
   // )
+  let rs = rows.map((r, ir) => (
+    <tr key={`r${ir}`}>
+    {header.map((h, ih) => (
+      <td key={`d${ir}${ih}`}><small>{r[h]}</small></td>)
+    )}
+    </tr>
+  ))
+  rs.push(<tr key={`r---}`}>{header.map((h, ih) => (
+    <td key={`d---${ih}`}><small>...</small></td>)
+  )}</tr>)
 
   return (
     <Table responsive striped bordered hover size="sm" className="download-table">
@@ -23,13 +33,7 @@ export const ResultsTable = ({ rows, header }) => {
       </tr>
       </thead>
       <tbody>
-      {rows.map((r, ir) => (
-        <tr key={`r${ir}`}>
-        {header.map((h, ih) => (
-          <td key={`d${ir}${ih}`}><small>{r[h]}</small></td>)
-        )}
-        </tr>
-      ))}
+        {rs}
       </tbody> 
     </Table>
   )
