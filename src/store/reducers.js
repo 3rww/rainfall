@@ -55,7 +55,7 @@ import {
   selectLayersByIds,
   selectLyrSrcByName,
   selectLayerById,
-  
+  selectMapStyleSourceDataFeatures
 } from './selectors'
 
 import {
@@ -196,7 +196,30 @@ export const rootReducer = createReducer(
 
     },
     [highlightSensor]: (state, action) => {
-      console.log(action.payload)
+      // console.log(action.payload)
+      const { contextType, sensorLocationType, selectedOptions } = action.payload
+
+      let selectedIds = selectedOptions.map(i => i.value)
+      
+      if (selectedOptions !== null) {
+        selectMapStyleSourceDataFeatures(state, sensorLocationType).forEach((f, i) => {
+          if (includes(selectedIds, f.id )) {
+            f.properties.selected = true
+          } else {
+            f.properties.selected = false
+          }
+        })
+        //   .filter(f => includes(selectedIds, f.id))
+        //   .forEach((f, i) => {
+        //     f.properties.selected = !f.properties.selected
+        // })
+
+      } else {
+        selectMapStyleSourceDataFeatures(state, sensorLocationType).forEach((f, i) => {
+          f.properties.selected = false
+        })
+      }
+
       // let { joinAttr } = action.payload
       // const tracts = state.selections.tracts.length !== 0 ? state.selections.tracts : ["none"]
       // selectAllHighlightLayers(state).forEach(lyr => {

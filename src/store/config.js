@@ -79,6 +79,23 @@ export const LYR_HIGHLIGHT_PREFIX = 'HIGHLIGHT'
 export const MAP_LAYERS = [
   {
     INDEX: 69,
+    'id': `${LYR_HIGHLIGHT_PREFIX}-pixel`,
+    'type': 'fill',
+    'source': 'pixel',
+    'layout': {},
+    'paint': {
+      'fill-color': '#2196f3',
+      // 'fill-color': "#cad2d3",
+      'fill-opacity': [
+        "case",
+        ['boolean', ['get', 'selected'], false],
+        0.4,
+        0
+      ]
+    }
+  },
+  {
+    INDEX: 70,
     'id': `pixel-results`,
     'type': 'fill',
     'source': 'pixel',
@@ -109,41 +126,99 @@ export const MAP_LAYERS = [
     }
   },
   {
-    INDEX: 70,
+    INDEX: 71,
     'id': `${LYR_HOVER_PREFIX}-pixel`,
     'type': 'fill',
     'source': 'pixel',
     'layout': {},
     'paint': {
-      'fill-color': '#2196f3',
+      // 'fill-color': '#2196f3',
+      'fill-color': "#cad2d3",
       'fill-opacity': [
         'case',
         ['boolean', ['feature-state', 'hover'], false],
-        0.25,
+        0.8,
         0
       ]
     }
   },
   {
-    INDEX: 71,
-    "id": `${LYR_HOVER_PREFIX}-gauge-halo`,
+    INDEX: 72,
+    "id": `${LYR_HIGHLIGHT_PREFIX}-gauge`,
     "type": "circle",
     "source": `gauge`,
-    'layout': {},
+    "layout": {},
     "paint": {
-      "circle-radius": 20,
+      "circle-radius": [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        7, 6,
+        18,12
+      ],
       "circle-color": "#2196f3",
-      "circle-blur": 0.8,
+      "circle-stroke-color": "#fff",
+      "circle-stroke-width": 2,
       "circle-opacity": [
         'case',
-        ['boolean', ['feature-state', 'hover'], false],
-        0.8,
+        ['boolean', ['get', 'selected'], false],
+        0.4,
         0
       ],
+      "circle-stroke-opacity": [
+        'case',
+        ['boolean', ['get', 'selected'], false],
+        1,
+        0
+      ]
     }
-  },
+  },  
+  // {
+  //   INDEX: 72,
+  //   "id": `${LYR_HIGHLIGHT_PREFIX}-gauge-halo`,
+  //   "type": "circle",
+  //   "source": `gauge`,
+  //   'layout': {},
+  //   "paint": {
+  //     "circle-radius": [
+  //       'interpolate',
+  //       ['linear'],
+  //       ['zoom'],
+  //       7, 10,
+  //       18, 16
+  //     ],
+  //     "circle-color": "#2196f3",
+  //     // "circle-color": "#cad2d3",
+  //     "circle-blur": 0.5,
+  //     'circle-opacity': [
+  //       "case",
+  //       ['boolean', ['get', 'selected'], false],
+  //       0.4,
+  //       0
+  //     ]
+  //   }
+  // },  
+  // {
+  //   INDEX: 73,
+  //   "id": `${LYR_HOVER_PREFIX}-gauge-halo`,
+  //   "type": "circle",
+  //   "source": `gauge`,
+  //   'layout': {},
+  //   "paint": {
+  //     "circle-radius": 20,
+  //     // "circle-color": "#2196f3",
+  //     "circle-color": "#cad2d3",
+  //     "circle-blur": 0.8,
+  //     "circle-opacity": [
+  //       'case',
+  //       ['boolean', ['feature-state', 'hover'], false],
+  //       0.8,
+  //       0
+  //     ],
+  //   }
+  // },
   {
-    INDEX: 72,
+    INDEX: 73,
     "id": `${LYR_HOVER_PREFIX}-gauge`,
     "type": "circle",
     "source": `gauge`,

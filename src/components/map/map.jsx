@@ -371,6 +371,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       return dispatch(initDataFetch(payload))
     },
     makeChoiceOnMapClick: payload => {
+      // console.log("map:")
       dispatch(pickSensorFromMap({
         contextType: ownProps.activeTab,
         ...payload

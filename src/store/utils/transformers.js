@@ -22,6 +22,7 @@ export const transformRainfallPixelsToMapboxSourceObject = geojson => {
       label: `Virtual Gauge ${f.id.toString()}`,
       data: [],
       total: "",
+      selected: false,
       ...f.properties
     },
     id: f.id,
@@ -50,6 +51,7 @@ export const transformRainfallGaugesToMapboxSourceObject = geojson => {
         label: `Gauge ${f.id.toString()}: ${props.name}`,
         data: [],
         total: "",
+        selected: false,
         dwid: id,
         ...props
       },

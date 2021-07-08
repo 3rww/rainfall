@@ -19,9 +19,12 @@ import {
   selectPickedSensors,
   selectContext
 } from '../../store/selectors'
+// import {
+//   pickSensor
+// } from '../../store/actions'
 import {
-  pickSensor
-} from '../../store/actions'
+  pickSensorFromMap
+} from '../../store/middleware'
 import {
   pluralize
 } from '../../store/utils/index'
@@ -53,7 +56,7 @@ class GeodataPicker extends React.Component {
   handleSelectPixel = selectedPixels => {
     this.props.dispatchPickSensorParam({
       sensorLocationType: "pixel",
-      selectedOptions: selectedPixels
+      selectedOptions: selectedPixels // this is a list
     })
   };
 
@@ -193,7 +196,8 @@ function mapStateToProps(state, ownProps) {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     dispatchPickSensorParam: payload => {
-      dispatch(pickSensor({...payload, contextType: ownProps.contextType}))
+      // console.log("geompicker:")
+      dispatch(pickSensorFromMap({...payload, contextType: ownProps.contextType, inputType: "geomPicker"}))
     }
   }
 }

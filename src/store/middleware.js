@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { MD5 } from 'object-hash'
-import { includes, keys, xorBy } from 'lodash-es'
+import { includes, keys, intersectionBy, xorBy, unionBy, get } from 'lodash-es'
 import moment from 'moment'
 
 import {
@@ -592,9 +592,8 @@ export function switchContext(payload) {
 /**
  * Dispatch pickSensor and highlightSensor when clicking a tract on the map.
  * Use when the sensors's geojson feature is the source of the sensor ID.
- * Handles comparison of payload to state tree so that `pickSensor` is provided
- * with only the list of sensors to show (makes map selection compatible with
- * the way react-select works)
+ * Handles comparison of payload to state tree so that `pickSensor` and 
+ * `highlightSensor` are provided with only the list of sensors to show 
  * @param {*} payload arguments match that of the `pickSensor` reducer
  */
 export function pickSensorFromMap(payload) {
@@ -602,26 +601,43 @@ export function pickSensorFromMap(payload) {
   
   let state = store.getState()
 
-  const { contextType, sensorLocationType, selectedOptions } = payload
+  const { contextType, sensorLocationType, selectedOptions, inputType } = payload
 
   // const sensorFeature = { ...payload }
   // console.log(sensorFeature)
 
   return async function (dispatch) {
 
-    let newOpts = selectedOptions.filter((opt) => opt !== null)
-    let oldOpts = [...selectFetchKwargs(state, contextType).sensorLocations[sensorLocationType]]    
+    let opts = []
 
-    // console.log("------------------")
-    // console.log("existing selection",  oldOpts.map(i => i.label))
-    // console.log("incoming selection", newOpts.map(i => i.label))  
-    
-    // if newOpt in oldOpts, remove it, leave the rest as-is
-    // if newOpt not in oldOpts, add it leave the rest as-is
-    let opts = xorBy(oldOpts, newOpts, 'value')
-    // console.log("new selection", opts.map(i =>i.label))
+    if (selectedOptions !== null || get(selectedOptions, 'length', 0) !== 0) { 
+      let newOpts = selectedOptions.filter((opt) => opt !== null)
+      let oldOpts = [...selectFetchKwargs(state, contextType).sensorLocations[sensorLocationType]]
+  
+      // console.log("------------------")
+      console.log("existing selection",  oldOpts.map(i => i.label))
+      console.log("incoming selection", newOpts.map(i => i.label))  
+      
+      // react-select always send the entire list of selections everytime
+      if (inputType === "geomPicker") {
+        if (newOpts.length < oldOpts.length) {
+          // determine what is left in both
+          opts = intersectionBy(oldOpts, newOpts, 'value')
+        } else {
+          // combine them both
+          opts = unionBy(oldOpts, newOpts, 'value')
+        }
+      // selections from the map only send those picked
+      } else {
+        // if newOpt in oldOpts, remove it, leave the rest as-is
+        // if newOpt not in oldOpts, add it leave the rest as-is        
+        opts = xorBy(oldOpts, newOpts, 'value')  
+      }
+      console.log("new selection", opts.map(i =>i.label))
+    }
 
-    let kwargs = { 
+
+    let kwargs = {
       contextType: contextType,
       sensorLocationType: sensorLocationType,
       selectedOptions: opts
