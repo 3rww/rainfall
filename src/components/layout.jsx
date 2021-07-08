@@ -34,6 +34,7 @@ class Layout extends React.Component {
 
         <Col sm={7} className="map-column">
             <ReactMap
+              activeTab={this.props.tab}
               token={this.props.token}
               styleUrl={this.props.styleId}
               latitude={this.props.latitude}

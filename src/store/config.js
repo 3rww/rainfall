@@ -249,7 +249,7 @@ export const MAP_LAYERS = [
 export const LAYERS_W_MOUSEOVER = [
   [`${LYR_HOVER_PREFIX}-pixel`, 'pixel'],
   [`${LYR_HOVER_PREFIX}-gauge`, 'gauge'],
-  [`${LYR_HOVER_PREFIX}-gauge-halo`, 'gauge']
+  // [`${LYR_HOVER_PREFIX}-gauge-halo`, 'gauge']
 ]
 
 export const LAYERS_W_RESULTS = [

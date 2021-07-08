@@ -239,6 +239,3 @@ export const buildColorStyleExpression = (
   
     return buildColorStyleExpression(customData, customAttr, joinField, chromaScaleStr, breaks, method, minMax)
   }
-  
-
-  

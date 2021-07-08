@@ -168,6 +168,7 @@ export const rootReducer = createReducer(
     },
     /**
      * pick the sensor (the "where")
+     * selectedOptions is the complete list of selected sensors
      */
     [pickSensor]: (state, action) => {
 
@@ -181,7 +182,7 @@ export const rootReducer = createReducer(
       }
 
       // we do some additional work if a basin was picked, finding corresponding pixels.
-      if (sensorLocationType == 'basin') {
+      if (sensorLocationType === 'basin') {
         if (selectedOptions !== null) {
           selectFetchKwargs(state, contextType).sensorLocations[sensorLocationType].forEach((b, i) => {
             let pixelIds = state.refData.basinPixelLookup[b.value]
@@ -401,10 +402,10 @@ export const rootReducer = createReducer(
     [setState]: (state, action) => {
       const { data, path, how } = action.payload
 
-      if (how == "replace") {
+      if (how === "replace") {
         // put the JSON in the store at path using lodash's set function
         set(state, path, data)
-      } else if (how == "append") {
+      } else if (how === "append") {
         let existing = get(state, path)
         // console.log(existing, data)
         set(state, path, [...existing, ...data])

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import Immutable from 'immutable';
 import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
-import { isEmpty } from 'lodash-es';
+import { isEmpty, has, forEach, get } from 'lodash-es';
 
 import {
   setStyle,
@@ -90,18 +90,55 @@ class ReactMap extends Component {
 
     /**
      * query rendered features
+     * This may return multiple features. 
      */
     let features = this.webmap.queryRenderedFeatures(bbox, { layers: LAYERS_W_SELECT });
     
-    // filter = ['in', 'id']
+
+    // group selected features by the value of the `source` property;
+    // {gauge: [value: 5, label: ]}
+    let selectionsBySensorType = {};
+
     if (features.length > 0) {
+
       features.forEach(f => {
-        console.log(f)
-        this.props.makeChoiceOnMapClick({ layerId: f.layer.id, ...f.properties })
+
+        // derive the label and assemble a "rec" which resembles a select
+        // menu option object (i.e., it has a value and a label)
+        // this gets us the right label, but is tied to the data structure 
+        // of the gauges, which has a `name` property
+        let label = get(f, 'properties.name', false)
+        let opt;
+        if (label) {
+          opt = {value: f.id, label: `${f.id}: ${label}`} //, layerId: f.layer.id}
+        } else {
+          opt = {value: f.id, label: `${f.id}`} //, layerId: f.layer.id}
+        }
+
+        // push those to an array within an object by sensor type
+        if (has(selectionsBySensorType, f.source)) {
+          selectionsBySensorType[f.source].push(opt)
+        } else {
+          selectionsBySensorType[f.source] = [opt]
+        }
       })
+
+      // for each sensor type, run the mapDispatchToProps function
+      forEach(selectionsBySensorType, (v, k) => {
+          this.props.makeChoiceOnMapClick({
+            sensorLocationType: k,
+            selectedOptions: v
+          })
+      })
+
+      
+
+      //   // pass the feature layer ID, layer source, and properties as a flat object to the connector
+
+
     }
 
-  }  
+  }
 
 
   /**
@@ -334,7 +371,10 @@ const mapDispatchToProps = (dispatch, ownProps) => {
       return dispatch(initDataFetch(payload))
     },
     makeChoiceOnMapClick: payload => {
-      dispatch(pickSensorFromMap(payload))
+      dispatch(pickSensorFromMap({
+        contextType: ownProps.activeTab,
+        ...payload
+      }))
     },    
   }
 }

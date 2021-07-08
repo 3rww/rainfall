@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { MD5 } from 'object-hash'
-import { includes, keys } from 'lodash-es'
+import { includes, keys, xorBy } from 'lodash-es'
 import moment from 'moment'
 
 import {
@@ -422,6 +422,8 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
  */
 export function fetchRainfallDataFromApiV2(payload) {
 
+  // console.log(payload)
+
   let state = store.getState()
 
   return function (dispatch) {
@@ -451,18 +453,17 @@ export function fetchRainfallDataFromApiV2(payload) {
     // parse the props of selectedEvent to form the body of the API request
     let requestSensors = ['gauge', 'basin']
 
-    // return Promise.all([
-    //   // get the rainfall events json
-    //   new Promise((resolve, reject) => {
-
-    //   })
-    
-    // ])
-
     requestSensors.forEach((s, i) => {
 
+      // then deal with the IDs.
+      // It gets a little weird here: get the correct names used for various 
+      // api params and state tree lookups
+      // [0: api url endpoint and state tree path, 1: api param]      
+
+      let sensor = (s === 'basin') ? ['pixel', 'pixels'] : ['gauge', 'gauges']
+
       // skip if no selections
-      if (kwargs.sensorLocations[s].length === 0) {
+      if (kwargs.sensorLocations[sensor[0]].length === 0) {
         return
       }
 
@@ -473,12 +474,6 @@ export function fetchRainfallDataFromApiV2(payload) {
         rollup: kwargs.rollup,
         f: kwargs.f
       }
-
-      // then deal with the IDs.
-      // It gets a little weird here: get the correct names used for various 
-      // api params and state tree lookups
-      // 0: api url endpoint and state tree path, 1: api param
-      let sensor = (s === 'basin') ? ['pixel', 'pixels'] : ['gauge', 'gauges']
 
       requestParams[sensor[1]] = kwargs.sensorLocations[sensor[0]].map(i => i.value).join(",")
 
@@ -492,6 +487,8 @@ export function fetchRainfallDataFromApiV2(payload) {
 
       let url = `${process.env.REACT_APP_API_URL_ROOT}v2/${sensor[0]}/${rainfallDataType}/`
       let params = requestParams
+
+      // console.log(s, sensor[0], params)
 
       _fetchRainfallDataFromApiV2(dispatch, requestId, sensor[0], contextType, url, params)
 
@@ -593,19 +590,45 @@ export function switchContext(payload) {
  */
 
 /**
- * Dispatch pickTract and highlightTract when clicking a tract on the map.
- * Use when the tract's geojson feature is the source of the tract ID.
- * @param {*} payload 
+ * Dispatch pickSensor and highlightSensor when clicking a tract on the map.
+ * Use when the sensors's geojson feature is the source of the sensor ID.
+ * Handles comparison of payload to state tree so that `pickSensor` is provided
+ * with only the list of sensors to show (makes map selection compatible with
+ * the way react-select works)
+ * @param {*} payload arguments match that of the `pickSensor` reducer
  */
 export function pickSensorFromMap(payload) {
 
-  const sensorFeature = { ...payload }
-  console.log(sensorFeature)
+  
+  let state = store.getState()
 
-  return function (dispatch) {
+  const { contextType, sensorLocationType, selectedOptions } = payload
 
-    // dispatch(pickSensor({ tid: tid }))
-    dispatch(highlightSensor(sensorFeature))
+  // const sensorFeature = { ...payload }
+  // console.log(sensorFeature)
+
+  return async function (dispatch) {
+
+    let newOpts = selectedOptions.filter((opt) => opt !== null)
+    let oldOpts = [...selectFetchKwargs(state, contextType).sensorLocations[sensorLocationType]]    
+
+    // console.log("------------------")
+    // console.log("existing selection",  oldOpts.map(i => i.label))
+    // console.log("incoming selection", newOpts.map(i => i.label))  
+    
+    // if newOpt in oldOpts, remove it, leave the rest as-is
+    // if newOpt not in oldOpts, add it leave the rest as-is
+    let opts = xorBy(oldOpts, newOpts, 'value')
+    // console.log("new selection", opts.map(i =>i.label))
+
+    let kwargs = { 
+      contextType: contextType,
+      sensorLocationType: sensorLocationType,
+      selectedOptions: opts
+    }
+
+    dispatch(pickSensor(kwargs))
+    dispatch(highlightSensor(kwargs))
 
   }
 

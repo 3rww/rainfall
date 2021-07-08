@@ -91,6 +91,7 @@ function mapStateToProps(state, ownProps) {
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     fetchRainfallData: payload => {
+      // console.log(payload)
       dispatch(fetchRainfallDataFromApiV2(payload))
     }
   }

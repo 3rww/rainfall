@@ -50,6 +50,13 @@ class GeodataPicker extends React.Component {
     })
   };
 
+  handleSelectPixel = selectedPixels => {
+    this.props.dispatchPickSensorParam({
+      sensorLocationType: "pixel",
+      selectedOptions: selectedPixels
+    })
+  };
+
   handleSelectBasin = selectedBasin => {
     this.props.dispatchPickSensorParam({
       sensorLocationType: "basin",
@@ -82,6 +89,8 @@ class GeodataPicker extends React.Component {
         </Row>
 
         {(this.props.context !== CONTEXT_TYPES.legacyGarr) ? (
+        
+        // GAUGE SELECTOR
         <Row noGutters>
           <Col md={2}>
             <small>Rain Gauges</small>
@@ -91,7 +100,7 @@ class GeodataPicker extends React.Component {
               isMulti
               value={this.props.selectedGauges}
               onChange={this.handleSelectGauge}
-              options={this.props.raingaugeOpts}
+              options={this.props.gaugeOpts}
               menuPortalTarget={document.body}
               isClearable
             />
@@ -107,23 +116,34 @@ class GeodataPicker extends React.Component {
             )}
           </Col>
         </Row>
+
         ):(
           null
         )}
 
       {(this.props.context !== CONTEXT_TYPES.legacyGauge) ? (
+
+        // BASIN / PIXEL SELECTOR
         <Row noGutters>
           <Col md={2}>
             <small>Radar Pixels</small>
           </Col>
           <Col md={8}>
-            <Select
+            {/* <Select
               value={this.props.selectedBasin}
               onChange={this.handleSelectBasin}
               options={this.props.basinOpts}
               menuPortalTarget={document.body}
               isClearable
-            />
+            /> */}
+            <Select
+              isMulti
+              value={this.props.selectedPixels}
+              onChange={this.handleSelectPixel}
+              options={this.props.pixelOpts}
+              menuPortalTarget={document.body}
+              isClearable
+            />            
           </Col>
           <Col md={2}>
           {(pixelCount > 0) ? (
@@ -148,18 +168,24 @@ class GeodataPicker extends React.Component {
 
 function mapStateToProps(state, ownProps) {
   var selectedPixels = selectPickedSensors(state, ownProps.contextType, 'pixel')
-  var selectedRainGauges = selectPickedSensors(state, ownProps.contextType, 'gauge')
+  var selectedGauges = selectPickedSensors(state, ownProps.contextType, 'gauge')
 
   return {
-    raingaugeOpts: selectMapStyleSourceDataFeatures(state, 'gauge')
+
+    gaugeOpts: selectMapStyleSourceDataFeatures(state, 'gauge')
       .map(i => ({ value: i.id, label: `${i.id}: ${i.properties.name}` })),
     basinOpts: selectPixelLookupsBasinsOnly(state)
       .map(i => ({ value: i.value, label: i.value })),
+    pixelOpts: selectMapStyleSourceDataFeatures(state, 'pixel')
+      .map(i => ({ value: i.id, label: `${i.id}`})),
+
     selectedBasin: selectPickedSensors(state, ownProps.contextType, 'basin'),
-    selectedRaingauges: selectedPixels,
+    selectedGauges: selectedGauges,
     selectedPixels: selectedPixels,
+
     pixelCount: selectedPixels.length,
-    gaugeCount: selectedRainGauges.length,
+    gaugeCount: selectedGauges.length,
+
     context: selectContext(state)
   }
 }
