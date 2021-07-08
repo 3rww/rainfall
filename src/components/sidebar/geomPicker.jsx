@@ -4,7 +4,9 @@ import { connect } from 'react-redux';
 import {
   Row,
   Col,
-  Badge
+  Badge,
+  Tabs,
+  Tab
 } from 'react-bootstrap'
 
 import Select from 'react-select';
@@ -91,79 +93,96 @@ class GeodataPicker extends React.Component {
           </Col>
         </Row>
 
-        {(this.props.context !== CONTEXT_TYPES.legacyGarr) ? (
+        <Row noGutters>
+          <Col>
+          
+            <Tabs defaultActiveKey="sensor" id="geomPickerTypes">
+              <Tab eventKey="sensor" title="Sensor" className="my-5">
+
+
+                {(this.props.context !== CONTEXT_TYPES.legacyGarr) ? (
+                // GAUGE SELECTOR
+                <Row noGutters>
+                  <Col md={2}>
+                    <small>Rain Gauges</small>
+                  </Col>
+                  <Col md={8}>
+                    <Select
+                      isMulti
+                      value={this.props.selectedGauges}
+                      onChange={this.handleSelectGauge}
+                      options={this.props.gaugeOpts}
+                      menuPortalTarget={document.body}
+                      isClearable
+                    />
+                  </Col>
+                  <Col md={2}>
+                    {(gaugeCount > 0) ? (
+                      <span className="mx-1 my-1"><Badge pill variant="primary">
+                        {`${gaugeCount} ${pluralize(gaugeCount, 'gauge', 'gauges')}`}
+                      </Badge>
+                      </span>
+                    ) : (
+                      null
+                    )}
+                  </Col>
+                </Row>
+
+                ):(
+                  null
+                )}
+
+              {(this.props.context !== CONTEXT_TYPES.legacyGauge) ? (
+
+                // BASIN / PIXEL SELECTOR
+                <Row noGutters>
+                  <Col md={2}>
+                    <small>Radar Pixels</small>
+                  </Col>
+                  <Col md={8}>
+                    {/* <Select
+                      value={this.props.selectedBasin}
+                      onChange={this.handleSelectBasin}
+                      options={this.props.basinOpts}
+                      menuPortalTarget={document.body}
+                      isClearable
+                    /> */}
+                    <Select
+                      isMulti
+                      value={this.props.selectedPixels}
+                      onChange={this.handleSelectPixel}
+                      options={this.props.pixelOpts}
+                      menuPortalTarget={document.body}
+                      isClearable
+                    />            
+                  </Col>
+                  <Col md={2}>
+                  {(pixelCount > 0) ? (
+                      <span className="mx-1 my-1"><Badge pill variant="primary">
+                        {`${pixelCount} ${pluralize(pixelCount, 'pixel', 'pixels')}`}
+                      </Badge>
+                      </span>
+                    ) : (
+                      null
+                    )}
+                  </Col>          
+                </Row>
+                ):(
+                  null
+                )}
+
+              </Tab>
+              <Tab eventKey="geography" title="Geography" className="my-5">
+                <p className="small"><em>Coming soon: select gauges and pixels by watershed or municipality</em></p>
+              </Tab>
+            </Tabs>
         
-        // GAUGE SELECTOR
-        <Row noGutters>
-          <Col md={2}>
-            <small>Rain Gauges</small>
-          </Col>
-          <Col md={8}>
-            <Select
-              isMulti
-              value={this.props.selectedGauges}
-              onChange={this.handleSelectGauge}
-              options={this.props.gaugeOpts}
-              menuPortalTarget={document.body}
-              isClearable
-            />
-          </Col>
-          <Col md={2}>
-            {(gaugeCount > 0) ? (
-              <span className="mx-1 my-1"><Badge pill variant="primary">
-                {`${gaugeCount} ${pluralize(gaugeCount, 'gauge', 'gauges')}`}
-              </Badge>
-              </span>
-            ) : (
-              null
-            )}
-          </Col>
+          </Col>      
         </Row>
-
-        ):(
-          null
-        )}
-
-      {(this.props.context !== CONTEXT_TYPES.legacyGauge) ? (
-
-        // BASIN / PIXEL SELECTOR
-        <Row noGutters>
-          <Col md={2}>
-            <small>Radar Pixels</small>
-          </Col>
-          <Col md={8}>
-            {/* <Select
-              value={this.props.selectedBasin}
-              onChange={this.handleSelectBasin}
-              options={this.props.basinOpts}
-              menuPortalTarget={document.body}
-              isClearable
-            /> */}
-            <Select
-              isMulti
-              value={this.props.selectedPixels}
-              onChange={this.handleSelectPixel}
-              options={this.props.pixelOpts}
-              menuPortalTarget={document.body}
-              isClearable
-            />            
-          </Col>
-          <Col md={2}>
-          {(pixelCount > 0) ? (
-              <span className="mx-1 my-1"><Badge pill variant="primary">
-                {`${pixelCount} ${pluralize(pixelCount, 'pixel', 'pixels')}`}
-              </Badge>
-              </span>
-            ) : (
-              null
-            )}
-          </Col>          
-        </Row>
-        ):(
-          null
-        )}
 
       </div>
+
+   
 
     );
   }
