@@ -1,4 +1,4 @@
-import { has, isEmpty, keys, forEach, includes, startsWith } from 'lodash-es'
+import { has, isEmpty, keys, forEach, includes, startsWith, get } from 'lodash-es'
 
 import { LYR_HIGHLIGHT_PREFIX } from './config'
 
@@ -187,6 +187,10 @@ export const selectPixelLookupsBasinsOnly = (state) => {
 //     return []
 //   }
 // }
+
+export const selectSensorGeographyLookup = (state, sensorType, geographyType) => {
+  return get(state.refData.lookups, [sensorType, geographyType], [])
+}
 
 // ----------------------------------------------
 // selecting rainfall events data

@@ -15,6 +15,7 @@ import {
 import { initDataFetch, pickSensorFromMap } from '../../store/middleware';
 import { LAYERS_W_MOUSEOVER } from '../../store/config'
 import diffStyles from '../../utilities/styleSpecDiff';
+import { transformFeatureToOption } from '../../store/utils/transformers'
 
 import { Tooltip } from './tooltip'
 import MapLegend from './legend'
@@ -103,17 +104,7 @@ class ReactMap extends Component {
 
       features.forEach(f => {
 
-        // derive the label and assemble a "rec" which resembles a select
-        // menu option object (i.e., it has a value and a label)
-        // this gets us the right label, but is tied to the data structure 
-        // of the gauges, which has a `name` property
-        let label = get(f, 'properties.name', false)
-        let opt;
-        if (label) {
-          opt = {value: f.id, label: `${f.id}: ${label}`} //, layerId: f.layer.id}
-        } else {
-          opt = {value: f.id, label: `${f.id}`} //, layerId: f.layer.id}
-        }
+        let opt = transformFeatureToOption(f)
 
         // push those to an array within an object by sensor type
         if (has(selectionsBySensorType, f.source)) {

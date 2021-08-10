@@ -22,7 +22,8 @@ export const EVENTS_API_URL = process.env.REACT_APP_API_URL_ROOT + "rainfall-eve
 export const TIMESTAMPS_API_URL = process.env.REACT_APP_API_URL_ROOT + "v2/latest-observations/?format=json"
 export const URL_GARRD_GEOJSON = ROOT + "static/data/pixels.geojson"
 export const URL_GAUGE_GEOJSON = ROOT + "static/data/gauges.geojson"
-export const URL_BASIN_PIXEL_LOOKUP = ROOT + "static/data/basin-lookup-pixel.json"
+// export const URL_BASIN_PIXEL_LOOKUP = ROOT + "static/data/basin-lookup-pixel.json"
+export const URL_GEOGRAPHY_LOOKUP = ROOT + "static/data/geography-lookup.json"
 
 // Service Parms -----------------------------------------
 // export const REQUEST_TIME_INTERVAL = 2000

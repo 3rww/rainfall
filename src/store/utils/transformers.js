@@ -211,3 +211,28 @@ export const transformRainfallResults = (r) => {
   return r
 
 }
+
+/**
+ * from a geojson feature, derive assemble an object which 
+ * resembles a select menu option object (i.e., it has a value and a label)
+ * Note that it assumes the feature has an id and the label can be derived from
+ * a property within the feature's properties object 
+ * @param {*} f a single geojson
+ */
+export const transformFeatureToOption = (f, property) => {
+
+    if (property === undefined)
+      property = 'name'
+
+    let label = get(f, ['properties', property], false)
+    let opt;
+    if (label) {
+      opt = {value: f.id, label: `${f.id}: ${label}`}
+    } else {
+      opt = {value: f.id, label: `${f.id}`}
+    }
+
+    return opt
+}
+
+
