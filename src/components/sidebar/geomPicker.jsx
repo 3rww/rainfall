@@ -191,15 +191,17 @@ class GeodataPicker extends React.Component {
 function mapStateToProps(state, ownProps) {
   var selectedPixels = selectPickedSensors(state, ownProps.contextType, 'pixel')
   var selectedGauges = selectPickedSensors(state, ownProps.contextType, 'gauge')
+  var context = selectContext(state)
 
   return {
 
     gaugeOpts: selectMapStyleSourceDataFeatures(state, 'gauge')
-      .map(i => ({ value: i.id, label: `${i.id}: ${i.properties.name}` })),
+      // .filter(i => i.properties.active === true)
+      .map(i => ({ value: i.properties.id, label: `${i.properties.id}: ${i.properties.name}` })),
     basinOpts: selectPixelLookupsBasinsOnly(state)
       .map(i => ({ value: i.value, label: i.value })),
     pixelOpts: selectMapStyleSourceDataFeatures(state, 'pixel')
-      .map(i => ({ value: i.id, label: `${i.id}`})),
+      .map(i => ({ value: i.properties.id, label: `${i.properties.id}`})),
 
     selectedBasin: selectPickedSensors(state, ownProps.contextType, 'basin'),
     selectedGauges: selectedGauges,
@@ -208,7 +210,7 @@ function mapStateToProps(state, ownProps) {
     pixelCount: selectedPixels.length,
     gaugeCount: selectedGauges.length,
 
-    context: selectContext(state)
+    context: context
   }
 }
 
