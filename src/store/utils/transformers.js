@@ -227,17 +227,22 @@ export const transformRainfallResults = (r) => {
  * a property within the feature's properties object 
  * @param {*} f a single geojson
  */
-export const transformFeatureToOption = (f, property) => {
+export const transformFeatureToOption = (f, featureNamePropertyPath, featureIdPropertyPath) => {
 
-    if (property === undefined)
-      property = 'name'
+    // defaults
+    if (featureIdPropertyPath === undefined) {featureIdPropertyPath = 'properties.id'}
+    if (featureNamePropertyPath === undefined) { featureNamePropertyPath = 'properties.name'}
 
-    let label = get(f, ['properties', property], false)
+    // get values from the feature 
+    let featureId = get(f, featureIdPropertyPath, false)
+    let featureName = get(f, featureNamePropertyPath, false)
+
+    // create the option object
     let opt;
-    if (label) {
-      opt = {value: f.id, label: `${f.id}: ${label}`}
+    if (featureName) {
+      opt = {value: featureId, label: `${f.id}: ${featureName}`}
     } else {
-      opt = {value: f.id, label: `${f.id}`}
+      opt = {value: featureId, label: `${f.id}`}
     }
 
     return opt
