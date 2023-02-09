@@ -18,14 +18,14 @@ export const transformToMapboxSourceObject = geojson => {
 export const transformRainfallPixelsToMapboxSourceObject = geojson => {
   let features = geojson.features.map(f => ({
     properties: {
-      id: f.id.toString(),
-      label: `Virtual Gauge ${f.id.toString()}`,
+      id: f.properties.pixel_id.toString(), // f.id.toString(),
+      label: `Virtual Gauge ${f.properties.pixel_id.toString()}`,// `Virtual Gauge ${f.id.toString()}`,
       data: [],
       total: "",
       selected: false,
       ...f.properties
     },
-    id: f.id,
+    id: f.properties.pixel_id.toString(),
     geometry: f.geometry
   }))
   return {
@@ -39,23 +39,31 @@ export const transformRainfallPixelsToMapboxSourceObject = geojson => {
  * within the Mapbox sources object. Additionally, this takes the geojson
  * feature id and copies it into the properties as a string, and renames the
  * existing 'id' property as dwid (datawise id) so there is no conflict.
+ * 
+ * TODO: this currently filters inactive gauges; in the future we will want to
+ * expose those and style them differently for the purposes of enabling 
+ * download of historic/archived gauge data
+ * 
  * @param {*} geojson 
  */
 export const transformRainfallGaugesToMapboxSourceObject = geojson => {
 
-  let features = geojson.features.map(f => {
+  let features = geojson.features
+    .filter(f => f.properties.active)
+    .map(f => {
     let { id, ...props } = f.properties
     return {
       properties: {
-        id: f.id.toString(),
-        label: `Gauge ${f.id.toString()}: ${props.name}`,
+        id: props.web_id, // f.id.toString(),
+        label: `Gauge ${props.web_id}: ${props.name}`, //`Gauge ${f.id.toString()}: ${props.name}`,
         data: [],
         total: "",
         selected: false,
-        dwid: id,
+        dwid: props.ext_id,
+        active: props.active,
         ...props
       },
-      id: f.id,
+      id: props.web_id,
       geometry: f.geometry
     }
   })

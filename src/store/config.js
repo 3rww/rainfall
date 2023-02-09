@@ -79,6 +79,18 @@ export const LYR_HIGHLIGHT_PREFIX = 'HIGHLIGHT'
 // in the style sheet, so that it renders in the correct order with the basemap elements
 export const MAP_LAYERS = [
   {
+    INDEX: 8,
+    "id": "pixel",
+    "type": "line",
+    "source": "pixel",
+    "layout": {},
+    "paint": {
+      "line-color": "hsl(209, 25%, 55%)",
+      "line-width": 0.5,
+      "line-opacity": 0.2
+    }
+  },
+  {
     INDEX: 69,
     'id': `${LYR_HIGHLIGHT_PREFIX}-pixel`,
     'type': 'fill',
@@ -155,7 +167,7 @@ export const MAP_LAYERS = [
         ['linear'],
         ['zoom'],
         7, 6,
-        18,12
+        18, 12
       ],
       "circle-color": "#2196f3",
       "circle-stroke-color": "#fff",
@@ -173,51 +185,7 @@ export const MAP_LAYERS = [
         0
       ]
     }
-  },  
-  // {
-  //   INDEX: 72,
-  //   "id": `${LYR_HIGHLIGHT_PREFIX}-gauge-halo`,
-  //   "type": "circle",
-  //   "source": `gauge`,
-  //   'layout': {},
-  //   "paint": {
-  //     "circle-radius": [
-  //       'interpolate',
-  //       ['linear'],
-  //       ['zoom'],
-  //       7, 10,
-  //       18, 16
-  //     ],
-  //     "circle-color": "#2196f3",
-  //     // "circle-color": "#cad2d3",
-  //     "circle-blur": 0.5,
-  //     'circle-opacity': [
-  //       "case",
-  //       ['boolean', ['get', 'selected'], false],
-  //       0.4,
-  //       0
-  //     ]
-  //   }
-  // },  
-  // {
-  //   INDEX: 73,
-  //   "id": `${LYR_HOVER_PREFIX}-gauge-halo`,
-  //   "type": "circle",
-  //   "source": `gauge`,
-  //   'layout': {},
-  //   "paint": {
-  //     "circle-radius": 20,
-  //     // "circle-color": "#2196f3",
-  //     "circle-color": "#cad2d3",
-  //     "circle-blur": 0.8,
-  //     "circle-opacity": [
-  //       'case',
-  //       ['boolean', ['feature-state', 'hover'], false],
-  //       0.8,
-  //       0
-  //     ],
-  //   }
-  // },
+  },
   {
     INDEX: 73,
     "id": `${LYR_HOVER_PREFIX}-gauge`,
@@ -251,26 +219,38 @@ export const MAP_LAYERS = [
       ]
     }
   },
-
-  // {
-  //   INDEX: 69,
-  //   'id': `pixel-results-3d`,
-  //   'type': 'fill-extrusion',
-  //   'source': 'pixel',
-  //   'layout': {},
-  //   'paint': {
-  //     'fill-extrusion-base': 0,
-  //     'fill-extrusion-color': '#fff',
-  //     'fill-extrusion-opacity': 0.9, 
-  //     // 'fill-extrusion-translate': [
-  //     //   "match",
-  //     //   ["get", "total"],
-  //     //   "",
-  //     //   [0, -10],
-  //     //   [0, 0]
-  //     // ]
-  //   }
-  // },    
+  {
+    "id": "pixel-points",
+    "type": "circle",
+    "source": "pixel",
+    "layout": { "visibility": "none" },
+    "paint": {
+      "circle-color": "hsl(209, 25%, 55%)",
+      "circle-opacity": 0,
+      "circle-stroke-width": 1,
+      "circle-stroke-color": "hsl(0, 0%, 31%)",
+      "circle-radius": 0
+    }
+  },
+  {
+    "id": "gauges",
+    "type": "circle",
+    "source": "gauge",
+    "paint": {
+      "circle-radius": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        7,
+        3,
+        18,
+        9
+      ],
+      "circle-stroke-color": "hsl(0, 100%, 100%)",
+      "circle-stroke-opacity": 0.5,
+      "circle-color": "#708da9"
+    }
+  },
   {
     // INDEX: 73,
     'id': `gauge-results`,
@@ -288,7 +268,7 @@ export const MAP_LAYERS = [
         14
       ],
       "circle-stroke-color": "#fff",
-      "circle-stroke-width": 2,      
+      "circle-stroke-width": 2,
       'circle-color': [
         "match",
         ["get", "total"],
@@ -317,9 +297,33 @@ export const MAP_LAYERS = [
         "",
         0,
         1
-      ]      
+      ]
     }
   },
+  {
+    "id": "gauges-labels",
+    "type": "symbol",
+    "source": "gauge",
+    "layout": {
+      "text-field": ["to-string", ["get", "name"]],
+      "text-anchor": "top",
+      "text-size": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        8,
+        12,
+        18,
+        18
+      ],
+      "text-offset": [0, 0.75]
+    },
+    "paint": {
+      "text-color": "#708da9",
+      "text-halo-width": 2,
+      "text-halo-color": "hsl(0, 0%, 100%)"
+    }
+  },  
 ]
 
 export const LAYERS_W_MOUSEOVER = [
@@ -340,7 +344,7 @@ export const symbolBinLookup = {
   'l': 'Linear',
 }
 
-export const RAINFALL_COLOR_ARRAY = ["#fde725", "#5dc962" ,"#20908d", "#3a528b", "#440154"]
+export const RAINFALL_COLOR_ARRAY = ["#fde725", "#5dc962", "#20908d", "#3a528b", "#440154"]
 export const RAINFALL_COLOR_MODE = 'lch'
 export const RAINFALL_BREAK_COUNT = 7
 

@@ -18,7 +18,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCalendarAlt, faList } from '@fortawesome/free-solid-svg-icons'
 
 import EventsList from './eventsList';
-import PaginatedEventsList from './paginatedEventsList'
+// import PaginatedEventsList from './paginatedEventsList'
 import { pickRainfallDateTimeRange } from '../../store/actions';
 import {
   selectEventStats, 

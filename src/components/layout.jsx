@@ -70,7 +70,7 @@ class Layout extends React.Component {
                     title="Historical Rain Gauge"
                   >
                     <h1 className="data-type-header">Get Historical Rain Gauge Data</h1>
-                    <p>Download historic rain gauge data, which has been through a QA/QC process with ALCOSAN and 3RWW, durin which any data errors caused by the gauge hardware have been addressed.</p>
+                    <p>Download historic rain gauge data, which has been through a QA/QC process with ALCOSAN and 3RWW, during which any data errors caused by the gauge hardware have been addressed.</p>
                     <RainfallDownloader 
                       contextType={CONTEXT_TYPES.legacyGauge} 
                       rainfallDataType={RAINFALL_TYPES.historic}

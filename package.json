@@ -44,7 +44,7 @@
     "serve": "serve -s build -p 3000",
     "deploy": "gh-pages -d build"
   },
-  "homepage": "http://3rww.github.io/rainfall",
+  "homepage": "http://3rww.github.io/",
   "eslintConfig": {
     "extends": "react-app"
   },

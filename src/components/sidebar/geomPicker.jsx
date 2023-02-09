@@ -216,6 +216,7 @@ class GeodataPicker extends React.Component {
 function mapStateToProps(state, ownProps) {
   var selectedPixels = selectPickedSensors(state, ownProps.contextType, 'pixel')
   var selectedGauges = selectPickedSensors(state, ownProps.contextType, 'gauge')
+  var context = selectContext(state)
 
   return {
 
@@ -229,7 +230,7 @@ function mapStateToProps(state, ownProps) {
     pixelCount: selectedPixels.length,
     gaugeCount: selectedGauges.length,
 
-    context: selectContext(state)
+    context: context
   }
 }
 
