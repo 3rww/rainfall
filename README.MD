@@ -22,7 +22,6 @@ Currently, this site offers search, download, and mapping capability for rainfal
 
 The rainfall data is served up from [3RWW's Data API](https://github.com/3rww/data-api). Currently a few low-level API functions are documented and accessible through https://trwwapi.herokuapp.com/rainfall/.
 
-
 ## Status
 
 This project is a work-in-progress. We're currently looking to replicate the workflows of the original rainfall downloads site. In the future and with feedback, we'll build out new ways to explore and view the rainfall data. We'll also provide resources for helping you integrate this data into your workflows and use it in your tools.
@@ -32,6 +31,8 @@ This project is a work-in-progress. We're currently looking to replicate the wor
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 Use Node NPM, Yarn, or PNPM to install dependencies. While we use PNPM, the commands shown the sections below are the same with any of those tools.
+
+NOTE: dependencies as spec'd are currently only building with Node V16.
 
 ### Clone and Installation
 

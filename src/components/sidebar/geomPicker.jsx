@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { connect } from 'react-redux';
 import {
@@ -17,7 +16,7 @@ import Select from 'react-select';
 
 import {
   selectMapStyleSourceDataFeatures,
-  selectSensorGeographyLookup,
+  selectPixelLookupsBasinsOnly,
   selectPickedSensors,
   selectContext
 } from '../../store/selectors'
@@ -30,9 +29,6 @@ import {
 import {
   pluralize
 } from '../../store/utils/index'
-import {
-  transformFeatureToOption
-} from '../../store/utils/transformers'
 
 import { CONTEXT_TYPES } from '../../store/config'
 
@@ -100,7 +96,6 @@ class GeodataPicker extends React.Component {
           <Col>
           
             <Tabs defaultActiveKey="sensor" id="geomPickerTypes">
-              
               <Tab eventKey="sensor" title="By Sensor" className="my-4">
 
 
@@ -138,12 +133,19 @@ class GeodataPicker extends React.Component {
 
               {(this.props.context !== CONTEXT_TYPES.legacyGauge) ? (
 
-                // PIXEL SELECTOR
+                // BASIN / PIXEL SELECTOR
                 <Row noGutters>
                   <Col md={2}>
                     <small>Radar Pixels</small>
                   </Col>
                   <Col md={8}>
+                    {/* <Select
+                      value={this.props.selectedBasin}
+                      onChange={this.handleSelectBasin}
+                      options={this.props.basinOpts}
+                      menuPortalTarget={document.body}
+                      isClearable
+                    /> */}
                     <Select
                       isMulti
                       value={this.props.selectedPixels}
@@ -169,37 +171,9 @@ class GeodataPicker extends React.Component {
                 )}
 
               </Tab>
-              
               <Tab eventKey="geography" title="By Geography" className="my-4">
-                {/* <p className="small"><em>Coming soon: select watersheds and/or municipalities to select gauges and pixels</em></p> */}
-                {/* BASIN SELECTOR */}
-                <Row noGutters>
-                  <Col md={2}>
-                    <small>Basins</small>
-                  </Col>
-                  <Col md={8}>
-                    <Select
-                      isMulti
-                      value={this.props.selectedBasin}
-                      onChange={this.handleSelectBasin}
-                      options={this.props.basinOpts}
-                      menuPortalTarget={document.body}
-                      isClearable
-                    />
-                  </Col>
-                  <Col md={2}>
-                  {(pixelCount > 0) ? (
-                      <span className="mx-1 my-1"><Badge pill variant="primary">
-                        {`${pixelCount} ${pluralize(pixelCount, 'pixel', 'pixels')}`}
-                      </Badge>
-                      </span>
-                    ) : (
-                      null
-                    )}
-                  </Col>          
-                </Row>
+                <p className="small"><em>Coming soon: select watersheds and/or municipalities to select gauges and pixels</em></p>
               </Tab>
-            
             </Tabs>
         
           </Col>      
@@ -220,9 +194,14 @@ function mapStateToProps(state, ownProps) {
 
   return {
 
-    gaugeOpts: selectMapStyleSourceDataFeatures(state, 'gauge').map(f => transformFeatureToOption(f)),
-    pixelOpts: selectMapStyleSourceDataFeatures(state, 'pixel').map(f => transformFeatureToOption(f)),
-    // basinOpts: selectSensorGeographyLookup(state, 'pixel', 'basin').map(i => ({ value: i.value, label: i.value })),
+    gaugeOpts: selectMapStyleSourceDataFeatures(state, 'gauge')
+      // .filter(i => i.properties.active === true)
+      .map(i => ({ value: i.properties.id, label: `${i.properties.id}: ${i.properties.name}` })),
+    basinOpts: selectPixelLookupsBasinsOnly(state)
+      .map(i => ({ value: i.value, label: i.value })),
+    pixelOpts: selectMapStyleSourceDataFeatures(state, 'pixel')
+      .map(i => ({ value: i.properties.id, label: `${i.properties.id}`})),
+
     selectedBasin: selectPickedSensors(state, ownProps.contextType, 'basin'),
     selectedGauges: selectedGauges,
     selectedPixels: selectedPixels,

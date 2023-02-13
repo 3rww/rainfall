@@ -225,6 +225,8 @@ class ReactMap extends Component {
       let lyrName = lyrRef[0]
       let lyrSrc = lyrRef[1]
 
+      // console.log(lyrName, lyrSrc);
+
       hoveredStateId[lyrName] = null;
       // When the user moves their mouse over the HOVER-* layer, we'll update the
       // feature state for the feature under the mouse.

@@ -1,6 +1,6 @@
 import React from "react";
 import { Tabs, Tab, Row, Col, Image, Card } from "react-bootstrap";
-import ReactMarkdown from "react-markdown/with-html";
+import ReactMarkdown from "react-markdown";
 
 import { ROOT } from "../../store/config";
 

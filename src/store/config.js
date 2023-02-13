@@ -20,9 +20,9 @@ export const MAPBOX_STYLE_BASEMAP = process.env.REACT_APP_MAPBOX_STYLE_BASEMAP
 export const EVENTS_JSON_URL = ROOT + "static/data/events.json"
 export const EVENTS_API_URL = process.env.REACT_APP_API_URL_ROOT + "rainfall-events/?format=json"
 export const TIMESTAMPS_API_URL = process.env.REACT_APP_API_URL_ROOT + "v2/latest-observations/?format=json"
-export const URL_GARRD_GEOJSON = ROOT + "static/data/pixels.geojson"
-export const URL_GAUGE_GEOJSON = ROOT + "static/data/gauges.geojson"
-// export const URL_BASIN_PIXEL_LOOKUP = ROOT + "static/data/basin-lookup-pixel.json"
+export const URL_GARRD_GEOJSON = process.env.REACT_APP_API_URL_ROOT + "pixels/" //ROOT + "static/data/pixels.geojson"
+export const URL_GAUGE_GEOJSON = process.env.REACT_APP_API_URL_ROOT + "gauges/" // ROOT + "static/data/gauges.geojson"
+export const URL_BASIN_PIXEL_LOOKUP = ROOT + "static/data/basin-lookup-pixel.json"
 export const URL_GEOGRAPHY_LOOKUP = ROOT + "static/data/geography-lookup.json"
 
 // Service Parms -----------------------------------------

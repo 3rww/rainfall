@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Navbar, Nav, Button, Modal, Col, Row } from 'react-bootstrap';
-import ReactMarkdown from 'react-markdown/with-html'
+// import ReactMarkdown from 'react-markdown/with-html'
 
 // icons
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
