@@ -169,27 +169,33 @@ export const selectMapStyleSourceDataIDs = (state, name) => {
   return []
 }
 
-export const selectPixelLookupsBasinsOnly = (state) => {
-  if (has(state, ['refData', 'basinPixelLookup'])) {
-    let basins = state.refData.basinPixelLookup
-    return keys(basins)
-      .filter(k => k !== "other")
-      .map(k => ({ value: k, pixels: basins[k] }))
-  } else {
-    return []
-  }
-}
-
-// export const selectPixelsForBasin = (state, basin) => {
-//   if (has(state, ['refData', 'basinPixelLookup'])) {
-//     return state.refData.basinPixelLookup[basin]
+// export const selectPixelLookupsBasinsOnly = (state) => {
+//   if (has(state, ['refData', 'lookups', 'pixel', 'basin'])) {
+//     let basins = state.refData.basinPixelLookup
+//     return keys(basins)
+//       .filter(k => k !== "other")
+//       .map(k => ({ value: k, pixels: basins[k] }))
 //   } else {
 //     return []
 //   }
 // }
 
-export const selectSensorGeographyLookup = (state, sensorType, geographyType) => {
-  return get(state.refData.lookups, [sensorType, geographyType], [])
+export const selectSensorGeographyLookup = (state, lookupPath) => {
+  return get(state.refData.lookups, lookupPath, {})
+}
+
+export const selectGeographyLookupsAsGroupedOptions = (state) => {
+  let geographyTypes = get(state, "refData.lookups", {})
+  return keys(geographyTypes)
+    .map(gt => ({
+      label: gt,
+      options: keys(geographyTypes[gt]).map(g => ({
+        value:`${gt}.${g}`,
+        label:g
+      }))
+    }))
+  
+
 }
 
 // ----------------------------------------------

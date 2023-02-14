@@ -181,19 +181,6 @@ export const rootReducer = createReducer(
         selectFetchKwargs(state, contextType).sensorLocations[sensorLocationType] = []
       }
 
-      // we do some additional work if a basin was picked, finding corresponding pixels.
-      if (sensorLocationType === 'basin') {
-        if (selectedOptions !== null) {
-          selectFetchKwargs(state, contextType).sensorLocations[sensorLocationType].forEach((b, i) => {
-            let pixelIds = state.refData.basinPixelLookup[b.value]
-            console.log(b.value, pixelIds.length)
-            selectFetchKwargs(state, contextType).sensorLocations.pixel = pixelIds.map(i => ({ value: i, label: i }))
-          })
-        } else {
-          selectFetchKwargs(state, contextType).sensorLocations.pixel = []
-        }
-      }
-
     },
     [highlightSensor]: (state, action) => {
       // console.log(action.payload)

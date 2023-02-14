@@ -593,88 +593,6 @@ export function switchContext(payload) {
  */
 
 
-export function pickSensorWithGeography(payload) {
-
-  let state = store.getState()
-
-  const { contextType, sensorLocationType, selectedOptions, inputType } = payload
-
-  return function (dispatch) {
-
-    let pixelIds = new Set()
-    let gaugeIds = new Set()
-
-    // this uses the sensor (basin, watershed, or muni, as 'opt.value') to get a list 
-    // of corresponding pixels and gauges
-    selectedOptions.forEach((opt, i) => {
-      get(selectSensorGeographyLookup(state, 'pixel', sensorLocationType), [opt, 'value'], []).forEach(v => pixelIds.add(v))
-      get(selectSensorGeographyLookup(state, 'gauge', sensorLocationType), [opt, 'value'], []).forEach(v => gaugeIds.add(v))
-    })
-
-    // assemble a list of objects for iteration
-    let sensorSelections = [
-      {sensorIds: pixelIds, sensorLocationType: "pixel", selectedOptions: []},
-      {sensorIds: gaugeIds, sensorLocationType: "gauge", selectedOptions: []}
-    ]
-    
-    // the rest of this is like
-    sensorSelections.forEach(s => {
-
-      let selectedOptions = s.selectedOptions
-      let sensorLocationType = s.sensorLocationType
-
-      // we then need to turn that list of ids into options objects themselves, so we do another lookup
-      selectedOptions = selectMapStyleSourceDataFeatures(state, sensorLocationType)
-        .filter(f => includes(s.sensorIds, f.id))
-        .map(f => transformFeatureToOption(f))
-
-      let opts = []        
-      if (selectedOptions !== null || get(selectedOptions, 'length', 0) !== 0) {
-
-        // TODO: modularize this portion and re-use in pickSensorFromMap
-
-        let newOpts = []
-        let oldOpts = []
-
-        newOpts = selectedOptions.filter((opt) => opt !== null)
-        oldOpts = [...selectFetchKwargs(state, contextType).sensorLocations[sensorLocationType]]
-
-        console.log("------------------")
-        console.log("existing selection",  oldOpts.map(i => i.label))
-        console.log("incoming selection", newOpts.map(i => i.label))  
-        
-        // react-select always send the entire list of selections everytime
-        if (inputType === "geomPicker") {
-          if (newOpts.length < oldOpts.length) {
-            // determine what is left in both
-            opts = intersectionBy(oldOpts, newOpts, 'value')
-          } else {
-            // combine them both
-            opts = unionBy(oldOpts, newOpts, 'value')
-          }
-        // selections from the map only send those clicked/tapped
-        } else {
-          // if newOpt in oldOpts, remove it, leave the rest as-is
-          // if newOpt not in oldOpts, add it leave the rest as-is        
-          opts = xorBy(oldOpts, newOpts, 'value')  
-        }
-        console.log("new selection", opts.map(i =>i.label))
-      }
-
-      let kwargs = {
-        contextType: contextType,
-        sensorLocationType: sensorLocationType,
-        selectedOptions: opts
-      }
-
-      dispatch(pickSensor(kwargs))
-      dispatch(highlightSensor(kwargs))
-    })
-
-  }
-
-}
-
 /**
  * Dispatch pickSensor and highlightSensor when clicking a tract on the map.
  * Use when the sensors's geojson feature is the source of the sensor ID.
@@ -682,10 +600,11 @@ export function pickSensorWithGeography(payload) {
  * `highlightSensor` are provided with only the list of sensors to show 
  * @param {*} payload arguments match that of the `pickSensor` reducer
  */
-export function pickSensorFromMap(payload) {
+export function pickSensorMiddleware(payload, isMappable=true) {
 
-  
   let state = store.getState()
+
+  console.log(payload)
 
   const { contextType, sensorLocationType, selectedOptions, inputType } = payload
 
@@ -704,8 +623,8 @@ export function pickSensorFromMap(payload) {
       oldOpts = [...selectFetchKwargs(state, contextType).sensorLocations[sensorLocationType]]              
 
       // console.log("------------------")
-      console.log("existing selection",  oldOpts.map(i => i.label))
-      console.log("incoming selection", newOpts.map(i => i.label))  
+      console.log("existing selection",  oldOpts) //.map(i => i.label))
+      console.log("incoming selection", newOpts) //.map(i => i.label))  
       
       // react-select always send the entire list of selections everytime
       if (inputType === "geomPicker") {
@@ -722,7 +641,7 @@ export function pickSensorFromMap(payload) {
         // if newOpt not in oldOpts, add it leave the rest as-is        
         opts = xorBy(oldOpts, newOpts, 'value')  
       }
-      console.log("new selection", opts.map(i =>i.label))
+      console.log("new selection", opts)//.map(i =>i.label))
     }
 
 
@@ -733,7 +652,80 @@ export function pickSensorFromMap(payload) {
     }
 
     dispatch(pickSensor(kwargs))
-    dispatch(highlightSensor(kwargs))
+    if (isMappable) { dispatch(highlightSensor(kwargs))}
+
+  }
+
+}
+
+
+/**
+ * similar to pickSensorMiddleware, this function takes a user-selected geography 
+ * and crosswalks it to a list of pixels and gauges. It then fires pickSensor
+ * action to update the selected geography state, and then fires the 
+ * pickSensorMiddleware(pixels) and pickSensorMiddleware(gauges)
+ * @param {*} payload 
+ * @returns 
+ */
+export function pickSensorByGeographyMiddleware(payload) {
+
+  let state = store.getState()
+
+  const { selectedOptions, sensorLocationType, contextType, inputType } = payload
+
+  return async function (dispatch) {
+
+    console.log(payload)
+
+    /**********************************
+     * first: pass the geography selection to pickSensorMiddleware to update UI 
+     * state, but *not* the map (isMappable = false)
+     */    
+    pickSensorMiddleware(payload, false)
+
+      /**********************************
+       * second: crosswalk the selected geographies to pixels and gauges
+       */
+
+    let sensorTypes = ['pixel', 'gauge']
+
+    sensorTypes.forEach(st => {
+
+      // if (selectedOptions !== null || get(selectedOptions, 'length', 0) !== 0) {
+
+      let sIds = new Set() // need to be a string for comparison 
+      if (selectedOptions !== null || get(selectedOptions, 'length', 0) !== 0) {
+        // gets the list of Sensor Ids associated with each selected geography
+        selectedOptions.forEach((opt, i) => {
+          let lkp = selectSensorGeographyLookup(state, opt.value);
+          get(lkp, st, []).forEach(v => sIds.add(v.toString()));
+        })
+      }
+
+      // convert the set to an array
+      let sensorIds = [...sIds]
+
+      // we then need to turn that list of sensor ids into options objects 
+      // themselves, so we do another lookup
+      let selectedFeatures = selectMapStyleSourceDataFeatures(state, st)
+        .filter(f => includes(sensorIds, f.properties.id))
+      // then convert that to an options object
+      let selectedSensorOptions = selectedFeatures
+        .map(f => transformFeatureToOption(f))
+      
+      // dispatch the pickSensor and highlightSensor actions
+      // with assembled arguments:
+      let kwargs = {
+        contextType: contextType,
+        sensorLocationType: st,
+        selectedOptions: selectedSensorOptions,
+        inputType: inputType
+      }
+
+      dispatch(pickSensorMiddleware(kwargs))
+
+
+    })
 
   }
 

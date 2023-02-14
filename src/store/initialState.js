@@ -32,7 +32,7 @@ export const initialState = {
         endDt: null,
         sensorLocations: {
           gauge: [],
-          basin: [],
+          geographies: [],
           pixel: []
         },
         rollup: "15-minute",
@@ -47,7 +47,7 @@ export const initialState = {
         endDt: null,
         sensorLocations: {
           gauge: [],
-          basin: [],
+          geographies: [],
           pixel: []
         },
         rollup: "15-minute",
@@ -63,7 +63,7 @@ export const initialState = {
         endDt: null,
         sensorLocations: {
           gauge: [],
-          basin: [],
+          geographies: [],
           pixel: []
         },
         rollup: "15-minute",

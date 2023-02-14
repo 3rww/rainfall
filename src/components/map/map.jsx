@@ -12,7 +12,7 @@ import {
   startThinking,
   stopThinking
 } from '../../store/actions';
-import { initDataFetch, pickSensorFromMap } from '../../store/middleware';
+import { initDataFetch, pickSensorMiddleware } from '../../store/middleware';
 import { LAYERS_W_MOUSEOVER } from '../../store/config'
 import diffStyles from '../../utilities/styleSpecDiff';
 import { transformFeatureToOption } from '../../store/utils/transformers'
@@ -365,7 +365,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     makeChoiceOnMapClick: payload => {
       // console.log("map:")
-      dispatch(pickSensorFromMap({
+      dispatch(pickSensorMiddleware({
         contextType: ownProps.activeTab,
         ...payload
       }))
