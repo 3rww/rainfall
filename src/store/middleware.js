@@ -604,7 +604,7 @@ export function pickSensorMiddleware(payload, isMappable=true) {
 
   let state = store.getState()
 
-  console.log(payload)
+  // console.log(payload)
 
   const { contextType, sensorLocationType, selectedOptions, inputType } = payload
 
@@ -623,8 +623,8 @@ export function pickSensorMiddleware(payload, isMappable=true) {
       oldOpts = [...selectFetchKwargs(state, contextType).sensorLocations[sensorLocationType]]              
 
       // console.log("------------------")
-      console.log("existing selection",  oldOpts) //.map(i => i.label))
-      console.log("incoming selection", newOpts) //.map(i => i.label))  
+      console.log(sensorLocationType, "existing selection",  oldOpts.map(i => i.label))
+      console.log(sensorLocationType, "incoming selection", newOpts.map(i => i.label))  
       
       // react-select always send the entire list of selections everytime
       if (inputType === "geomPicker") {
@@ -641,7 +641,7 @@ export function pickSensorMiddleware(payload, isMappable=true) {
         // if newOpt not in oldOpts, add it leave the rest as-is        
         opts = xorBy(oldOpts, newOpts, 'value')  
       }
-      console.log("new selection", opts)//.map(i =>i.label))
+      console.log(sensorLocationType, "new selection", opts.map(i =>i.label))
     }
 
 
@@ -675,7 +675,7 @@ export function pickSensorByGeographyMiddleware(payload) {
 
   return async function (dispatch) {
 
-    console.log(payload)
+    // console.log(payload)
 
     /**********************************
      * first: pass the geography selection to pickSensorMiddleware to update UI 
