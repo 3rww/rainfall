@@ -22,11 +22,11 @@ class MapLegend extends React.Component {
 
 
     <Row className="my-2">
-        <Col sm={2}>
+      <Col sm={2}>
           <Form>
-            <Form.Check custom size="sm" value="breaks_005" label="0.5" name="legendRadios" type="radio" id="legend-radio-1" onChange={this.handleSelectLegend}/>
-            <Form.Check defaultChecked custom size="sm" value="breaks_050" label="5" name="legendRadios" type="radio" id="legend-radio-2" onChange={this.handleSelectLegend}/>
-            <Form.Check custom size="sm" value="breaks_100" label="10" name="legendRadios" type="radio" id="legend-radio-3" onChange={this.handleSelectLegend}/>
+            <Form.Check custom size="sm" value="breaks_005" label="0.5 in." name="legendRadios" type="radio" id="legend-radio-1" onChange={this.handleSelectLegend}/>
+            <Form.Check defaultChecked custom size="sm" value="breaks_050" label="5 in." name="legendRadios" type="radio" id="legend-radio-2" onChange={this.handleSelectLegend}/>
+            <Form.Check custom size="sm" value="breaks_100" label="10 in." name="legendRadios" type="radio" id="legend-radio-3" onChange={this.handleSelectLegend}/>
           </Form>
       </Col>
       <Col sm={10}>
@@ -50,6 +50,7 @@ class MapLegend extends React.Component {
             </tr>
           </tbody>
         </Table>
+        <span class="form-check-label">Total Rainfall</span>
       </Col>
 
     </Row>
