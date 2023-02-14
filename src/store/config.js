@@ -91,8 +91,8 @@ export const MAP_LAYERS = [
     }
   },
   {
-    INDEX: 69,
-    'id': `${LYR_HIGHLIGHT_PREFIX}-pixel`,
+    INDEX: 68,
+    'id': `${LYR_HIGHLIGHT_PREFIX}-pixel-fill`,
     'type': 'fill',
     'source': 'pixel',
     'layout': {},
@@ -102,13 +102,30 @@ export const MAP_LAYERS = [
       'fill-opacity': [
         "case",
         ['boolean', ['get', 'selected'], false],
-        0.4,
+        0.2,
         0
       ]
     }
   },
   {
     INDEX: 70,
+    'id': `${LYR_HIGHLIGHT_PREFIX}-pixel`,
+    'type': 'line',
+    'source': 'pixel',
+    'layout': {},
+    'paint': {
+      'line-color': '#2196f3',
+      'line-width': 1,
+      'line-opacity': [
+        "case",
+        ['boolean', ['get', 'selected'], false],
+        1,
+        0
+      ]
+    }
+  },
+  {
+    INDEX: 69,
     'id': `pixel-results`,
     'type': 'fill',
     'source': 'pixel',
