@@ -52,8 +52,11 @@ const how1 = `
 Querying the rainfall data requires selecting the "when" and the "where".
 
 * First, select the start and end date/time. The available calendar selector provides pre-defined time ranges to help select time periods of interest. For historic gauge and calibrated radar rainfall data, a list of documented rainfall events provides another shortcut to selected date/time ranges.
-* Next, select the gauges or radar pixels. In the future, the app will support selecting a geography (watershed, municipality, or planning basin), which will in turn select all coincident gauges pixels for you.
-* Then, optionally select. the time interval to aggregate the results on: 15-minute (default), hourly, daily, or sum total. Rainfall data is collected and stored in 15-minute increments, which allows for 15-minute, hourly, and daily aggregations to be calculated. Note that if a daily interval is selected, the start and end selections will begin at midnight and the start and end hour will be ignored.
+* Next, select the gauges or radar pixels. You can do this by 
+  * clicking on the map;
+  * under "Where" in the "By Sensor" tab: selecting or typing (If you know the name or ID of the sensor) in the dropdown menus.
+  * under "Where" in the "By Geography" tab: selecting an ALCOSAN Planning Basin, Municipality, or Watershed, which will in turn select all coincident pixels for you
+* Then, optionally select the time interval to aggregate the results on: 15-minute (default), hourly, daily, or sum total. Rainfall data is collected and stored in 15-minute increments, which allows for 15-minute, hourly, and daily aggregations to be calculated. Note that if a daily interval is selected, the start and end selections will begin at midnight and the start and end hour will be ignored.
 * Finally, Press "Get Rainfall Data" button to get the data.
 
 Query results will be listed in a panel below on each page and shown on the map. The tabular data output may be viewed and downloaded on the page by selecting the 'View and Download Results' Button. Download formats currently include a CSV tabular format, for use in spreadsheet software. Spatial formats will be included in the future.
@@ -155,9 +158,9 @@ export const AboutContent = () => {
           <ReactMarkdown children={how1} />
         </div>
       </Tab>
-      <Tab eventKey="more" title="Webinar">
+      <Tab eventKey="more" title="Demos">
         <div className="about-body">
-          <h2>Learn more!</h2>
+          <h3>2021 Webinar</h3>
           <p>
             Our January 2021 webinar provides an overview of the rainfall system
             and a how-to for using this site.
@@ -171,6 +174,11 @@ export const AboutContent = () => {
               allowFullScreen
             ></iframe>
           </div>
+          <hr></hr>
+          <h3>Boundary-based selections</h3>
+          <p>A quick demo of the boundary-based selection feature:          
+          </p>
+            <iframe src="https://capture.dropbox.com/embed/XSWyyjHt6nXx2PdN?source=copy-embed" width="560" height="315" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>          
         </div>
       </Tab>
       <Tab eventKey="how2" title="Under the Hood">
