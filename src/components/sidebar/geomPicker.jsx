@@ -7,6 +7,7 @@ import {
   Tabs,
   Tab
 } from 'react-bootstrap'
+import {keys} from 'lodash-es';
 
 import Select from 'react-select';
 
@@ -147,6 +148,7 @@ class GeodataPicker extends React.Component {
               <Row noGutters>
                   <Col md={12}>
                   <Select
+                      placeholder="Select radar pixels by basin, municipality, or watershed"
                       isMulti
                       // value={this.props.selectedBasin}
                       onChange={this.props.handleSelectGeography}
