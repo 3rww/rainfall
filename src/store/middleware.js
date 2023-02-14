@@ -687,7 +687,7 @@ export function pickSensorByGeographyMiddleware(payload) {
        * second: crosswalk the selected geographies to pixels and gauges
        */
 
-    let sensorTypes = ['pixel', 'gauge']
+    let sensorTypes = ['pixel']//, 'gauge'] TODO: gauge lookups not yet implemented
 
     sensorTypes.forEach(st => {
 
