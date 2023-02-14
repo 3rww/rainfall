@@ -69,6 +69,22 @@ class GeodataPicker extends React.Component {
         <Row noGutters className="mb-2">
           <Col>
             <strong>Where</strong>
+              {(gaugeCount > 0) ? (
+                <span className="mx-1 my-1"><Badge pill variant="primary">
+                  {`${gaugeCount} ${pluralize(gaugeCount, 'gauge', 'gauges')}`}
+                </Badge>
+                </span>
+              ) : (
+                null
+              )}                 
+              {(pixelCount > 0) ? (
+                <span className="mx-1 my-1"><Badge pill variant="primary">
+                  {`${pixelCount} ${pluralize(pixelCount, 'pixel', 'pixels')}`}
+                </Badge>
+                </span>
+              ) : (
+                null
+              )}
           </Col>
         </Row>
 
@@ -82,10 +98,10 @@ class GeodataPicker extends React.Component {
                 {(this.props.context !== CONTEXT_TYPES.legacyGarr) ? (
                 // GAUGE SELECTOR
                 <Row noGutters>
-                  <Col md={2}>
+                  <Col md={3}>
                     <small>Rain Gauges</small>
                   </Col>
-                  <Col md={8}>
+                  <Col md={9}>
                     <Select
                       isMulti
                       value={this.props.selectedGauges}
@@ -95,7 +111,7 @@ class GeodataPicker extends React.Component {
                       isClearable
                     />
                   </Col>
-                  <Col md={2}>
+                  {/* <Col md={2}>
                     {(gaugeCount > 0) ? (
                       <span className="mx-1 my-1"><Badge pill variant="primary">
                         {`${gaugeCount} ${pluralize(gaugeCount, 'gauge', 'gauges')}`}
@@ -104,7 +120,7 @@ class GeodataPicker extends React.Component {
                     ) : (
                       null
                     )}
-                  </Col>
+                  </Col> */}
                 </Row>
 
                 ):(
@@ -115,10 +131,10 @@ class GeodataPicker extends React.Component {
 
                 // PIXEL SELECTOR
                 <Row noGutters>
-                  <Col md={2}>
+                  <Col md={3}>
                     <small>Radar Pixels</small>
                   </Col>
-                  <Col md={8}>
+                  <Col md={9}>
                     <Select
                       isMulti
                       value={this.props.selectedPixels}
@@ -128,7 +144,7 @@ class GeodataPicker extends React.Component {
                       isClearable
                     />            
                   </Col>
-                  <Col md={2}>
+                  {/* <Col md={2}>
                   {(pixelCount > 0) ? (
                       <span className="mx-1 my-1"><Badge pill variant="primary">
                         {`${pixelCount} ${pluralize(pixelCount, 'pixel', 'pixels')}`}
@@ -137,7 +153,7 @@ class GeodataPicker extends React.Component {
                     ) : (
                       null
                     )}
-                  </Col>          
+                  </Col>           */}
                 </Row>
                 ):(
                   null
@@ -155,15 +171,7 @@ class GeodataPicker extends React.Component {
                       options={this.props.geographyOpts}
                       menuPortalTarget={document.body}
                       isClearable
-                    />
-                  {(pixelCount > 0) ? (
-                      <span className="mx-1 my-1"><Badge pill variant="primary">
-                        {`${pixelCount} ${pluralize(pixelCount, 'pixel', 'pixels')}`}
-                      </Badge>
-                      </span>
-                    ) : (
-                      null
-                    )}                    
+                    />                         
                   </Col>
               </Row>
               
