@@ -1,6 +1,6 @@
 {
   "name": "3rww-rainfall-viz",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.30",
@@ -45,7 +45,7 @@
     "serve": "serve -s build -p 3000",
     "deploy": "gh-pages -d build"
   },
-  "homepage": "http://3rww.github.io/",
+  "homepage": "http://3rww.github.io/rainfall",
   "eslintConfig": {
     "extends": "react-app"
   },
@@ -56,9 +56,9 @@
       "not op_mini all"
     ],
     "development": [
-      "last 10 chrome version",
-      "last 10 firefox version",
-      "last 10 safari version"
+      "last 2 chrome version",
+      "last 2 firefox version",
+      "last 2 safari version"
     ]
   },
   "devDependencies": {
