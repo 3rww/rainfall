@@ -1,6 +1,6 @@
 {
     "globalNotice": {
-        "show": false,
+        "show": true,
         "title": "System Maintenance",
         "content": "The rainfall database is currently undergoing maintenance. Queries may be slow or unresponsive during this time. We apologize for any inconvenience.",
         "level": "info"
