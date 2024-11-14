@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Navbar, Nav, Button, Modal, Col, Row } from 'react-bootstrap';
+import { Navbar, Nav, Button, Modal, Col, Row, Alert, Popover, OverlayTrigger} from 'react-bootstrap';
 // import ReactMarkdown from 'react-markdown/with-html'
 
 // icons
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-// import { faSpinner, faCloudRain } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faInfo, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 
 // import {legend} from '../data/legend'
 import { AboutContent } from './aboutContent'
@@ -16,6 +16,7 @@ import { switchContext } from '../../store/middleware'
 
 import './navigation.scss';
 
+
 class Navigation extends Component {
 
   constructor(props, context) {
@@ -23,6 +24,7 @@ class Navigation extends Component {
 
     this.handleShow = this.handleShow.bind(this);
     this.handleClose = this.handleClose.bind(this);
+    
 
     this.state = {
       show: true,
@@ -75,15 +77,6 @@ class Navigation extends Component {
             <img className="nav-brand-logo-xs" src={`${ROOT}static/assets/3rww_logo_full_inverse_transparent.png`} alt="3RWW Logo" />&nbsp;
             Rainfall <small><em>beta</em></small>
           </Navbar.Brand>
-          {/* <Navbar.Text>
-            &nbsp;&nbsp;
-            {this.props.isThinking === true || this.props.mapLoaded === false ? (
-              <span className="fa-layers fa-fw">
-                <FontAwesomeIcon icon={faSpinner} pulse size="4x"/>
-                <FontAwesomeIcon icon={faCloudRain} size="2x" transform="right-8"/>
-              </span>
-            ) : ("")}
-          </Navbar.Text> */}
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
           <Navbar.Collapse id="basic-navbar-nav">
@@ -113,13 +106,31 @@ class Navigation extends Component {
               </Nav.Item>
             </Nav>
             <Nav className="ml-auto">
-              {/* <Nav.Item
-                className="btn btn-outline-primary btn-sm"
-                id="LegendButton"
-                onClick={this.handleShow}              
+              {/* Global Notification Button */}
+              {this.props.globalNotice.show ? (
+                <OverlayTrigger
+                  trigger="click"
+                  placement={'bottom'}
+                  overlay={
+                    <Popover id="global-notice-popover">
+                      <Popover.Title as="h3">{this.props.globalNotice.title}</Popover.Title>
+                      <Popover.Content>{this.props.globalNotice.content}</Popover.Content>
+                    </Popover>
+                  }
                 >
-                Map Legend
-              </Nav.Item> */}
+                  <Nav.Item
+                    as="button"
+                    className={`mx-3 btn btn-sm text-light btn-${this.props.globalNotice.level}`}
+                    // variant={this.props.globalNotice.level}
+                    id="noticePopover"
+                  >
+                    <FontAwesomeIcon icon={faExclamationTriangle} />
+                  </Nav.Item>
+                </OverlayTrigger>
+              ):(
+                null
+              )
+              }
               <Nav.Item
                 className="btn btn-outline-light btn-sm"
                 id="AboutButton"
@@ -142,7 +153,17 @@ class Navigation extends Component {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-              {(this.state.showWhich) ? this.state.content[this.state.showWhich].content : (null)}
+              {this.props.globalNotice.show ? (
+                <Row className={"my-3"}>
+                  <Col>
+                    <Alert variant={this.props.globalNotice.level}>
+                      <Alert.Heading>{this.props.globalNotice.title}</Alert.Heading>
+                      <p>{this.props.globalNotice.content}</p>
+                    </Alert>
+                  </Col>
+                </Row>
+              ) : ("")}
+              {(this.state.showWhich) ? this.state.content[this.state.showWhich].content : (null)}              
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={this.handleClose}>
@@ -159,7 +180,8 @@ function mapStateToProps(state) {
   return {
     isThinking: state.progress.isThinking > 0,
     mapLoaded: state.progress.mapLoaded,
-    tab: state.progress.tab
+    tab: state.progress.tab,
+    globalNotice: state.globalConfig.globalNotice
   }
 }
 

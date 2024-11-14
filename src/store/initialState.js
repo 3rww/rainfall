@@ -21,6 +21,16 @@ export const initialState = {
     isThinking: 0,
     messages: []
   },
+  // global config ----------------------------------------------
+  // loaded once from config.json. used for maintenance flags, etc.
+  globalConfig: {
+    globalNotice: {
+        "show": false,
+        "title": "System Maintenance",
+        "content": "The rainfall database is currently undergoing maintenance. Queries may be slow or unresponsive during this time. We apologize for any inconvenience.",
+        "level": "info"
+    }
+  },
   // fetchKwargs ------------------------------------------
   // Holds arguments for calling the API, e.g., sensor type, rollup, zerofill.
   // Keys correspond to tabs in the UI, and each tab has both an active and history
