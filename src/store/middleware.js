@@ -45,7 +45,7 @@ import {
 
 import {
   MAP_LAYERS,
-  // EVENTS_JSON_URL,
+  GLOBAL_CONFIG_URL,
   EVENTS_API_URL,
   TIMESTAMPS_API_URL,
   URL_GEOGRAPHY_LOOKUP,
@@ -126,23 +126,23 @@ export function fetchJSON(payload) {
  */
 
 /**
- * asynchronously fetch the three seed datasets required for the app to start and render. 
+ * asynchronously fetch the seed datasets required for the app to start and render. 
  * Called by initDataFetch 
  * @param {*} dispatch 
  */
 function promiseFetchReferenceDatasets(dispatch) {
 
   return Promise.all([
-    // get the rainfall events json
-    // new Promise((resolve, reject) => {
-    //   let result = dispatch(fetchJSON({
-    //     url: EVENTS_JSON_URL,
-    //     pathArray: ["rainfallEvents", "list"],
-    //     transformer: transformEventsJSON,
-    //     keepACopy: false
-    //   }))
-    //   resolve(result)
-    // }),
+    // get the static global config object
+    new Promise((resolve, reject) => {
+      let result = dispatch(fetchJSON({
+        url: GLOBAL_CONFIG_URL,
+        pathArray: ["globalConfig"],
+        transformer: false,
+        keepACopy: false
+      }))
+      resolve(result)
+    }),   
     //get the rainfall events json from the API
     new Promise((resolve, reject) => {
       let result = dispatch(fetchJSON({
@@ -154,7 +154,7 @@ function promiseFetchReferenceDatasets(dispatch) {
       resolve(result)
     }),    
     
-    // get the rainfall events json
+    // get the latest rainfall timestamps
     new Promise((resolve, reject) => {
       let result = dispatch(fetchJSON({
         url: TIMESTAMPS_API_URL,

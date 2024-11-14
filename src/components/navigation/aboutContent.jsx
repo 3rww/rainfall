@@ -43,7 +43,7 @@ The calibrated radar rainfall section allows the retrieval of archived gauge-adj
 
 # Need something more powerful?
 
-For technical users requiring a more powerful visualization, querying, and data exploration capability, Vieux Associates provides an advanced internal tool at [vip.vieuxinc.com](https://vip.vieuxinc.com/). To request access, please email [aquinn@3rww.org](mailto:aquinn@3rww.org).
+For technical users requiring a more powerful visualization, querying, and data exploration capability, Vieux Associates provides an advanced internal tool at [vip.vieuxinc.com](https://vip.vieuxinc.com/). To request access, please email [info@3rww.org](mailto:info@3rww.org).
 `;
 
 const how1 = `

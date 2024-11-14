@@ -17,6 +17,7 @@ export const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN
 export const MAPBOX_STYLE_BASEMAP = process.env.REACT_APP_MAPBOX_STYLE_BASEMAP
 
 // Service URLs -----------------------------------------
+export const GLOBAL_CONFIG_URL = ROOT + "static/config.json"
 export const EVENTS_JSON_URL = ROOT + "static/data/events.json"
 export const EVENTS_API_URL = process.env.REACT_APP_API_URL_ROOT + "rainfall-events/?format=json"
 export const TIMESTAMPS_API_URL = process.env.REACT_APP_API_URL_ROOT + "v2/latest-observations/?format=json"
