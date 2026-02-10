@@ -9,26 +9,45 @@
 
 // Seed data --------------------------------------------
 // import RAINFALL_EVENTS from '../data/events.json'
-export const ROOT = window.location.href
+const withTrailingSlash = (value) => (value ? (value.endsWith("/") ? value : `${value}/`) : "");
+const normalizeMapboxStyleUrl = (value) => {
+  if (!value) {
+    return "mapbox://styles/mapbox/light-v11";
+  }
 
+  const trimmed = value.trim();
+
+  if (trimmed.startsWith("mapbox://styles/") || trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed;
+  }
+
+  // Accept shorthand like "mapbox/light-v11" and normalize it.
+  if (/^[^/]+\/[^/]+$/.test(trimmed)) {
+    return `mapbox://styles/${trimmed}`;
+  }
+
+  return trimmed;
+};
+
+export const ROOT = import.meta.env.BASE_URL;
+export const API_URL_ROOT = withTrailingSlash(import.meta.env.VITE_API_URL_ROOT || "");
 
 // Mapbox constants -------------------------------------
-export const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN
-export const MAPBOX_STYLE_BASEMAP = process.env.REACT_APP_MAPBOX_STYLE_BASEMAP
+export const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+export const MAPBOX_STYLE_BASEMAP = normalizeMapboxStyleUrl(import.meta.env.VITE_MAPBOX_STYLE_BASEMAP);
 
 // Service URLs -----------------------------------------
-export const GLOBAL_CONFIG_URL = ROOT + "static/config.json"
-export const EVENTS_JSON_URL = ROOT + "static/data/events.json"
-export const EVENTS_API_URL = process.env.REACT_APP_API_URL_ROOT + "rainfall-events/?format=json"
-export const TIMESTAMPS_API_URL = process.env.REACT_APP_API_URL_ROOT + "v2/latest-observations/?format=json"
-export const URL_GARRD_GEOJSON = process.env.REACT_APP_API_URL_ROOT + "pixels/" //ROOT + "static/data/pixels.geojson"
-export const URL_GAUGE_GEOJSON = process.env.REACT_APP_API_URL_ROOT + "gauges/" // ROOT + "static/data/gauges.geojson"
-export const URL_BASIN_PIXEL_LOOKUP = ROOT + "static/data/basin-lookup-pixel.json"
-export const URL_GEOGRAPHY_LOOKUP = ROOT + "static/data/geography-lookup.json"
+export const GLOBAL_CONFIG_URL = `${ROOT}static/config.json`;
+export const EVENTS_JSON_URL = `${ROOT}static/data/events.json`;
+export const EVENTS_API_URL = `${API_URL_ROOT}rainfall-events/?format=json`;
+export const TIMESTAMPS_API_URL = `${API_URL_ROOT}v2/latest-observations/?format=json`;
+export const URL_GARRD_GEOJSON = `${API_URL_ROOT}pixels/`; // ROOT + "static/data/pixels.geojson"
+export const URL_GAUGE_GEOJSON = `${API_URL_ROOT}gauges/`; // ROOT + "static/data/gauges.geojson"
+export const URL_BASIN_PIXEL_LOOKUP = `${ROOT}static/data/basin-lookup-pixel.json`;
+export const URL_GEOGRAPHY_LOOKUP = `${ROOT}static/data/geography-lookup.json`;
 
 // Service Parms -----------------------------------------
-// export const REQUEST_TIME_INTERVAL = 2000
-export const REQUEST_TIME_INTERVAL = Number(process.env.REACT_APP_API_REQUEST_INTERVAL_MS)
+export const REQUEST_TIME_INTERVAL = Number(import.meta.env.VITE_API_REQUEST_INTERVAL_MS || 2000);
 
 
 // rainfall data constants ----------------------------------
@@ -41,7 +60,7 @@ export const INTERVAL_OPTIONS = [
 ]
 
 // the earliest date that can be selected:
-export const RAINFALL_MIN_DATE = `${process.env.REACT_APP_RAINFALL_MIN_DATE}`
+export const RAINFALL_MIN_DATE = `${import.meta.env.VITE_RAINFALL_MIN_DATE || "2000-04-01"}`
 
 // the types of rainfall data that can be queried
 export const RAINFALL_TYPES = {

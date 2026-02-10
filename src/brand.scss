@@ -18,9 +18,9 @@ body {
   // }
 
 /* Import Bootstrap and themes (note the order) **********/
-@import "~bootswatch/dist/materia/variables";
-@import "~bootstrap/scss/bootstrap";
-@import "~bootswatch/dist/materia/bootswatch";
+@import "bootswatch/dist/materia/variables";
+@import "bootstrap/scss/bootstrap";
+@import "bootswatch/dist/materia/bootswatch";
 
 .card {
   border-radius: 0px;

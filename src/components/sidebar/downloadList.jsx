@@ -55,7 +55,7 @@ class DownloadsList extends React.Component {
               variant={listColor}
             >
 
-              <Row noGutters>
+              <Row className="g-0">
                 <Col sm={ i.isFetching ? (11) : (12) }>
                   <DownloadItem
                     fetchHistoryItem={i}
@@ -72,7 +72,7 @@ class DownloadsList extends React.Component {
                           animation="border"
                           variant="primary"
                         >
-                          <span className="sr-only">
+                          <span className="visually-hidden">
                             "Fetching rainfall data...
                           </span>
                         </Spinner>

@@ -66,11 +66,11 @@ class GeodataPicker extends React.Component {
     let pixelCount = this.props.pixelCount
     return (
       <div>
-        <Row noGutters className="mb-2">
+        <Row className="g-0 mb-2">
           <Col>
             <strong>Where</strong>
               {(gaugeCount > 0) ? (
-                <span className="mx-1 my-1"><Badge pill variant="primary">
+                <span className="mx-1 my-1"><Badge pill bg="primary">
                   {`${gaugeCount} ${pluralize(gaugeCount, 'gauge', 'gauges')}`}
                 </Badge>
                 </span>
@@ -78,7 +78,7 @@ class GeodataPicker extends React.Component {
                 null
               )}                 
               {(pixelCount > 0) ? (
-                <span className="mx-1 my-1"><Badge pill variant="primary">
+                <span className="mx-1 my-1"><Badge pill bg="primary">
                   {`${pixelCount} ${pluralize(pixelCount, 'pixel', 'pixels')}`}
                 </Badge>
                 </span>
@@ -88,7 +88,7 @@ class GeodataPicker extends React.Component {
           </Col>
         </Row>
 
-        <Row noGutters>
+        <Row className="g-0">
           <Col>
           
             <Tabs defaultActiveKey="sensor" id="geomPickerTypes">
@@ -97,7 +97,7 @@ class GeodataPicker extends React.Component {
 
                 {(this.props.context !== CONTEXT_TYPES.legacyGarr) ? (
                 // GAUGE SELECTOR
-                <Row noGutters>
+                <Row className="g-0">
                   <Col md={3}>
                     <small>Rain Gauges</small>
                   </Col>
@@ -130,7 +130,7 @@ class GeodataPicker extends React.Component {
               {(this.props.context !== CONTEXT_TYPES.legacyGauge) ? (
 
                 // PIXEL SELECTOR
-                <Row noGutters>
+                <Row className="g-0">
                   <Col md={3}>
                     <small>Radar Pixels</small>
                   </Col>
@@ -161,7 +161,7 @@ class GeodataPicker extends React.Component {
 
               </Tab>
               <Tab eventKey="geography" title="By Geography" className="my-4">
-              <Row noGutters>
+              <Row className="g-0">
                   <Col md={12}>
                   <Select
                       placeholder="Select radar pixels by basin, municipality, or watershed"

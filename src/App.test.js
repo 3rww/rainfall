@@ -1,9 +1,18 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
 import App from './App';
+import store from './store/index';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
-  ReactDOM.render(<App />, div);
-  ReactDOM.unmountComponentAtNode(div);
+  document.body.appendChild(div);
+  const root = createRoot(div);
+  root.render(
+    <Provider store={store}>
+      <App />
+    </Provider>
+  );
+  root.unmount();
+  div.remove();
 });

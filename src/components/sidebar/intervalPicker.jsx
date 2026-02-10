@@ -15,7 +15,7 @@ class IntervalPicker extends React.Component {
 
   render() {
     return (
-      <Row noGutters>
+      <Row className="g-0">
         <Col lg={3}>
           <strong>Interval</strong>
         </Col>

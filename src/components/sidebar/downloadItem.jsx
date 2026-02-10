@@ -141,7 +141,7 @@ class DownloadsItem extends React.Component {
                 </Button>
 
                 {/* <ButtonToolbar aria-label="Download and Playback Toolbar">
-              <ButtonGroup className="mr-2" aria-label="First Group">
+              <ButtonGroup className="me-2" aria-label="First Group">
                <Button size="sm">View & Download</Button>
               </ButtonGroup>
               <ButtonGroup aria-label="Third group">

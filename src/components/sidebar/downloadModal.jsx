@@ -133,7 +133,7 @@ class DownloadModal extends React.Component {
                   <p>Download as: </p>
                 </Col>
                 <Col sm={3}>
-                  <Button block variant="outline-primary" size={'sm'} onClick={this.handleDownloadClick}>
+                  <Button className="w-100" variant="outline-primary" size={'sm'} onClick={this.handleDownloadClick}>
                     CSV
                   </Button>
                   {/* <Button block variant="outline-primary" onClick={this.props.onHide}>

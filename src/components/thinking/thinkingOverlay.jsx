@@ -24,7 +24,7 @@ class ThinkingOverlay extends React.Component {
               variant="primary"
               className="thinking-spinner"
             >
-              <span className="sr-only">"Loading...</span>
+              <span className="visually-hidden">"Loading...</span>
             </Spinner> */}
           </div>
           <p className="debug-messages">{this.props.message}</p>

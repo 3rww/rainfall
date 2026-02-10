@@ -53,6 +53,7 @@ import {
   URL_GAUGE_GEOJSON,
   CONTEXT_TYPES,
   REQUEST_TIME_INTERVAL,
+  API_URL_ROOT,
   // BREAKS_005,
   BREAKS_050,
   // BREAKS_100,
@@ -488,7 +489,7 @@ export function fetchRainfallDataFromApiV2(payload) {
         contextType: contextType
       }))
 
-      let url = `${process.env.REACT_APP_API_URL_ROOT}v2/${sensor[0]}/${rainfallDataType}/`
+      let url = `${API_URL_ROOT}v2/${sensor[0]}/${rainfallDataType}/`
       let params = requestParams
 
       // console.log(s, sensor[0], params)

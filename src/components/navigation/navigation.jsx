@@ -5,7 +5,7 @@ import { Navbar, Nav, Button, Modal, Col, Row, Alert, Popover, OverlayTrigger} f
 
 // icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faInfo, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 
 // import {legend} from '../data/legend'
 import { AboutContent } from './aboutContent'
@@ -80,7 +80,7 @@ class Navigation extends Component {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
           <Navbar.Collapse id="basic-navbar-nav">
-            <Nav variant="pills" className="mr-auto" defaultActiveKey={CONTEXT_TYPES.legacyRealtime}>
+            <Nav variant="pills" className="me-auto" defaultActiveKey={CONTEXT_TYPES.legacyRealtime}>
               <Nav.Item>
                 <Nav.Link
                   active={this.props.tab === CONTEXT_TYPES.legacyRealtime}
@@ -105,7 +105,7 @@ class Navigation extends Component {
                 >Calibrated Radar Rainfall</Nav.Link>
               </Nav.Item>
             </Nav>
-            <Nav className="ml-auto">
+            <Nav className="ms-auto">
               {/* Global Notification Button */}
               {this.props.globalNotice.show ? (
                 <OverlayTrigger
@@ -113,8 +113,8 @@ class Navigation extends Component {
                   placement={'bottom'}
                   overlay={
                     <Popover id="global-notice-popover">
-                      <Popover.Title as="h3">{this.props.globalNotice.title}</Popover.Title>
-                      <Popover.Content>{this.props.globalNotice.content}</Popover.Content>
+                      <Popover.Header as="h3">{this.props.globalNotice.title}</Popover.Header>
+                      <Popover.Body>{this.props.globalNotice.content}</Popover.Body>
                     </Popover>
                   }
                 >
