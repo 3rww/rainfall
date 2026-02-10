@@ -20,7 +20,7 @@ Currently, this site offers search, download, and mapping capability for rainfal
 
 ### Powered By *The 3RWW Data API*
 
-The rainfall data is served up from [3RWW's Data API](https://github.com/3rww/data-api). Currently a few low-level API functions are documented and accessible through https://trwwapi.herokuapp.com/rainfall/.
+The rainfall data is served up from [3RWW's Atlas](https://atlas.3riverswetweather.org/). Currently a few low-level API functions are documented and accessible through [https://atlas.3riverswetweather.org/rainfall/](https://atlas.3riverswetweather.org/rainfall/).
 
 ## Status
 
