@@ -103,53 +103,55 @@ class DateTimePicker extends React.Component {
           </Modal.Header>
           <Modal.Body>
             <Row className="g-3">
-              <Col md={6}>
-                <label className="form-label">Start</label>
-                <DatePicker
-                  selected={pendingStart}
-                  onChange={(date) => {
-                    const nextStart = date;
-                    const nextEnd = pendingEnd && date && pendingEnd < date ? date : pendingEnd;
-                    this.setState({ pendingStart: nextStart, pendingEnd: nextEnd });
-                  }}
-                  showTimeSelect
-                  timeIntervals={15}
-                  dateFormat="MM/dd/yyyy hh:mm aa"
-                  minDate={this.props.minDate.toDate()}
-                  maxDate={this.props.maxDate.toDate()}
-                  className="form-control"
-                />
+              <Col xs={3} className="border-end">
+              <div className="btn-group-vertical w-100" role="group" aria-label="Quick Ranges">
+                {Object.entries(this.props.ranges).map(([label, range]) => (
+                  <Button
+                    key={`${this.props.contextType}-${label}`}
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={() => this.handlePresetPick(range)}
+                  >
+                    {label}
+                  </Button>
+                ))}
+              </div>
               </Col>
-              <Col md={6}>
-                <label className="form-label">End</label>
-                <DatePicker
-                  selected={pendingEnd}
-                  onChange={(date) => this.setState({ pendingEnd: date })}
-                  showTimeSelect
-                  timeIntervals={15}
-                  dateFormat="MM/dd/yyyy hh:mm aa"
-                  minDate={pendingStart || this.props.minDate.toDate()}
-                  maxDate={this.props.maxDate.toDate()}
-                  className="form-control"
-                />
+              <Col xs={9}>
+                <Row>
+                  <Col md={6}>
+                    <p className="lead mb-0">Start</p>
+                    <DatePicker
+                      selected={pendingStart}
+                      onChange={(date) => {
+                        const nextStart = date;
+                        const nextEnd = pendingEnd && date && pendingEnd < date ? date : pendingEnd;
+                        this.setState({ pendingStart: nextStart, pendingEnd: nextEnd });
+                      }}
+                      showTimeSelect
+                      timeIntervals={15}
+                      dateFormat="MM/dd/yyyy hh:mm aa"
+                      minDate={this.props.minDate.toDate()}
+                      maxDate={this.props.maxDate.toDate()}
+                      className="form-control"
+                    />
+                  </Col>
+                  <Col md={6}>
+                    <p className="lead mb-0">End</p>
+                    <DatePicker
+                      selected={pendingEnd}
+                      onChange={(date) => this.setState({ pendingEnd: date })}
+                      showTimeSelect
+                      timeIntervals={15}
+                      dateFormat="MM/dd/yyyy hh:mm aa"
+                      minDate={pendingStart || this.props.minDate.toDate()}
+                      maxDate={this.props.maxDate.toDate()}
+                      className="form-control"
+                    />
+                  </Col>                  
+                </Row>
               </Col>
             </Row>
-
-            <hr />
-
-            <p className="mb-2"><strong>Quick ranges</strong></p>
-            <div className="d-flex flex-wrap gap-2">
-              {Object.entries(this.props.ranges).map(([label, range]) => (
-                <Button
-                  key={`${this.props.contextType}-${label}`}
-                  variant="outline-secondary"
-                  size="sm"
-                  onClick={() => this.handlePresetPick(range)}
-                >
-                  {label}
-                </Button>
-              ))}
-            </div>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={this.handleRangeModalClose}>

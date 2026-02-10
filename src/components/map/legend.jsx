@@ -1,14 +1,17 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import { Table, Row, Col, Form } from 'react-bootstrap'
-import { isEmpty } from 'lodash-es'
-import * as chroma from 'chroma-js'
+import { get } from 'lodash-es'
+import chroma from 'chroma-js'
 
-import { symbolBinLookup, LEGEND_BREAKS } from '../../store/config'
+import { LEGEND_BREAKS } from '../../store/config'
 import { applyColorStretch } from '../../store/actions'
+import { buildRainfallColorStyleExp } from '../../store/utils/mb'
 
 
 import './legend.scss'
+
+const DEFAULT_LEGEND_BINS = buildRainfallColorStyleExp('total', LEGEND_BREAKS.breaks_050).legendContent
 
 class MapLegend extends React.Component {
 
@@ -61,21 +64,24 @@ class MapLegend extends React.Component {
 
 function mapStateToProps(state) {
 
-  let legendContent = !isEmpty(state.mapLegend) ? state.mapLegend : false
-
-  let bins = (legendContent) ? legendContent.content : []
+  let bins = get(state, ['mapLegend', 'content'], [])
+  if (!Array.isArray(bins) || bins.length === 0) {
+    bins = DEFAULT_LEGEND_BINS
+  }
 
   // generate legend bins with labels and colors
   // generate a font color based on luminance https://gka.github.io/chroma.js/#color-luminance
   // e.g., if luminance < 0.5, color = white, else black
-  bins = bins.map((b, bi) => {
+  bins = bins
+    .filter((b) => Array.isArray(b) && b.length >= 2 && chroma.valid(b[1]))
+    .map((b) => {
 
-    let c = "#000"
-    if (chroma(b[1]).luminance() < 0.4) {
-      c = "#fff"
-    }
-    return [b[0], b[1], c]
-  })
+      let c = "#000"
+      if (chroma(b[1]).luminance() < 0.4) {
+        c = "#fff"
+      }
+      return [b[0], b[1], c]
+    })
 
   return {
     bins: bins

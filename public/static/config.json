@@ -1,6 +1,6 @@
 {
     "globalNotice": {
-        "show": true,
+        "show": false,
         "title": "Data Availability",
         "content": "We are currently investigating an issue with the availability of real-time gauge data from our providers.",
         "level": "warning"

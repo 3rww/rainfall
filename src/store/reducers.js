@@ -54,7 +54,6 @@ import {
   selectFetchHistory,
   selectLayersByIds,
   selectLyrSrcByName,
-  selectLayerById,
   selectMapStyleSourceDataFeatures
 } from './selectors'
 
@@ -547,16 +546,29 @@ const caseReducers = {
     },
     [applyColorStretch.type]: (state, action) => {
 
-      let { breaks } = action.payload
+      const { breaks } = action.payload || {}
 
-      let {colorExp, legendContent} = buildRainfallColorStyleExp('total', breaks)
+      const { colorExp, legendContent } = buildRainfallColorStyleExp('total', breaks)
+      const mapLayers = get(state, ['mapStyle', 'layers'], [])
 
       LAYERS_W_RESULTS.forEach(lyrId => {
-        let lyr = selectLayerById(state, lyrId)
+        if (!Array.isArray(mapLayers)) {
+          return
+        }
+
+        const lyr = mapLayers.find(layer => layer.id === lyrId)
+        if (!lyr || !lyr.type || !lyr.paint) {
+          console.debug(`[applyColorStretch] skipping missing/unready layer "${lyrId}"`)
+          return
+        }
+
         lyr.paint[`${lyr.type}-color`] = colorExp
       })
 
-      state.mapLegend.content = legendContent
+      if (!state.mapLegend) {
+        state.mapLegend = {}
+      }
+      state.mapLegend.content = Array.isArray(legendContent) ? legendContent : []
 
     },
 }

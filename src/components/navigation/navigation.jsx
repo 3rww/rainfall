@@ -22,6 +22,7 @@ class Navigation extends Component {
   constructor(props, context) {
     super(props, context);
 
+    this.handleContextSwitch = this.handleContextSwitch.bind(this);
     this.handleShow = this.handleShow.bind(this);
     this.handleClose = this.handleClose.bind(this);
     
@@ -62,6 +63,13 @@ class Navigation extends Component {
     this.setState({ show: true, showWhich: e.target.id });
   }
 
+  handleContextSwitch(contextType, e) {
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault();
+    }
+    this.props.switchContext(contextType);
+  }
+
   render() {
 
     return (
@@ -80,12 +88,12 @@ class Navigation extends Component {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
           <Navbar.Collapse id="basic-navbar-nav">
-            <Nav variant="pills" className="me-auto" defaultActiveKey={CONTEXT_TYPES.legacyRealtime}>
+            <Nav variant="pills" className="me-auto py-2" defaultActiveKey={CONTEXT_TYPES.legacyRealtime}>
               <Nav.Item>
                 <Nav.Link
                   active={this.props.tab === CONTEXT_TYPES.legacyRealtime}
                   eventKey={CONTEXT_TYPES.legacyRealtime}
-                  onSelect={this.props.switchContext}
+                  onClick={(e) => this.handleContextSwitch(CONTEXT_TYPES.legacyRealtime, e)}
                 >
                   Real-Time Rainfall
                 </Nav.Link>
@@ -94,14 +102,14 @@ class Navigation extends Component {
                 <Nav.Link
                   active={this.props.tab === CONTEXT_TYPES.legacyGauge}
                   eventKey={CONTEXT_TYPES.legacyGauge}
-                  onSelect={this.props.switchContext}
+                  onClick={(e) => this.handleContextSwitch(CONTEXT_TYPES.legacyGauge, e)}
                 >Historical Rain Gauge</Nav.Link>
               </Nav.Item>
               <Nav.Item>
                 <Nav.Link
                   active={this.props.tab === CONTEXT_TYPES.legacyGarr}
                   eventKey={CONTEXT_TYPES.legacyGarr}
-                  onSelect={this.props.switchContext}
+                  onClick={(e) => this.handleContextSwitch(CONTEXT_TYPES.legacyGarr, e)}
                 >Calibrated Radar Rainfall</Nav.Link>
               </Nav.Item>
             </Nav>
