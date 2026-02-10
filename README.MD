@@ -81,6 +81,55 @@ Use Vite-prefixed environment keys:
 * `VITE_MAPBOX_STYLE_BASEMAP`
 * `VITE_RAINFALL_MIN_DATE`
 * `VITE_API_REQUEST_INTERVAL_MS`
+* `VITE_ENABLE_SHARE_STATE` (default `false`; set `true` to enable `#s=...` share-state sync)
+
+### Shareable URL State (`#s=...`)
+
+The app can preserve the active rainfall context and selected sensors in the URL hash.
+
+Format:
+
+* URL: `https://.../rainfall#s=<token>`
+* Token codec: `base64url(deflate(utf8(json)))`
+* JSON payload (canonical):
+
+```json
+{
+  "v": 1,
+  "c": "legacyRealtime",
+  "g": ["1", "2"],
+  "p": ["1201", "1202"]
+}
+```
+
+Where:
+
+* `v`: schema version
+* `c`: context/tab (`legacyRealtime`, `legacyGauge`, `legacyGarr`)
+* `g`: selected gauge IDs (strings)
+* `p`: selected pixel IDs (strings)
+
+Runtime behavior:
+
+* Feature flag: `VITE_ENABLE_SHARE_STATE=false` by default.
+* When enabled, on startup the app reads `#s` and hydrates Redux.
+* When enabled, after startup the app syncs URL hash state from Redux using `history.replaceState`.
+* When enabled, legacy `?state=<json>` links are read once and migrated to `#s=...`.
+
+Implementation note:
+
+* Compression uses browser-native `CompressionStream`/`DecompressionStream` with `"deflate"` where available. `base64url` by itself does not compress; DEFLATE is what reduces payload size.
+
+External app pseudocode:
+
+```text
+payload = {"v":1,"c":"legacyRealtime","g":["1"],"p":["1201","1202"]}
+json = JSON.stringify(payload)
+bytes = UTF8(json)
+compressed = DEFLATE(bytes)
+token = BASE64URL(compressed)
+url = "https://.../rainfall#s=" + token
+```
 
 ### Deployment Notes
 

@@ -57,8 +57,14 @@ import {
   // BREAKS_005,
   BREAKS_050,
   // BREAKS_100,
-  SENSOR_TYPES
+  SENSOR_TYPES,
+  ENABLE_SHARE_STATE
 } from './config'
+
+import {
+  hydrateShareStateToRedux,
+  startShareStateSync
+} from './urlShareState'
 
 
 import store from './index'
@@ -252,6 +258,15 @@ export function initDataFetch(payload) {
           endDt: maxDateLegacyGarr
         }))
 
+      })
+      .then(async () => {
+        if (ENABLE_SHARE_STATE) {
+          await hydrateShareStateToRedux({
+            dispatch: dispatch,
+            getState: store.getState
+          })
+          startShareStateSync(store)
+        }
       })
       .then(() => dispatch(stopThinking("Initial data load complete."))
       )

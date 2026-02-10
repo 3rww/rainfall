@@ -29,12 +29,21 @@ const normalizeMapboxStyleUrl = (value) => {
   return trimmed;
 };
 
+export const parseBooleanEnvFlag = (value, defaultValue = false) => {
+  if (typeof value !== "string") {
+    return defaultValue;
+  }
+
+  return ["true", "1", "yes", "on"].includes(value.trim().toLowerCase());
+};
+
 export const ROOT = import.meta.env.BASE_URL;
 export const API_URL_ROOT = withTrailingSlash(import.meta.env.VITE_API_URL_ROOT || "");
 
 // Mapbox constants -------------------------------------
 export const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 export const MAPBOX_STYLE_BASEMAP = normalizeMapboxStyleUrl(import.meta.env.VITE_MAPBOX_STYLE_BASEMAP);
+export const ENABLE_SHARE_STATE = parseBooleanEnvFlag(import.meta.env.VITE_ENABLE_SHARE_STATE, false);
 
 // Service URLs -----------------------------------------
 export const GLOBAL_CONFIG_URL = `${ROOT}static/config.json`;
