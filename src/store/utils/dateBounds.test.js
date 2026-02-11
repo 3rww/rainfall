@@ -30,7 +30,9 @@ describe("resolveAvailableBounds", () => {
     });
 
     expect(bounds.max.toISOString()).toBe(moment("2026-02-11T10:00:00Z").toISOString());
-    expect(bounds.min.toISOString()).toBe(moment("2025-02-01T00:00:00Z").toISOString());
+    expect(bounds.min.toISOString()).toBe(
+      moment("2026-02-11T10:00:00Z").subtract(1, "year").startOf("month").toISOString()
+    );
   });
 
   it("falls back to now for legacyRealtime max when realtime keys are missing", () => {
