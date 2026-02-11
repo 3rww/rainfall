@@ -13,7 +13,7 @@ import {
   stopThinking
 } from '../../store/actions';
 import { initDataFetch, pickSensorMiddleware } from '../../store/middleware';
-import { LAYERS_W_MOUSEOVER, getInteractiveMapLayersForContext } from '../../store/config'
+import { ENABLE_DEBUG_LOGS, LAYERS_W_MOUSEOVER, getInteractiveMapLayersForContext } from '../../store/config'
 import diffStyles from '../../utilities/styleSpecDiff';
 import { transformFeatureToOption } from '../../store/utils/transformers'
 
@@ -24,7 +24,7 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import './map.scss'
 
-let DEBUG = true
+const DEBUG = ENABLE_DEBUG_LOGS
 const MAPID = 'map'
 
 class ReactMap extends Component {

@@ -57,6 +57,36 @@ describe("config env parsing", () => {
     const { ENABLE_SHARE_STATE } = await import("./config");
     expect(ENABLE_SHARE_STATE).toBe(false);
   });
+
+  it("ENABLE_DEBUG_LOGS defaults to false when unset", async () => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
+
+    const { ENABLE_DEBUG_LOGS } = await import("./config");
+    expect(ENABLE_DEBUG_LOGS).toBe(false);
+  });
+
+  it("ENABLE_DEBUG_LOGS is true for supported truthy env values", async () => {
+    const truthyValues = ["true", "1", "yes", "on", "On"];
+
+    for (const value of truthyValues) {
+      vi.unstubAllEnvs();
+      vi.resetModules();
+      vi.stubEnv("VITE_ENABLE_DEBUG_LOGS", value);
+
+      const { ENABLE_DEBUG_LOGS } = await import("./config");
+      expect(ENABLE_DEBUG_LOGS).toBe(true);
+    }
+  });
+
+  it("ENABLE_DEBUG_LOGS is false for unsupported values", async () => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
+    vi.stubEnv("VITE_ENABLE_DEBUG_LOGS", "definitely-not-true");
+
+    const { ENABLE_DEBUG_LOGS } = await import("./config");
+    expect(ENABLE_DEBUG_LOGS).toBe(false);
+  });
 });
 
 describe("config interval and path helpers", () => {
