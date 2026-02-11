@@ -136,6 +136,8 @@ export const shouldIncludeRollupParam = ({ contextType, rainfallDataType, rollup
 );
 
 export const HEADER_LABELS = {
+  start_ts: "start timestamp",
+  end_ts: "end timestamp",
   ts: "timestamp",
   val: "rainfall",
   src: "source",

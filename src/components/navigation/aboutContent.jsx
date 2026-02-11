@@ -65,7 +65,7 @@ Query results will be listed in a panel below on each page and shown on the map.
 The output table for each query result contains:
 
 * a gauge or pixel ID
-* a date/time of the observation (presented as standard ISO 8061 datetime text). For hourly and daily aggregations, the start and end time of the observation is indicated using the standard ISO 8061 datetime range format, with start and end delimited by a "/".
+* date/time columns formatted for spreadsheet compatibility as 'MM/DD/YYYY HH:mm:ss'. For hourly and daily aggregations, the observation window is exported as separate \`start_ts\` and \`end_ts\` columns.
 * a rainfall amount (in inches) 
 * a source code, which indicates where the rainfall measurement came from. While all results include this, only Calibrated Radar Rainfall data will potentially indicate different codes, depending on the calibration methodology.
 

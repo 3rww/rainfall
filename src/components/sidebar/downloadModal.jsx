@@ -4,9 +4,9 @@ import { Modal, Button, Row, Col, Tabs, Tab } from 'react-bootstrap';
 import moment from 'moment'
 import { unparse } from 'papaparse'
 import { saveAs } from 'file-saver'
-import { keys } from 'lodash-es'
 
 import { ResultsTable } from './resultsTable'
+import { buildDownloadRowsAndFields } from './downloadTableUtils'
 
 const TABLE_ROW_LIMIT = 50
 
@@ -168,23 +168,13 @@ class DownloadModal extends React.Component {
 
 const mapStateToProps = (state, ownProps) => {
 
-  let resultsTableData = ownProps.fetchHistoryItem.results
-  
-  let allRows = []
-  keys(resultsTableData).forEach(s => {
-    let sensorRows = resultsTableData[s]
-    sensorRows.forEach(sr => {
-      let rows = sr.data.map(srd => {
-        return { ...srd, id: sr.id, type: s}
-      })
-      allRows = allRows.concat(rows)
-    })
-  })
+  let resultsTableData = ownProps.fetchHistoryItem.results || {}
+  let { rows, fields } = buildDownloadRowsAndFields(resultsTableData)
   
   return {
-    header: (allRows.length > 0 ? keys(allRows[0]) : []),
-    rows: (allRows.length > 0 ? allRows : []),
-    csv: (allRows.length > 0 ? unparse(allRows) : ""),
+    header: fields,
+    rows: rows,
+    csv: (rows.length > 0 ? unparse({ fields, data: rows }) : ""),
   }
 }
 
