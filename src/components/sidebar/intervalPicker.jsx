@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { Form, Row, Col } from 'react-bootstrap'
 
 import { pickInterval } from '../../store/actions'
-import { INTERVAL_OPTIONS } from '../../store/config'
+import { getIntervalOptionsForContext } from '../../store/config'
 
 
 class IntervalPicker extends React.Component {
@@ -14,6 +14,8 @@ class IntervalPicker extends React.Component {
   };
 
   render() {
+    const intervalOptions = getIntervalOptionsForContext(this.props.contextType)
+
     return (
       <Row className="g-0">
         <Col lg={3}>
@@ -21,9 +23,9 @@ class IntervalPicker extends React.Component {
         </Col>
         <Col lg={9}>
           <Form>
-            {INTERVAL_OPTIONS.map((opt, i) => (
+            {intervalOptions.map((opt, i) => (
               <Form.Check
-                defaultChecked={opt == "15-minute" ? true : false}
+                defaultChecked={opt === "15-minute"}
                 inline
                 // custom
                 key={`interval-${opt}-${i}-${this.props.rainfallDataType}`}

@@ -20,10 +20,19 @@ import EventsList from './eventsList';
 import { pickRainfallDateTimeRange } from '../../store/actions';
 import {
   selectFetchKwargs,
+  selectEarliestlegacyGauge5MinTS,
+  selectEarliestlegacyGarr5MinTS,
+  selectLatestlegacyGauge5MinTS,
   selectLatestlegacyGaugeTS,
+  selectLatestlegacyGarr5MinTS,
   selectLatestlegacyGarrTS
 } from '../../store/selectors';
-import { RAINFALL_TYPES, RAINFALL_MIN_DATE } from '../../store/config';
+import {
+  CONTEXT_TYPES,
+  FIVE_MINUTE_ROLLUP,
+  RAINFALL_TYPES,
+  RAINFALL_MIN_DATE
+} from '../../store/config';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import './datetimePicker.scss';
@@ -247,12 +256,27 @@ function mapStateToProps(state, ownProps) {
   let startDt = moment(currentKwargs.startDt);
   let endDt = moment(currentKwargs.endDt);
   let maxDate = false;
+  let minDate = RAINFALL_MIN_DATE;
   let ranges = {};
+  let isHistoricFiveMinute = (
+    ownProps.rainfallDataType === RAINFALL_TYPES.historic
+    && currentKwargs.rollup === FIVE_MINUTE_ROLLUP
+  );
 
-  if (ownProps.contextType === 'legacyGarr') {
-    maxDate = selectLatestlegacyGarrTS(state);
-  } else if (ownProps.contextType === 'legacyGauge') {
-    maxDate = selectLatestlegacyGaugeTS(state);
+  if (ownProps.contextType === CONTEXT_TYPES.legacyGarr) {
+    if (isHistoricFiveMinute) {
+      minDate = selectEarliestlegacyGarr5MinTS(state) || RAINFALL_MIN_DATE;
+      maxDate = selectLatestlegacyGarr5MinTS(state) || selectLatestlegacyGarrTS(state);
+    } else {
+      maxDate = selectLatestlegacyGarrTS(state);
+    }
+  } else if (ownProps.contextType === CONTEXT_TYPES.legacyGauge) {
+    if (isHistoricFiveMinute) {
+      minDate = selectEarliestlegacyGauge5MinTS(state) || RAINFALL_MIN_DATE;
+      maxDate = selectLatestlegacyGauge5MinTS(state) || selectLatestlegacyGaugeTS(state);
+    } else {
+      maxDate = selectLatestlegacyGaugeTS(state);
+    }
   } else {
     maxDate = moment().toISOString(); // right now
   }
@@ -296,9 +320,9 @@ function mapStateToProps(state, ownProps) {
     local: { format: 'MM/DD/YYYY hh:mm A' },
     startDt: startDt,
     endDt: endDt,
-    minDate: moment(RAINFALL_MIN_DATE),
+    minDate: moment(minDate),
     maxDate: moment(maxDate),
-    minYear: moment(RAINFALL_MIN_DATE).year(),
+    minYear: moment(minDate).year(),
     maxYear: moment().year(),
     ranges: ranges,
     rainfallDataType: ownProps.rainfallDataType,

@@ -54,6 +54,8 @@ import {
   CONTEXT_TYPES,
   REQUEST_TIME_INTERVAL,
   API_URL_ROOT,
+  getRainfallDataTypePath,
+  shouldIncludeRollupParam,
   // BREAKS_005,
   BREAKS_050,
   // BREAKS_100,
@@ -352,7 +354,7 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
             } else {
 
               // calculate totals and any stats
-              r = transformRainfallResults(r)
+              r = transformRainfallResults(r, { contextType, sensor })
 
               // dispatch the success action, which puts the data in the correct 
               // places, updates the status in the ui, etc.
@@ -450,6 +452,16 @@ export function fetchRainfallDataFromApiV2(payload) {
     let { contextType, rainfallDataType } = payload
     // get the active batch of Fetch Kwargs
     let kwargs = selectFetchKwargs(state, contextType)
+    let rainfallDataTypePath = getRainfallDataTypePath({
+      contextType: contextType,
+      rainfallDataType: rainfallDataType,
+      rollup: kwargs.rollup
+    })
+    let includeRollupParam = shouldIncludeRollupParam({
+      contextType: contextType,
+      rainfallDataType: rainfallDataType,
+      rollup: kwargs.rollup
+    })
 
     // generate a unique ID, based on the hash of the kwargs
     // this will let us 1) update the correct object in fetchHistory
@@ -490,8 +502,10 @@ export function fetchRainfallDataFromApiV2(payload) {
       let requestParams = {
         start_dt: kwargs.startDt,
         end_dt: kwargs.endDt,
-        rollup: kwargs.rollup,
         f: kwargs.f
+      }
+      if (includeRollupParam) {
+        requestParams.rollup = kwargs.rollup
       }
 
       requestParams[sensor[1]] = kwargs.sensorLocations[sensor[0]].map(i => i.value).join(",")
@@ -504,7 +518,7 @@ export function fetchRainfallDataFromApiV2(payload) {
         contextType: contextType
       }))
 
-      let url = `${API_URL_ROOT}v2/${sensor[0]}/${rainfallDataType}/`
+      let url = `${API_URL_ROOT}v2/${sensor[0]}/${rainfallDataTypePath}/`
       let params = requestParams
 
       // console.log(s, sensor[0], params)

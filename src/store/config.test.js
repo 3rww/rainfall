@@ -59,3 +59,118 @@ describe("config env parsing", () => {
   });
 });
 
+describe("config interval and path helpers", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+
+  it("adds 5-minute interval only for legacy gauge and calibrated radar contexts", async () => {
+    const {
+      CONTEXT_TYPES,
+      FIVE_MINUTE_ROLLUP,
+      INTERVAL_OPTIONS,
+      getIntervalOptionsForContext
+    } = await import("./config");
+
+    expect(getIntervalOptionsForContext(CONTEXT_TYPES.legacyGauge)).toEqual([
+      FIVE_MINUTE_ROLLUP,
+      ...INTERVAL_OPTIONS
+    ]);
+    expect(getIntervalOptionsForContext(CONTEXT_TYPES.legacyGarr)).toEqual([
+      FIVE_MINUTE_ROLLUP,
+      ...INTERVAL_OPTIONS
+    ]);
+    expect(getIntervalOptionsForContext(CONTEXT_TYPES.legacyRealtime)).toEqual(INTERVAL_OPTIONS);
+  });
+
+  it("does not mutate the shared interval options array", async () => {
+    const {
+      CONTEXT_TYPES,
+      INTERVAL_OPTIONS,
+      getIntervalOptionsForContext
+    } = await import("./config");
+
+    const initial = [...INTERVAL_OPTIONS];
+    getIntervalOptionsForContext(CONTEXT_TYPES.legacyGauge);
+    expect(INTERVAL_OPTIONS).toEqual(initial);
+  });
+
+  it("uses historic5 only for legacy gauge/garr with 5-minute rollup", async () => {
+    const {
+      CONTEXT_TYPES,
+      RAINFALL_TYPES,
+      FIVE_MINUTE_ROLLUP,
+      getRainfallDataTypePath
+    } = await import("./config");
+
+    expect(getRainfallDataTypePath({
+      contextType: CONTEXT_TYPES.legacyGauge,
+      rainfallDataType: RAINFALL_TYPES.historic,
+      rollup: FIVE_MINUTE_ROLLUP
+    })).toBe("historic5");
+
+    expect(getRainfallDataTypePath({
+      contextType: CONTEXT_TYPES.legacyGarr,
+      rainfallDataType: RAINFALL_TYPES.historic,
+      rollup: FIVE_MINUTE_ROLLUP
+    })).toBe("historic5");
+
+    expect(getRainfallDataTypePath({
+      contextType: CONTEXT_TYPES.legacyGauge,
+      rainfallDataType: RAINFALL_TYPES.historic,
+      rollup: "15-minute"
+    })).toBe(RAINFALL_TYPES.historic);
+
+    expect(getRainfallDataTypePath({
+      contextType: CONTEXT_TYPES.legacyRealtime,
+      rainfallDataType: RAINFALL_TYPES.historic,
+      rollup: FIVE_MINUTE_ROLLUP
+    })).toBe(RAINFALL_TYPES.historic);
+
+    expect(getRainfallDataTypePath({
+      contextType: CONTEXT_TYPES.legacyGauge,
+      rainfallDataType: RAINFALL_TYPES.realtime,
+      rollup: FIVE_MINUTE_ROLLUP
+    })).toBe(RAINFALL_TYPES.realtime);
+  });
+
+  it("omits rollup only when request path resolves to historic5", async () => {
+    const {
+      CONTEXT_TYPES,
+      RAINFALL_TYPES,
+      FIVE_MINUTE_ROLLUP,
+      shouldIncludeRollupParam
+    } = await import("./config");
+
+    expect(shouldIncludeRollupParam({
+      contextType: CONTEXT_TYPES.legacyGauge,
+      rainfallDataType: RAINFALL_TYPES.historic,
+      rollup: FIVE_MINUTE_ROLLUP
+    })).toBe(false);
+
+    expect(shouldIncludeRollupParam({
+      contextType: CONTEXT_TYPES.legacyGarr,
+      rainfallDataType: RAINFALL_TYPES.historic,
+      rollup: FIVE_MINUTE_ROLLUP
+    })).toBe(false);
+
+    expect(shouldIncludeRollupParam({
+      contextType: CONTEXT_TYPES.legacyGauge,
+      rainfallDataType: RAINFALL_TYPES.historic,
+      rollup: "15-minute"
+    })).toBe(true);
+
+    expect(shouldIncludeRollupParam({
+      contextType: CONTEXT_TYPES.legacyRealtime,
+      rainfallDataType: RAINFALL_TYPES.historic,
+      rollup: FIVE_MINUTE_ROLLUP
+    })).toBe(true);
+
+    expect(shouldIncludeRollupParam({
+      contextType: CONTEXT_TYPES.legacyRealtime,
+      rainfallDataType: RAINFALL_TYPES.realtime,
+      rollup: "15-minute"
+    })).toBe(true);
+  });
+});

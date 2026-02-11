@@ -68,6 +68,8 @@ export const INTERVAL_OPTIONS = [
   "Total"
 ]
 
+export const FIVE_MINUTE_ROLLUP = "5-minute";
+
 // the earliest date that can be selected:
 export const RAINFALL_MIN_DATE = `${import.meta.env.VITE_RAINFALL_MIN_DATE || "2000-04-01"}`
 
@@ -88,6 +90,37 @@ export const CONTEXT_TYPES = {
   legacyGarr: "legacyGarr",
   makeItRain: "makeItRain"
 }
+
+export const supportsFiveMinuteIntervalContext = (contextType) => (
+  contextType === CONTEXT_TYPES.legacyGauge
+  || contextType === CONTEXT_TYPES.legacyGarr
+);
+
+export const getIntervalOptionsForContext = (contextType) => (
+  supportsFiveMinuteIntervalContext(contextType)
+    ? [FIVE_MINUTE_ROLLUP, ...INTERVAL_OPTIONS]
+    : INTERVAL_OPTIONS
+);
+
+export const getRainfallDataTypePath = ({ contextType, rainfallDataType, rollup }) => {
+  if (
+    supportsFiveMinuteIntervalContext(contextType)
+    && rainfallDataType === RAINFALL_TYPES.historic
+    && rollup === FIVE_MINUTE_ROLLUP
+  ) {
+    return "historic5";
+  }
+
+  return rainfallDataType;
+};
+
+export const shouldIncludeRollupParam = ({ contextType, rainfallDataType, rollup }) => (
+  getRainfallDataTypePath({
+    contextType: contextType,
+    rainfallDataType: rainfallDataType,
+    rollup: rollup
+  }) !== "historic5"
+);
 
 export const HEADER_LABELS = {
   ts: "timestamp",

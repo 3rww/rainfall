@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { get } from 'lodash-es'
+import { flatMap, get, groupBy } from 'lodash-es'
 
 export const transformToMapboxSourceObject = geojson => {
   return {
@@ -187,17 +187,114 @@ export const joinTabletoGeojson = (gj, table, onGeojsonProp, onTableProp, dropFe
  * transform the rainfall API results object
  * @param {*} r 
  */
-export const transformRainfallResults = (r) => {
+const hasRainfallProperty = (value) => (
+  value !== null
+  && typeof value === "object"
+  && Object.prototype.hasOwnProperty.call(value, "rainfall")
+)
+
+const hasHistoric5Shape = (data) => (
+  Array.isArray(data)
+  && data.some((seriesOrPoint) => {
+    if (Array.isArray(seriesOrPoint?.data)) {
+      return seriesOrPoint.data.some((point) => hasRainfallProperty(point))
+    }
+    return hasRainfallProperty(seriesOrPoint)
+  })
+)
+
+const resolveHistoric5Source = (contextType, point) => {
+  if (contextType === "legacyGauge") {
+    return "G"
+  }
+  if (contextType === "legacyGarr") {
+    return null
+  }
+  return point?.src ?? null
+}
+
+const normalizeHistoric5PointRow = (point, fallbackSensorId, options = {}) => {
+  const sensorId = point?.id ?? fallbackSensorId
+  const value = point?.rainfall ?? point?.val
+
+  if (sensorId === null || sensorId === undefined || sensorId === "") {
+    return []
+  }
+  if (value === undefined) {
+    return []
+  }
+
+  return [{
+    sensorId,
+    sensorIdKey: `${typeof sensorId}:${sensorId}`,
+    point: {
+      ts: point?.ts,
+      val: value,
+      src: resolveHistoric5Source(options.contextType, point)
+    }
+  }]
+}
+
+const normalizeHistoric5RainfallResults = (r, options = {}) => {
+  const flattenedRows = flatMap(r.data ?? [], (seriesOrPoint) => {
+    if (Array.isArray(seriesOrPoint?.data)) {
+      return flatMap(seriesOrPoint.data, (point) => (
+        normalizeHistoric5PointRow(point, seriesOrPoint?.id, options)
+      ))
+    }
+    return normalizeHistoric5PointRow(seriesOrPoint, seriesOrPoint?.id, options)
+  })
+
+  const groupedRows = groupBy(flattenedRows, "sensorIdKey")
+  const sensorIdKeyOrder = new Set()
+
+  flattenedRows.forEach((row) => {
+    sensorIdKeyOrder.add(row.sensorIdKey)
+  })
+
+  r.data = [...sensorIdKeyOrder].map((sensorIdKey) => {
+    const rows = groupedRows[sensorIdKey] ?? []
+    return {
+      id: rows[0].sensorId,
+      data: rows.map((row) => row.point)
+    }
+  })
+
+  return r
+}
+
+export const transformRainfallResults = (r, options = {}) => {
+
+  if (!Array.isArray(r?.data)) {
+    r.data = []
+    return r
+  }
+
+  if (hasHistoric5Shape(r.data)) {
+    r = normalizeHistoric5RainfallResults(r, options)
+  }
 
   r.data.forEach((s) => {
+
+    if (!Array.isArray(s?.data)) {
+      s.data = []
+      s.total = 0
+      return
+    }
 
     // The API results don't come with rainfall total per sensor, 
     // so we tabulate rainfall values from one for all observation 
     // intervals for each sensor.we exclude erroneous negative numbers
     let initialValue = 0;
+    let seriesLength = s.data.length
+
+    if (seriesLength === 0) {
+      s.total = 0
+      return
+    }
 
     let total = (
-      s.data.length > 1 & s.data.length !== 0
+      seriesLength > 1
     ) ? (
         s.data
           .filter(i => i.val >= 0) // for the total, we exclude erroneous negative numbers
@@ -247,5 +344,3 @@ export const transformFeatureToOption = (f, featureNamePropertyPath, featureIdPr
 
     return opt
 }
-
-
