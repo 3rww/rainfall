@@ -91,6 +91,18 @@ export const CONTEXT_TYPES = {
   makeItRain: "makeItRain"
 }
 
+export const getSelectableSensorTypesForContext = (contextType) => {
+  if (contextType === CONTEXT_TYPES.legacyGauge) {
+    return [SENSOR_TYPES.gauge]
+  }
+
+  if (contextType === CONTEXT_TYPES.legacyGarr) {
+    return [SENSOR_TYPES.pixel]
+  }
+
+  return [SENSOR_TYPES.pixel, SENSOR_TYPES.gauge]
+}
+
 export const supportsFiveMinuteIntervalContext = (contextType) => (
   contextType === CONTEXT_TYPES.legacyGauge
   || contextType === CONTEXT_TYPES.legacyGarr
@@ -410,6 +422,17 @@ export const LAYERS_W_MOUSEOVER = [
   [`${LYR_HOVER_PREFIX}-gauge`, 'gauge'],
   // [`${LYR_HOVER_PREFIX}-gauge-halo`, 'gauge']
 ]
+
+export const getInteractiveMapLayersForContext = (contextType) => {
+  const hoverLayerBySensor = {
+    [SENSOR_TYPES.pixel]: `${LYR_HOVER_PREFIX}-pixel`,
+    [SENSOR_TYPES.gauge]: `${LYR_HOVER_PREFIX}-gauge`
+  }
+
+  return getSelectableSensorTypesForContext(contextType)
+    .map((sensorType) => hoverLayerBySensor[sensorType])
+    .filter((layerId) => layerId !== undefined)
+}
 
 export const LAYERS_W_RESULTS = [
   'pixel-results',

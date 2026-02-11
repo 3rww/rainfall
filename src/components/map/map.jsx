@@ -13,7 +13,7 @@ import {
   stopThinking
 } from '../../store/actions';
 import { initDataFetch, pickSensorMiddleware } from '../../store/middleware';
-import { LAYERS_W_MOUSEOVER } from '../../store/config'
+import { LAYERS_W_MOUSEOVER, getInteractiveMapLayersForContext } from '../../store/config'
 import diffStyles from '../../utilities/styleSpecDiff';
 import { transformFeatureToOption } from '../../store/utils/transformers'
 
@@ -26,7 +26,6 @@ import './map.scss'
 
 let DEBUG = true
 const MAPID = 'map'
-const LAYERS_W_SELECT = LAYERS_W_MOUSEOVER.map(i => i[0])
 
 class ReactMap extends Component {
 
@@ -78,7 +77,15 @@ class ReactMap extends Component {
     if (e === undefined) {
       return
     }
-    const layersToQuery = ['HOVER-pixel', 'HOVER-gauge']
+    const layersToQuery = getInteractiveMapLayersForContext(this.props.activeTab)
+    if (layersToQuery.length === 0) {
+      this.webmap.getCanvas().style.cursor = ''
+      this.setTooltip([])
+      this.setState({
+        features: []
+      })
+      return
+    }
     // query tilesets with mouse hover
     const features = this.webmap.queryRenderedFeatures(e.point, {
       layers: layersToQuery
@@ -95,6 +102,11 @@ class ReactMap extends Component {
    * run queryRenderedFeatures, using currentOverlays in redux store
    */
   handleMapClick(e) {
+    const layersToQuery = getInteractiveMapLayersForContext(this.props.activeTab)
+    if (layersToQuery.length === 0) {
+      return
+    }
+
     // set bbox as 5px reactangle area around clicked point
     const bbox = [[e.point.x - 1, e.point.y - 1], [e.point.x + 1, e.point.y + 1]];
 
@@ -102,7 +114,7 @@ class ReactMap extends Component {
      * query rendered features
      * This may return multiple features. 
      */
-    let features = this.webmap.queryRenderedFeatures(bbox, { layers: LAYERS_W_SELECT });
+    let features = this.webmap.queryRenderedFeatures(bbox, { layers: layersToQuery });
     
 
     // group selected features by the value of the `source` property;
@@ -238,10 +250,22 @@ class ReactMap extends Component {
         // When the user moves their mouse over the HOVER-* layer, we'll update the
         // feature state for the feature under the mouse.
         this.webmap.on('mousemove', lyrName, (e) => {
+          const interactiveLayers = getInteractiveMapLayersForContext(this.props.activeTab)
+          if (!interactiveLayers.includes(lyrName)) {
+            this.setTooltip([])
+            this.webmap.getCanvas().style.cursor = ''
+            if (hoveredStateId[lyrName]) {
+              this.webmap.setFeatureState(
+                { source: lyrSrc, id: hoveredStateId[lyrName] },
+                { hover: false }
+              );
+            }
+            hoveredStateId[lyrName] = null;
+            return
+          }
 
           this.makeTooltipOnHover(e, tooltip)
 
-          this.webmap.getCanvas().style.cursor = e.features.length ? 'pointer' : '';
           if (e.features.length > 0) {
             if (hoveredStateId[lyrName]) {
               this.webmap.setFeatureState(
@@ -259,9 +283,8 @@ class ReactMap extends Component {
 
         // When the mouse leaves the HOVER-* layer, update the feature state of the
         // previously hovered feature.
-        this.webmap.on('mouseleave', lyrName, (e) => {
-
-          this.makeTooltipOnHover(e, tooltip)
+        this.webmap.on('mouseleave', lyrName, () => {
+          this.setTooltip([])
 
           this.webmap.getCanvas().style.cursor = '';
           if (hoveredStateId[lyrName]) {

@@ -7,7 +7,7 @@ import {
   Tabs,
   Tab
 } from 'react-bootstrap'
-import {keys} from 'lodash-es';
+import { keys } from 'lodash-es';
 
 import Select from 'react-select';
 
@@ -69,49 +69,49 @@ class GeodataPicker extends React.Component {
         <Row className="g-0 mb-2">
           <Col>
             <strong>Where</strong>
-              {(gaugeCount > 0) ? (
-                <span className="mx-1 my-1"><Badge pill bg="primary">
-                  {`${gaugeCount} ${pluralize(gaugeCount, 'gauge', 'gauges')}`}
-                </Badge>
-                </span>
-              ) : (
-                null
-              )}                 
-              {(pixelCount > 0) ? (
-                <span className="mx-1 my-1"><Badge pill bg="primary">
-                  {`${pixelCount} ${pluralize(pixelCount, 'pixel', 'pixels')}`}
-                </Badge>
-                </span>
-              ) : (
-                null
-              )}
+            {(gaugeCount > 0) ? (
+              <span className="mx-1 my-1"><Badge pill bg="primary">
+                {`${gaugeCount} ${pluralize(gaugeCount, 'gauge', 'gauges')}`}
+              </Badge>
+              </span>
+            ) : (
+              null
+            )}
+            {(pixelCount > 0) ? (
+              <span className="mx-1 my-1"><Badge pill bg="primary">
+                {`${pixelCount} ${pluralize(pixelCount, 'pixel', 'pixels')}`}
+              </Badge>
+              </span>
+            ) : (
+              null
+            )}
           </Col>
         </Row>
 
         <Row className="g-0">
           <Col>
-          
+
             <Tabs defaultActiveKey="sensor" id="geomPickerTypes">
               <Tab eventKey="sensor" title="By Sensor" className="my-4">
 
 
                 {(this.props.context !== CONTEXT_TYPES.legacyGarr) ? (
-                // GAUGE SELECTOR
-                <Row className="g-0">
-                  <Col md={3}>
-                    <small>Rain Gauges</small>
-                  </Col>
-                  <Col md={9}>
-                    <Select
-                      isMulti
-                      value={this.props.selectedGauges}
-                      onChange={this.props.handleSelectGauge}
-                      options={this.props.gaugeOpts}
-                      menuPortalTarget={document.body}
-                      isClearable
-                    />
-                  </Col>
-                  {/* <Col md={2}>
+                  // GAUGE SELECTOR
+                  <Row className="g-0">
+                    <Col md={3}>
+                      <small>Rain Gauges</small>
+                    </Col>
+                    <Col md={9}>
+                      <Select
+                        isMulti
+                        value={this.props.selectedGauges}
+                        onChange={this.props.handleSelectGauge}
+                        options={this.props.gaugeOpts}
+                        menuPortalTarget={document.body}
+                        isClearable
+                      />
+                    </Col>
+                    {/* <Col md={2}>
                     {(gaugeCount > 0) ? (
                       <span className="mx-1 my-1"><Badge pill variant="primary">
                         {`${gaugeCount} ${pluralize(gaugeCount, 'gauge', 'gauges')}`}
@@ -121,30 +121,30 @@ class GeodataPicker extends React.Component {
                       null
                     )}
                   </Col> */}
-                </Row>
+                  </Row>
 
-                ):(
+                ) : (
                   null
                 )}
 
-              {(this.props.context !== CONTEXT_TYPES.legacyGauge) ? (
+                {(this.props.context !== CONTEXT_TYPES.legacyGauge) ? (
 
-                // PIXEL SELECTOR
-                <Row className="g-0">
-                  <Col md={3}>
-                    <small>Radar Pixels</small>
-                  </Col>
-                  <Col md={9}>
-                    <Select
-                      isMulti
-                      value={this.props.selectedPixels}
-                      onChange={this.props.handleSelectPixel}
-                      options={this.props.pixelOpts}
-                      menuPortalTarget={document.body}
-                      isClearable
-                    />            
-                  </Col>
-                  {/* <Col md={2}>
+                  // PIXEL SELECTOR
+                  <Row className="g-0">
+                    <Col md={3}>
+                      <small>Radar Pixels</small>
+                    </Col>
+                    <Col md={9}>
+                      <Select
+                        isMulti
+                        value={this.props.selectedPixels}
+                        onChange={this.props.handleSelectPixel}
+                        options={this.props.pixelOpts}
+                        menuPortalTarget={document.body}
+                        isClearable
+                      />
+                    </Col>
+                    {/* <Col md={2}>
                   {(pixelCount > 0) ? (
                       <span className="mx-1 my-1"><Badge pill variant="primary">
                         {`${pixelCount} ${pluralize(pixelCount, 'pixel', 'pixels')}`}
@@ -154,16 +154,17 @@ class GeodataPicker extends React.Component {
                       null
                     )}
                   </Col>           */}
-                </Row>
-                ):(
+                  </Row>
+                ) : (
                   null
                 )}
 
               </Tab>
+              {(this.props.context !== CONTEXT_TYPES.legacyGauge) ? (
               <Tab eventKey="geography" title="By Geography" className="my-4">
-              <Row className="g-0">
+                <Row className="g-0">
                   <Col md={12}>
-                  <Select
+                    <Select
                       placeholder="Select radar pixels by basin, municipality, or watershed"
                       isMulti
                       // value={this.props.selectedBasin}
@@ -171,19 +172,22 @@ class GeodataPicker extends React.Component {
                       options={this.props.geographyOpts}
                       menuPortalTarget={document.body}
                       isClearable
-                    />                         
+                    />
                   </Col>
-              </Row>
-              
+                </Row>
               </Tab>
+              ) : (
+                null
+              )}
+
             </Tabs>
-        
-          </Col>      
+
+          </Col>
         </Row>
 
       </div>
 
-   
+
 
     );
   }
@@ -196,7 +200,7 @@ function mapStateToProps(state, ownProps) {
 
   // pixel selection options
   var pixelOpts = selectMapStyleSourceDataFeatures(state, 'pixel')
-    .map(i => ({ value: i.properties.id, label: `${i.properties.id}`}))
+    .map(i => ({ value: i.properties.id, label: `${i.properties.id}` }))
   var selectedPixels = selectPickedSensors(state, ownProps.contextType, 'pixel')
 
   // gauge selection options
@@ -204,15 +208,15 @@ function mapStateToProps(state, ownProps) {
     .filter(i => i.properties.active === true)
     .map(i => ({ value: i.properties.id, label: `${i.properties.id}: ${i.properties.name}` }))
   var selectedGauges = selectPickedSensors(state, ownProps.contextType, 'gauge')
-  
+
   // geography selection options
   var geographyOpts = selectGeographyLookupsAsGroupedOptions(state)
   var selectedGeographies = selectPickedSensors(state, ownProps.contextType, 'basin')
-  
+
   return {
     gaugeOpts: gaugeOpts,
     pixelOpts: pixelOpts,
-    geographyOpts: geographyOpts, 
+    geographyOpts: geographyOpts,
     selectedBasin: selectedGeographies,
     selectedGauges: selectedGauges,
     selectedPixels: selectedPixels,
@@ -233,24 +237,24 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     handleSelectGauge: payload => {
       dispatch(pickSensorMiddleware({
-        contextType: ownProps.contextType, 
+        contextType: ownProps.contextType,
         inputType: "geomPicker",
         sensorLocationType: "gauge",
         selectedOptions: payload // this is a list of gauges
       }))
-    }, 
+    },
     handleSelectPixel: payload => {
       dispatch(pickSensorMiddleware({
-        contextType: ownProps.contextType, 
+        contextType: ownProps.contextType,
         inputType: "geomPicker",
         sensorLocationType: "pixel",
         selectedOptions: payload // this is a list of pixels
       }))
-    }, 
+    },
     handleSelectGeography: payload => {
       // console.log(payload)
       dispatch(pickSensorByGeographyMiddleware({
-        contextType: ownProps.contextType, 
+        contextType: ownProps.contextType,
         inputType: "geomPicker",
         sensorLocationType: "geography",
         selectedOptions: payload // this is a list of geography options

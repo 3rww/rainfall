@@ -53,6 +53,7 @@ import {
   REQUEST_TIME_INTERVAL,
   API_URL_ROOT,
   getRainfallDataTypePath,
+  getSelectableSensorTypesForContext,
   shouldIncludeRollupParam,
   // BREAKS_005,
   BREAKS_050,
@@ -748,9 +749,23 @@ export function pickSensorByGeographyMiddleware(payload) {
        * second: crosswalk the selected geographies to pixels and gauges
        */
 
-    let sensorTypes = ['pixel']//, 'gauge'] TODO: gauge lookups not yet implemented
+    const allowedSensorTypes = getSelectableSensorTypesForContext(contextType)
+    const allSensorTypes = [SENSOR_TYPES.gauge, SENSOR_TYPES.pixel]
+    const disallowedSensorTypes = allSensorTypes.filter((sensorType) => (
+      !allowedSensorTypes.includes(sensorType)
+    ))
 
-    sensorTypes.forEach(st => {
+    // Ensure hidden/disallowed sensor types are cleared for single-sensor contexts.
+    disallowedSensorTypes.forEach((sensorType) => {
+      dispatch(pickSensorMiddleware({
+        contextType: contextType,
+        sensorLocationType: sensorType,
+        selectedOptions: [],
+        inputType: inputType
+      }))
+    })
+
+    allowedSensorTypes.forEach(st => {
 
       // if (selectedOptions !== null || get(selectedOptions, 'length', 0) !== 0) {
 

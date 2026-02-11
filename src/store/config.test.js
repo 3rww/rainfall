@@ -173,4 +173,41 @@ describe("config interval and path helpers", () => {
       rollup: "15-minute"
     })).toBe(true);
   });
+
+  it("returns interactive map layers by context", async () => {
+    const {
+      CONTEXT_TYPES,
+      getInteractiveMapLayersForContext
+    } = await import("./config");
+
+    expect(getInteractiveMapLayersForContext(CONTEXT_TYPES.legacyRealtime)).toEqual([
+      "HOVER-pixel",
+      "HOVER-gauge"
+    ]);
+    expect(getInteractiveMapLayersForContext(CONTEXT_TYPES.legacyGauge)).toEqual([
+      "HOVER-gauge"
+    ]);
+    expect(getInteractiveMapLayersForContext(CONTEXT_TYPES.legacyGarr)).toEqual([
+      "HOVER-pixel"
+    ]);
+  });
+
+  it("returns selectable sensor types by context", async () => {
+    const {
+      CONTEXT_TYPES,
+      SENSOR_TYPES,
+      getSelectableSensorTypesForContext
+    } = await import("./config");
+
+    expect(getSelectableSensorTypesForContext(CONTEXT_TYPES.legacyRealtime)).toEqual([
+      SENSOR_TYPES.pixel,
+      SENSOR_TYPES.gauge
+    ]);
+    expect(getSelectableSensorTypesForContext(CONTEXT_TYPES.legacyGauge)).toEqual([
+      SENSOR_TYPES.gauge
+    ]);
+    expect(getSelectableSensorTypesForContext(CONTEXT_TYPES.legacyGarr)).toEqual([
+      SENSOR_TYPES.pixel
+    ]);
+  });
 });
