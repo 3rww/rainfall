@@ -35,7 +35,7 @@ class Navigation extends Component {
           title: (
             <Row>
               <Col lg={8}>
-                <h1>3RWW Rainfall <small><em>beta</em></small></h1>
+                <h1>3RWW Rainfall</h1>
                 <p className="lead">Map and download hyper-local rainfall measurements for Allegheny County</p>
               </Col>
               <Col>
@@ -78,12 +78,12 @@ class Navigation extends Component {
 
           <Navbar.Brand className="d-none d-sm-block">
             <img className="nav-brand-logo" src={`${ROOT}static/assets/3rww_logo_full_inverse_transparent.png`} alt="3RWW Logo" />&nbsp;
-            Rainfall <small><em>beta</em></small>
+            Rainfall
             {/* <small className="text-muted d-none d-lg-inline">by 3 Rivers Wet Weather</small> */}
           </Navbar.Brand>
           <Navbar.Brand className="d-block d-sm-none" style={{ fontSize: 0.9 + 'rem' }}>
             <img className="nav-brand-logo-xs" src={`${ROOT}static/assets/3rww_logo_full_inverse_transparent.png`} alt="3RWW Logo" />&nbsp;
-            Rainfall <small><em>beta</em></small>
+            Rainfall
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
