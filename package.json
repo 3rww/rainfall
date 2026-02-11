@@ -1,6 +1,6 @@
 {
   "name": "3rww-rainfall-viz",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.0.0",
@@ -27,6 +27,7 @@
     "react-markdown": "^10.0.0",
     "react-redux": "^9.0.0",
     "react-select": "^5.0.0",
+    "recharts": "^2.15.1",
     "remark-gfm": "^4.0.0",
     "sass": "^1.80.0"
   },

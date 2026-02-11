@@ -382,7 +382,6 @@ class DateTimePicker extends React.Component {
                   aria-label="start and end dates"
                   className="datetimepicker-control"
                 />
-
                 <Button
                   variant="light"
                   className="datetimepicker-control"

@@ -137,7 +137,7 @@ class DownloadsItem extends React.Component {
                   size="sm"
                   onClick={this.handleShow}
                 >
-                  View and Download Results Table
+                  View and Download Results
                 </Button>
 
                 {/* <ButtonToolbar aria-label="Download and Playback Toolbar">

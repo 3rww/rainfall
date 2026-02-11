@@ -1,0 +1,20 @@
+.download-modal-download-row {
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.download-modal-chart-meta {
+  margin-bottom: 0.75rem;
+}
+
+.download-chart-wrapper {
+  height: 460px;
+  min-height: 320px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .download-chart-wrapper {
+    height: 320px;
+  }
+}
