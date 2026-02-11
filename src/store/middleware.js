@@ -7,6 +7,7 @@ import {
   requestRainfallData,
   requestRainfallDataSuccess,
   requestRainfallDataFail,
+  removeFetchHistoryItem,
   asyncAction,
   asyncActionSuccess,
   asyncActionFail,
@@ -25,6 +26,7 @@ import {
 
 import {
   selectFetchKwargs,
+  selectFetchHistory,
   selectFetchHistoryItemById,
   selectActiveFetchHistoryItem,
   selectMapStyleSourceDataFeatures,
@@ -599,6 +601,66 @@ export function pickDownload(payload) {
 
   }
  
+}
+
+/**
+ * delete a rainfall result item from fetch history.
+ * if the removed item is currently active, activate the newest remaining
+ * history item in the same context, or clear map result layers if none remain.
+ * @param {*} payload
+ */
+export function deleteDownload(payload) {
+
+  let { contextType, requestId } = payload
+
+  return function (dispatch, getState) {
+    let state = getState()
+    let fetchHistoryItem = selectFetchHistoryItemById(state, requestId, contextType)
+
+    if (fetchHistoryItem === undefined) {
+      return
+    }
+
+    let wasActive = fetchHistoryItem.isActive === true
+
+    dispatch(removeFetchHistoryItem({
+      contextType: contextType,
+      requestId: requestId
+    }))
+
+    if (!wasActive) {
+      return
+    }
+
+    let updatedState = getState()
+    let updatedHistory = selectFetchHistory(updatedState, contextType)
+
+    if (updatedHistory.length > 0) {
+      let newestHistoryItem = updatedHistory[updatedHistory.length - 1]
+      dispatch(pickActiveResultItem({
+        requestId: newestHistoryItem.requestId,
+        contextType: contextType
+      }))
+    } else {
+      dispatch(resetLayerSrcs({
+        lyrSrcNames: keys(SENSOR_TYPES)
+      }))
+
+      // Preserve current sensor selections when clearing the last result.
+      let activeKwargs = selectFetchKwargs(updatedState, contextType)
+      keys(SENSOR_TYPES).forEach(sensorLocationType => {
+        let selectedOptions = activeKwargs?.sensorLocations?.[sensorLocationType] || []
+        if (selectedOptions.length > 0) {
+          dispatch(highlightSensor({
+            contextType: contextType,
+            sensorLocationType: sensorLocationType,
+            selectedOptions: selectedOptions
+          }))
+        }
+      })
+    }
+  }
+
 }
 
 // /**

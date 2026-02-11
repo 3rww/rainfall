@@ -43,6 +43,7 @@ export const requestRainfallData = createAction('GETTING_RAINFALL')
 export const requestRainfallDataInvalid = createAction('GETTING_RAINFALL_INVALID')
 export const requestRainfallDataSuccess = createAction('GETTING_RAINFALL_SUCCESS')
 export const requestRainfallDataFail = createAction('GETTING_RAINFALL_FAIL')
+export const removeFetchHistoryItem = createAction('REMOVE_FETCH_HISTORY_ITEM')
 
 // filter rainfall events
 export const filterEventByHours = createAction('FILTER_EVENT_BY_HOUR')

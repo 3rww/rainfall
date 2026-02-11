@@ -2,3 +2,30 @@
     background-color: #2195f36c;
     cursor: pointer;
 }
+
+.download-list-item {
+    position: relative;
+    padding-right: 2.5rem;
+}
+
+.download-list-item-row {
+    padding-top: 1.5rem;
+}
+
+.download-list-item-delete {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 2;
+}
+
+.download-list-item-content {
+    padding-right: 0.25rem;
+}
+
+.download-list-item-spinner {
+    align-items: flex-start;
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+}

@@ -26,6 +26,7 @@ import {
   requestRainfallDataInvalid,
   requestRainfallDataSuccess,
   requestRainfallDataFail,
+  removeFetchHistoryItem,
   asyncAction,
   asyncActionSuccess,
   asyncActionFail,
@@ -244,6 +245,11 @@ const caseReducers = {
       }
 
     },
+    [removeFetchHistoryItem.type]: (state, action) => {
+      let { contextType, requestId } = action.payload
+      state.fetchKwargs[contextType].history = selectFetchHistory(state, contextType)
+        .filter(i => i.requestId !== requestId)
+    },
     /**
      * upon successful rainfall data request, turn off fetching status, save
      * the data, save the fetch kwargs as processed, and save the API status.
@@ -280,6 +286,9 @@ const caseReducers = {
       let { requestId, results, status, messages } = action.payload
       console.log(requestId, status)
       let fetchItem = selectAnyFetchHistoryItemById(state, requestId)
+      if (fetchItem === undefined) {
+        return
+      }
       fetchItem.isFetching = fetchItem.isFetching - 1
       fetchItem.status = status
       fetchItem.messages = messages
@@ -293,11 +302,16 @@ const caseReducers = {
 
       let { requestId, contextType } = action.payload
 
+      // The request can be deleted from history while async callbacks are in flight.
+      let i = selectFetchHistoryItemById(state, requestId, contextType)
+      if (i === undefined) {
+        return
+      }
+
       // turn off all other items
       selectFetchHistoryItemsByIdInverse(state, requestId, contextType)
         .forEach(i => i.isActive = false)
       // turn on this item
-      let i = selectFetchHistoryItemById(state, requestId, contextType)
       i.isActive = true
 
       // take the results from this item and join them to the layer sources
