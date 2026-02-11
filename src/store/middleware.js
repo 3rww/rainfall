@@ -27,8 +27,6 @@ import {
   selectFetchKwargs,
   selectFetchHistoryItemById,
   selectActiveFetchHistoryItem,
-  selectLatestlegacyGarrTS,
-  selectLatestlegacyGaugeTS,
   selectMapStyleSourceDataFeatures,
   selectSensorGeographyLookup
 } from './selectors'
@@ -60,8 +58,14 @@ import {
   BREAKS_050,
   // BREAKS_100,
   SENSOR_TYPES,
-  ENABLE_SHARE_STATE
+  ENABLE_SHARE_STATE,
+  RAINFALL_MIN_DATE,
+  RAINFALL_TYPES
 } from './config'
+import {
+  clampDateTimeRange,
+  resolveAvailableBounds
+} from "./utils/dateBounds";
 
 import {
   hydrateShareStateToRedux,
@@ -237,28 +241,55 @@ export function initDataFetch(payload) {
       .then(() => {
 
         // set the default date/time range for all the contexts
+        const state = store.getState()
+        const latest = get(state, "stats.latest", {})
+        const now = moment().toISOString()
 
-        dispatch(pickRainfallDateTimeRange({
+        const dispatchDefaultRange = ({ contextType, rainfallDataType, lookbackAmount, lookbackUnit }) => {
+          const activeKwargs = selectFetchKwargs(state, contextType)
+          const bounds = resolveAvailableBounds({
+            contextType: contextType,
+            rainfallDataType: rainfallDataType,
+            rollup: activeKwargs.rollup,
+            latest: latest,
+            rainfallMinDate: RAINFALL_MIN_DATE,
+            now: now
+          })
+
+          const clamped = clampDateTimeRange({
+            start: bounds.max.clone().subtract(lookbackAmount, lookbackUnit),
+            end: bounds.max,
+            min: bounds.min,
+            max: bounds.max
+          })
+
+          dispatch(pickRainfallDateTimeRange({
+            contextType: contextType,
+            startDt: clamped.start.toISOString(),
+            endDt: clamped.end.toISOString()
+          }))
+        }
+
+        dispatchDefaultRange({
           contextType: CONTEXT_TYPES.legacyRealtime,
-          startDt: moment().subtract(2, 'hour').toISOString(),
-          endDt: moment().toISOString()
-        }))
+          rainfallDataType: RAINFALL_TYPES.realtime,
+          lookbackAmount: 2,
+          lookbackUnit: "hour"
+        })
 
-        let maxDateLegacyGauge = selectLatestlegacyGaugeTS(store.getState())
-        dispatch(pickRainfallDateTimeRange({
+        dispatchDefaultRange({
           contextType: CONTEXT_TYPES.legacyGauge,
-          // startDt: moment(maxDateLegacyGauge).startOf('month').toISOString(),
-          startDt: moment(maxDateLegacyGauge).subtract(1, 'month').toISOString(),
-          endDt: maxDateLegacyGauge
-        }))
+          rainfallDataType: RAINFALL_TYPES.historic,
+          lookbackAmount: 1,
+          lookbackUnit: "month"
+        })
 
-        let maxDateLegacyGarr = selectLatestlegacyGarrTS(store.getState())
-        dispatch(pickRainfallDateTimeRange({
+        dispatchDefaultRange({
           contextType: CONTEXT_TYPES.legacyGarr,
-          // startDt: moment(maxDateLegacyGarr).startOf('month').toISOString(),
-          startDt: moment(maxDateLegacyGarr).subtract(1, 'month').toISOString(),
-          endDt: maxDateLegacyGarr
-        }))
+          rainfallDataType: RAINFALL_TYPES.historic,
+          lookbackAmount: 1,
+          lookbackUnit: "month"
+        })
 
       })
       .then(async () => {

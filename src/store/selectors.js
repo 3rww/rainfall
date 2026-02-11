@@ -232,6 +232,10 @@ export const selectEventStats = (state) => state.rainfallEvents.stats
 
 export const selectLatestTimestamps = (state) => state.stats.latest
 
+export const selectLatestlegacyRealtimeGaugeTS = (state) => selectLatestTimestamps(state)['realtime-gauge']
+
+export const selectLatestlegacyRealtimeRadarTS = (state) => selectLatestTimestamps(state)['realtime-radar']
+
 export const selectLatestlegacyGaugeTS = (state) => selectLatestTimestamps(state)['calibrated-gauge']
 
 export const selectLatestlegacyGarrTS = (state) => selectLatestTimestamps(state)['calibrated-radar']

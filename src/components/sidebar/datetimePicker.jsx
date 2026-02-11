@@ -20,22 +20,30 @@ import EventsList from './eventsList';
 import { pickRainfallDateTimeRange } from '../../store/actions';
 import {
   selectFetchKwargs,
-  selectEarliestlegacyGauge5MinTS,
-  selectEarliestlegacyGarr5MinTS,
-  selectLatestlegacyGauge5MinTS,
-  selectLatestlegacyGaugeTS,
-  selectLatestlegacyGarr5MinTS,
-  selectLatestlegacyGarrTS
+  selectLatestTimestamps
 } from '../../store/selectors';
 import {
   CONTEXT_TYPES,
-  FIVE_MINUTE_ROLLUP,
   RAINFALL_TYPES,
   RAINFALL_MIN_DATE
 } from '../../store/config';
+import {
+  clampDateTimeRange,
+  isRangeWithinBounds,
+  resolveAvailableBounds
+} from '../../store/utils/dateBounds';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import './datetimePicker.scss';
+
+const DATE_FORMAT = 'MM/DD/YYYY hh:mm A';
+const NOTE_DATE_FORMAT = 'MM/DD/YYYY';
+
+const CONTEXT_AVAILABILITY_LABELS = {
+  [CONTEXT_TYPES.legacyRealtime]: 'real-time rainfall',
+  [CONTEXT_TYPES.legacyGauge]: 'historical rain gauge rainfall',
+  [CONTEXT_TYPES.legacyGarr]: 'calibrated radar rainfall'
+};
 
 class DateTimePicker extends React.Component {
   constructor(props) {
@@ -46,6 +54,7 @@ class DateTimePicker extends React.Component {
     this.handleRangeModalShow = this.handleRangeModalShow.bind(this);
     this.handleRangeModalClose = this.handleRangeModalClose.bind(this);
     this.handleApplyRange = this.handleApplyRange.bind(this);
+    this.handlePresetPick = this.handlePresetPick.bind(this);
 
     this.state = {
       showEventModal: false,
@@ -53,6 +62,91 @@ class DateTimePicker extends React.Component {
       pendingStart: null,
       pendingEnd: null
     };
+  }
+
+  componentDidMount() {
+    this.clampActiveStoreRange();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const boundsChanged = (
+      !this.props.minDate.isSame(prevProps.minDate)
+      || !this.props.maxDate.isSame(prevProps.maxDate)
+    );
+    const activeChanged = (
+      !this.props.rawStartDt.isSame(prevProps.rawStartDt)
+      || !this.props.rawEndDt.isSame(prevProps.rawEndDt)
+    );
+
+    if (boundsChanged || activeChanged) {
+      this.clampActiveStoreRange();
+    }
+
+    if (this.state.showRangeModal) {
+      const modalJustOpened = !prevState.showRangeModal && this.state.showRangeModal;
+      if (modalJustOpened || boundsChanged) {
+        this.clampPendingModalRange();
+      }
+    }
+  }
+
+  clampActiveStoreRange() {
+    if (!this.props.rawStartDt.isValid() || !this.props.rawEndDt.isValid()) {
+      return;
+    }
+
+    const clamped = clampDateTimeRange({
+      start: this.props.rawStartDt,
+      end: this.props.rawEndDt,
+      min: this.props.minDate,
+      max: this.props.maxDate
+    });
+
+    if (!clamped.start || !clamped.end) {
+      return;
+    }
+
+    if (
+      !clamped.start.isSame(this.props.rawStartDt)
+      || !clamped.end.isSame(this.props.rawEndDt)
+    ) {
+      this.props.dispatchPickRainfallDateTimeRange({
+        startDt: clamped.start.toISOString(),
+        endDt: clamped.end.toISOString()
+      });
+    }
+  }
+
+  clampPendingModalRange() {
+    const clamped = clampDateTimeRange({
+      start: this.state.pendingStart || this.props.startDt,
+      end: this.state.pendingEnd || this.props.endDt,
+      min: this.props.minDate,
+      max: this.props.maxDate
+    });
+
+    if (!clamped.start || !clamped.end) {
+      return;
+    }
+
+    const nextPendingStart = clamped.start.toDate();
+    const nextPendingEnd = clamped.end.toDate();
+
+    const startChanged = (
+      this.state.pendingStart === null
+      || this.state.pendingStart.getTime() !== nextPendingStart.getTime()
+    );
+    const endChanged = (
+      this.state.pendingEnd === null
+      || this.state.pendingEnd.getTime() !== nextPendingEnd.getTime()
+    );
+
+    if (startChanged || endChanged) {
+      this.setState({
+        pendingStart: nextPendingStart,
+        pendingEnd: nextPendingEnd
+      });
+    }
   }
 
   handleEventModalClose() {
@@ -68,10 +162,17 @@ class DateTimePicker extends React.Component {
   }
 
   handleRangeModalShow() {
+    const clamped = clampDateTimeRange({
+      start: this.props.startDt,
+      end: this.props.endDt,
+      min: this.props.minDate,
+      max: this.props.maxDate
+    });
+
     this.setState({
       showRangeModal: true,
-      pendingStart: this.props.startDt ? this.props.startDt.toDate() : new Date(),
-      pendingEnd: this.props.endDt ? this.props.endDt.toDate() : new Date()
+      pendingStart: clamped.start ? clamped.start.toDate() : this.props.minDate.toDate(),
+      pendingEnd: clamped.end ? clamped.end.toDate() : this.props.maxDate.toDate()
     });
   }
 
@@ -82,19 +183,63 @@ class DateTimePicker extends React.Component {
       return;
     }
 
+    const clamped = clampDateTimeRange({
+      start: pendingStart,
+      end: pendingEnd,
+      min: this.props.minDate,
+      max: this.props.maxDate
+    });
+
+    if (!clamped.start || !clamped.end) {
+      return;
+    }
+
     this.props.dispatchPickRainfallDateTimeRange({
-      startDt: moment(pendingStart).toISOString(),
-      endDt: moment(pendingEnd).toISOString()
+      startDt: clamped.start.toISOString(),
+      endDt: clamped.end.toISOString()
     });
 
     this.setState({ showRangeModal: false });
   }
 
-  handlePresetPick(range) {
-    this.setState({
-      pendingStart: range[0].toDate(),
-      pendingEnd: range[1].toDate()
+  handlePresetPick(label, range) {
+    const [attemptedStart, attemptedEnd] = range;
+    const isWithinBounds = isRangeWithinBounds({
+      start: attemptedStart,
+      end: attemptedEnd,
+      min: this.props.minDate,
+      max: this.props.maxDate
     });
+
+    if (!isWithinBounds) {
+      console.log('[DateTimePicker] preset range outside available bounds', {
+        label: label,
+        contextType: this.props.contextType,
+        rollup: this.props.rollup,
+        attemptedStart: moment(attemptedStart).toISOString(),
+        attemptedEnd: moment(attemptedEnd).toISOString(),
+        min: this.props.minDate.toISOString(),
+        max: this.props.maxDate.toISOString()
+      });
+      return;
+    }
+
+    this.setState({
+      pendingStart: attemptedStart.toDate(),
+      pendingEnd: attemptedEnd.toDate()
+    });
+  }
+
+  buildAvailabilityNote() {
+    const contextLabel = (
+      CONTEXT_AVAILABILITY_LABELS[this.props.contextType]
+      || 'rainfall'
+    );
+    const intervalLabel = this.props.rollup || 'selected';
+    const minDateText = this.props.minDate.format(NOTE_DATE_FORMAT);
+    const maxDateText = this.props.maxDate.format(NOTE_DATE_FORMAT);
+
+    return `${intervalLabel} ${contextLabel} data is available between ${minDateText} and ${maxDateText}`;
   }
 
   render() {
@@ -113,18 +258,18 @@ class DateTimePicker extends React.Component {
           <Modal.Body>
             <Row className="g-3">
               <Col xs={3} className="border-end">
-              <div className="btn-group-vertical w-100" role="group" aria-label="Quick Ranges">
-                {Object.entries(this.props.ranges).map(([label, range]) => (
-                  <Button
-                    key={`${this.props.contextType}-${label}`}
-                    variant="outline-primary"
-                    size="sm"
-                    onClick={() => this.handlePresetPick(range)}
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </div>
+                <div className="btn-group-vertical w-100" role="group" aria-label="Quick Ranges">
+                  {Object.entries(this.props.ranges).map(([label, range]) => (
+                    <Button
+                      key={`${this.props.contextType}-${label}`}
+                      variant="outline-primary"
+                      size="sm"
+                      onClick={() => this.handlePresetPick(label, range)}
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </div>
               </Col>
               <Col xs={9}>
                 <Row>
@@ -133,9 +278,16 @@ class DateTimePicker extends React.Component {
                     <DatePicker
                       selected={pendingStart}
                       onChange={(date) => {
-                        const nextStart = date;
-                        const nextEnd = pendingEnd && date && pendingEnd < date ? date : pendingEnd;
-                        this.setState({ pendingStart: nextStart, pendingEnd: nextEnd });
+                        const clamped = clampDateTimeRange({
+                          start: date,
+                          end: pendingEnd,
+                          min: this.props.minDate,
+                          max: this.props.maxDate
+                        });
+                        this.setState({
+                          pendingStart: clamped.start ? clamped.start.toDate() : null,
+                          pendingEnd: clamped.end ? clamped.end.toDate() : null
+                        });
                       }}
                       showTimeSelect
                       timeIntervals={15}
@@ -149,7 +301,18 @@ class DateTimePicker extends React.Component {
                     <p className="lead mb-0">End</p>
                     <DatePicker
                       selected={pendingEnd}
-                      onChange={(date) => this.setState({ pendingEnd: date })}
+                      onChange={(date) => {
+                        const clamped = clampDateTimeRange({
+                          start: pendingStart,
+                          end: date,
+                          min: this.props.minDate,
+                          max: this.props.maxDate
+                        });
+                        this.setState({
+                          pendingStart: clamped.start ? clamped.start.toDate() : null,
+                          pendingEnd: clamped.end ? clamped.end.toDate() : null
+                        });
+                      }}
                       showTimeSelect
                       timeIntervals={15}
                       dateFormat="MM/dd/yyyy hh:mm aa"
@@ -157,7 +320,14 @@ class DateTimePicker extends React.Component {
                       maxDate={this.props.maxDate.toDate()}
                       className="form-control"
                     />
-                  </Col>                  
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    <p className="datetimepicker-range-note mb-0">
+                      {this.buildAvailabilityNote()}
+                    </p>
+                  </Col>
                 </Row>
               </Col>
             </Row>
@@ -206,7 +376,7 @@ class DateTimePicker extends React.Component {
                   plaintext
                   readOnly
                   placeholder="start and end date/times"
-                  value={`${this.props.startDt.format('MM/DD/YYYY hh:mm A')} to ${this.props.endDt.format('MM/DD/YYYY hh:mm A')}`}
+                  value={`${this.props.startDt.format(DATE_FORMAT)} to ${this.props.endDt.format(DATE_FORMAT)}`}
                   aria-label="start and end dates"
                   className="datetimepicker-control"
                 />
@@ -250,85 +420,87 @@ class DateTimePicker extends React.Component {
 }
 
 function mapStateToProps(state, ownProps) {
-  let currentKwargs = selectFetchKwargs(state, ownProps.contextType);
+  const currentKwargs = selectFetchKwargs(state, ownProps.contextType);
+  const now = moment().toISOString();
+  const bounds = resolveAvailableBounds({
+    contextType: ownProps.contextType,
+    rainfallDataType: ownProps.rainfallDataType,
+    rollup: currentKwargs.rollup,
+    latest: selectLatestTimestamps(state),
+    rainfallMinDate: RAINFALL_MIN_DATE,
+    now: now
+  });
 
-  // calculate different available ranges, start, and endtimes, depending on rainfall data type
-  let startDt = moment(currentKwargs.startDt);
-  let endDt = moment(currentKwargs.endDt);
-  let maxDate = false;
-  let minDate = RAINFALL_MIN_DATE;
+  const rawStartDt = moment(currentKwargs.startDt);
+  const rawEndDt = moment(currentKwargs.endDt);
+  let startDt = rawStartDt.clone();
+  let endDt = rawEndDt.clone();
+  const minDate = bounds.min.clone();
+  const maxDate = bounds.max.clone();
   let ranges = {};
-  let isHistoricFiveMinute = (
-    ownProps.rainfallDataType === RAINFALL_TYPES.historic
-    && currentKwargs.rollup === FIVE_MINUTE_ROLLUP
-  );
+  const hasValidRawRange = rawStartDt.isValid() && rawEndDt.isValid();
 
-  if (ownProps.contextType === CONTEXT_TYPES.legacyGarr) {
-    if (isHistoricFiveMinute) {
-      minDate = selectEarliestlegacyGarr5MinTS(state) || RAINFALL_MIN_DATE;
-      maxDate = selectLatestlegacyGarr5MinTS(state) || selectLatestlegacyGarrTS(state);
-    } else {
-      maxDate = selectLatestlegacyGarrTS(state);
-    }
-  } else if (ownProps.contextType === CONTEXT_TYPES.legacyGauge) {
-    if (isHistoricFiveMinute) {
-      minDate = selectEarliestlegacyGauge5MinTS(state) || RAINFALL_MIN_DATE;
-      maxDate = selectLatestlegacyGauge5MinTS(state) || selectLatestlegacyGaugeTS(state);
-    } else {
-      maxDate = selectLatestlegacyGaugeTS(state);
-    }
+  if (hasValidRawRange) {
+    const clampedActiveRange = clampDateTimeRange({
+      start: rawStartDt,
+      end: rawEndDt,
+      min: minDate,
+      max: maxDate
+    });
+    startDt = clampedActiveRange.start;
+    endDt = clampedActiveRange.end;
   } else {
-    maxDate = moment().toISOString(); // right now
+    startDt = false;
+    endDt = false;
   }
 
   if (ownProps.rainfallDataType === RAINFALL_TYPES.historic) {
     ranges = {
-      'Latest month': [moment(maxDate).startOf('month'), moment(maxDate)],
-      'Latest 3 months': [moment(maxDate).subtract(2, 'month').startOf('month'), moment(maxDate)],
-      'Latest 6 months': [moment(maxDate).subtract(5, 'month').startOf('month'), moment(maxDate)],
-      'Latest 12 months': [moment(maxDate).subtract(11, 'month').startOf('month'), moment(maxDate)],
-      'Latest Available This Year': [moment(maxDate).startOf('year'), moment(maxDate)],
+      'Latest month': [maxDate.clone().startOf('month'), maxDate.clone()],
+      'Latest 3 months': [maxDate.clone().subtract(2, 'month').startOf('month'), maxDate.clone()],
+      'Latest 6 months': [maxDate.clone().subtract(5, 'month').startOf('month'), maxDate.clone()],
+      'Latest 12 months': [maxDate.clone().subtract(11, 'month').startOf('month'), maxDate.clone()],
+      'Latest Available This Year': [maxDate.clone().startOf('year'), maxDate.clone()],
       'Last Year': [
-        moment(maxDate).subtract(1, 'year').startOf('year'),
-        moment(maxDate).subtract(1, 'year').endOf('year')
+        maxDate.clone().subtract(1, 'year').startOf('year'),
+        maxDate.clone().subtract(1, 'year').endOf('year')
       ]
     };
   } else if (ownProps.rainfallDataType === RAINFALL_TYPES.realtime) {
-    let now = moment().toISOString();
     ranges = {
-      'Past 2 hours': [moment(now).subtract(2, 'hour'), moment(now)],
-      'Past 4 hours': [moment(now).subtract(4, 'hour'), moment(now)],
-      'Past 6 hours': [moment(now).subtract(6, 'hour'), moment(now)],
-      'Past 12 hours': [moment(now).subtract(12, 'hour'), moment(now)],
-      'Past 24 hours': [moment(now).subtract(24, 'hour'), moment(now)],
-      'Past 48 hours': [moment(now).subtract(48, 'hour'), moment(now)],
-      Today: [moment(now).startOf('day'), moment(now)],
-      Yesterday: [moment(now).subtract(1, 'day').startOf('day'), moment(now).subtract(1, 'day').endOf('day')],
-      'Past 3 days': [moment(now).subtract(3, 'day').startOf('day'), moment(now)],
-      'Past 7 days': [moment(now).subtract(7, 'day').startOf('day'), moment(now)],
-      'Past month': [moment(now).subtract(1, 'month').startOf('day'), moment(now)],
-      'Past 3 months': [moment(now).subtract(3, 'month').startOf('month'), moment(now)]
+      'Past 2 hours': [maxDate.clone().subtract(2, 'hour'), maxDate.clone()],
+      'Past 4 hours': [maxDate.clone().subtract(4, 'hour'), maxDate.clone()],
+      'Past 6 hours': [maxDate.clone().subtract(6, 'hour'), maxDate.clone()],
+      'Past 12 hours': [maxDate.clone().subtract(12, 'hour'), maxDate.clone()],
+      'Past 24 hours': [maxDate.clone().subtract(24, 'hour'), maxDate.clone()],
+      'Past 48 hours': [maxDate.clone().subtract(48, 'hour'), maxDate.clone()],
+      Today: [maxDate.clone().startOf('day'), maxDate.clone()],
+      Yesterday: [maxDate.clone().subtract(1, 'day').startOf('day'), maxDate.clone().subtract(1, 'day').endOf('day')],
+      'Past 3 days': [maxDate.clone().subtract(3, 'day').startOf('day'), maxDate.clone()],
+      'Past 7 days': [maxDate.clone().subtract(7, 'day').startOf('day'), maxDate.clone()],
+      'Past month': [maxDate.clone().subtract(1, 'month').startOf('day'), maxDate.clone()],
+      'Past 3 months': [maxDate.clone().subtract(3, 'month').startOf('month'), maxDate.clone()]
     };
   } else {
-    maxDate = false;
     startDt = false;
     endDt = false;
     ranges = {};
   }
 
-  let p = {
-    local: { format: 'MM/DD/YYYY hh:mm A' },
+  return {
+    local: { format: DATE_FORMAT },
     startDt: startDt,
     endDt: endDt,
-    minDate: moment(minDate),
-    maxDate: moment(maxDate),
-    minYear: moment(minDate).year(),
-    maxYear: moment().year(),
+    rawStartDt: rawStartDt,
+    rawEndDt: rawEndDt,
+    minDate: minDate,
+    maxDate: maxDate,
+    minYear: minDate.year(),
+    maxYear: maxDate.year(),
     ranges: ranges,
     rainfallDataType: ownProps.rainfallDataType,
+    rollup: currentKwargs.rollup
   };
-
-  return p;
 }
 
 const mapDispatchToProps = (dispatch, ownProps) => {

@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   selectEarliestlegacyGauge5MinTS,
   selectEarliestlegacyGarr5MinTS,
+  selectLatestlegacyRealtimeGaugeTS,
+  selectLatestlegacyRealtimeRadarTS,
   selectLatestlegacyGauge5MinTS,
   selectLatestlegacyGarr5MinTS,
   selectLatestlegacyGaugeTS,
@@ -10,6 +12,20 @@ import {
 } from "./selectors";
 
 describe("latest timestamp selectors", () => {
+  it("maps legacy realtime latest timestamp keys", () => {
+    const state = {
+      stats: {
+        latest: {
+          "realtime-gauge": "2026-02-10T00:00:00Z",
+          "realtime-radar": "2026-02-11T00:00:00Z"
+        }
+      }
+    };
+
+    expect(selectLatestlegacyRealtimeGaugeTS(state)).toBe("2026-02-10T00:00:00Z");
+    expect(selectLatestlegacyRealtimeRadarTS(state)).toBe("2026-02-11T00:00:00Z");
+  });
+
   it("maps legacy default latest timestamp keys", () => {
     const state = {
       stats: {
