@@ -232,6 +232,26 @@ export const selectEventStats = (state) => state.rainfallEvents.stats
 
 export const selectLatestTimestamps = (state) => state.stats.latest
 
+export const selectLatestlegacyRealtimeGaugeTS = (state) => selectLatestTimestamps(state)['realtime-gauge']
+
+export const selectLatestlegacyRealtimeRadarTS = (state) => selectLatestTimestamps(state)['realtime-radar']
+
 export const selectLatestlegacyGaugeTS = (state) => selectLatestTimestamps(state)['calibrated-gauge']
 
 export const selectLatestlegacyGarrTS = (state) => selectLatestTimestamps(state)['calibrated-radar']
+
+export const selectEarliestlegacyGauge5MinTS = (state) => (
+  selectLatestTimestamps(state)['earliest-5min-calibrated-gauge']
+)
+
+export const selectLatestlegacyGauge5MinTS = (state) => (
+  selectLatestTimestamps(state)['latest-5min-calibrated-gauge']
+)
+
+export const selectEarliestlegacyGarr5MinTS = (state) => (
+  selectLatestTimestamps(state)['earliest-5min-calibrated-radar']
+)
+
+export const selectLatestlegacyGarr5MinTS = (state) => (
+  selectLatestTimestamps(state)['latest-5min-calibrated-radar']
+)

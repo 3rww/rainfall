@@ -1,13 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Row, Col, ListGroup, Spinner } from 'react-bootstrap';
+import { Row, Col, ListGroup, Spinner, CloseButton } from 'react-bootstrap';
 import { includes } from 'lodash-es'
 
 import DownloadItem from './downloadItem'
-import { pickDownload } from '../../store/middleware'
+import { pickDownload, deleteDownload } from '../../store/middleware'
 import { selectFetchHistory } from '../../store/selectors'
 
-import './downloadList.scss'
+import './downloadList.css'
 
 /**
 * Downloads List Component. 
@@ -17,10 +17,17 @@ class DownloadsList extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.handleListClick = this.handleListClick.bind(this);
+    this.handleDeleteClick = this.handleDeleteClick.bind(this);
   }
 
   handleListClick(fh) {
     this.props.pickDownload(fh)
+  }
+
+  handleDeleteClick(e, requestId) {
+    e.preventDefault()
+    e.stopPropagation()
+    this.props.deleteDownload({ requestId: requestId })
   }
 
   render() {
@@ -31,7 +38,7 @@ class DownloadsList extends React.Component {
 
       <ListGroup variant="flush">
 
-        {this.props.fetchHistory.slice(0).reverse().map((i, idx) => {
+        {this.props.fetchHistory.slice(0).reverse().map((i) => {
 
           let failedJob = includes(['deferred', 'failed', "does not exist", 'error'], i.status)
 
@@ -46,17 +53,22 @@ class DownloadsList extends React.Component {
 
           return (
             <ListGroup.Item
-              key={idx}
+              key={i.requestId}
               // active={i.isActive}
               as="div"
-              className="mx-0"
+              className="mx-0 download-list-item"
               action
               onClick={() => this.handleListClick(i)}
               variant={listColor}
             >
+              <CloseButton
+                className="download-list-item-delete"
+                aria-label="Delete rainfall query result"
+                onClick={(e) => this.handleDeleteClick(e, i.requestId)}
+              />
 
-              <Row noGutters>
-                <Col sm={ i.isFetching ? (11) : (12) }>
+              <Row className="g-0 download-list-item-row">
+                <Col sm={ i.isFetching ? (11) : (12) } className="download-list-item-content">
                   <DownloadItem
                     fetchHistoryItem={i}
                     contextType={this.props.contextType}
@@ -67,12 +79,12 @@ class DownloadsList extends React.Component {
                 
                   {
                     i.isFetching ? (
-                      <Col sm={1}>
+                      <Col sm={1} className="download-list-item-spinner">
                         <Spinner
                           animation="border"
                           variant="primary"
                         >
-                          <span className="sr-only">
+                          <span className="visually-hidden">
                             "Fetching rainfall data...
                           </span>
                         </Spinner>
@@ -104,6 +116,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     pickDownload: payload => {
       dispatch(pickDownload({...payload, contextType: ownProps.contextType}))
+    },
+    deleteDownload: payload => {
+      dispatch(deleteDownload({...payload, contextType: ownProps.contextType}))
     }
   }
 }

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { connect } from 'react-redux';
 import Immutable from 'immutable';
 import mapboxgl from 'mapbox-gl';
@@ -13,7 +13,7 @@ import {
   stopThinking
 } from '../../store/actions';
 import { initDataFetch, pickSensorMiddleware } from '../../store/middleware';
-import { LAYERS_W_MOUSEOVER } from '../../store/config'
+import { ENABLE_DEBUG_LOGS, LAYERS_W_MOUSEOVER, getInteractiveMapLayersForContext } from '../../store/config'
 import diffStyles from '../../utilities/styleSpecDiff';
 import { transformFeatureToOption } from '../../store/utils/transformers'
 
@@ -22,11 +22,10 @@ import MapLegend from './legend'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
-import './map.scss'
+import './map.css'
 
-let DEBUG = true
+const DEBUG = ENABLE_DEBUG_LOGS
 const MAPID = 'map'
-const LAYERS_W_SELECT = LAYERS_W_MOUSEOVER.map(i => i[0])
 
 class ReactMap extends Component {
 
@@ -38,6 +37,7 @@ class ReactMap extends Component {
   }
 
   tooltipContainer;
+  tooltipRoot;
 
   componentDidMount() {
     this.props.loadingMap()
@@ -45,23 +45,31 @@ class ReactMap extends Component {
     this.loadMap()
   }
 
-  componentWillReceiveProps(nextProps) {
-    // update the map if the style sheet has changed
-    this.updateMapStyle(nextProps.mapStyle)
+  componentDidUpdate(prevProps) {
+    if (prevProps.mapStyle !== this.props.mapStyle) {
+      this.updateMapStyle(prevProps.mapStyle, this.props.mapStyle)
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.tooltipRoot) {
+      this.tooltipRoot.unmount()
+      this.tooltipRoot = null
+    }
+    if (this.webmap) {
+      this.webmap.remove()
+      this.webmap = null
+    }
   }
 
   setTooltip(features) {
+    if (!this.tooltipRoot) {
+      return
+    }
     if (features.length) {
-      ReactDOM.render(
-        React.createElement(
-          Tooltip, {
-          features
-        }
-        ),
-        this.tooltipContainer
-      );
+      this.tooltipRoot.render(<Tooltip features={features} />);
     } else {
-      ReactDOM.unmountComponentAtNode(this.tooltipContainer)
+      this.tooltipRoot.render(null)
     }
   }
 
@@ -69,7 +77,15 @@ class ReactMap extends Component {
     if (e === undefined) {
       return
     }
-    const layersToQuery = ['HOVER-pixel', 'HOVER-gauge']
+    const layersToQuery = getInteractiveMapLayersForContext(this.props.activeTab)
+    if (layersToQuery.length === 0) {
+      this.webmap.getCanvas().style.cursor = ''
+      this.setTooltip([])
+      this.setState({
+        features: []
+      })
+      return
+    }
     // query tilesets with mouse hover
     const features = this.webmap.queryRenderedFeatures(e.point, {
       layers: layersToQuery
@@ -86,6 +102,11 @@ class ReactMap extends Component {
    * run queryRenderedFeatures, using currentOverlays in redux store
    */
   handleMapClick(e) {
+    const layersToQuery = getInteractiveMapLayersForContext(this.props.activeTab)
+    if (layersToQuery.length === 0) {
+      return
+    }
+
     // set bbox as 5px reactangle area around clicked point
     const bbox = [[e.point.x - 1, e.point.y - 1], [e.point.x + 1, e.point.y + 1]];
 
@@ -93,7 +114,7 @@ class ReactMap extends Component {
      * query rendered features
      * This may return multiple features. 
      */
-    let features = this.webmap.queryRenderedFeatures(bbox, { layers: LAYERS_W_SELECT });
+    let features = this.webmap.queryRenderedFeatures(bbox, { layers: layersToQuery });
     
 
     // group selected features by the value of the `source` property;
@@ -137,11 +158,16 @@ class ReactMap extends Component {
    * and set the created map's style sheet into the redux (mapStyle)
    */
   loadMap() {
+    const basemapStyleUrl = this.props.initMap.mapboxSources["3rww-rainfall-base"].url
+    if (!basemapStyleUrl) {
+      console.error("Missing Mapbox style URL. Set VITE_MAPBOX_STYLE_BASEMAP in your .env file.")
+      return
+    }
 
     // set up the map
     const mapConfig = {
       container: MAPID,
-      style: this.props.initMap.mapboxSources["3rww-rainfall-base"].url,
+      style: basemapStyleUrl,
       center: [this.props.initMap.longitude, this.props.initMap.latitude],
       zoom: this.props.zoom,
       attributionControl: false
@@ -153,7 +179,9 @@ class ReactMap extends Component {
     // setup the tooltip
     // Container to put React generated content in.
     this.tooltipContainer = document.createElement('div');
-    const tooltip = new mapboxgl.Marker(this.tooltipContainer, {
+    this.tooltipRoot = createRoot(this.tooltipContainer);
+    const tooltip = new mapboxgl.Marker({
+      element: this.tooltipContainer,
       offset: [105, 0]
     }).setLngLat([0, 0]).addTo(this.webmap);
 
@@ -212,61 +240,69 @@ class ReactMap extends Component {
 
       this.props.initFetchData()
 
-    });
+      let hoveredStateId = {};
 
-    // ----------------------------------------------
-    // BIND LAYER INTERACTIVITY MAP EVENTS TO ACTIONS
+      LAYERS_W_MOUSEOVER.forEach((lyrRef) => {
+        let lyrName = lyrRef[0]
+        let lyrSrc = lyrRef[1]
 
-    this.webmap.on('click', (e) => this.handleMapClick(e))
+        hoveredStateId[lyrName] = null;
+        // When the user moves their mouse over the HOVER-* layer, we'll update the
+        // feature state for the feature under the mouse.
+        this.webmap.on('mousemove', lyrName, (e) => {
+          const interactiveLayers = getInteractiveMapLayersForContext(this.props.activeTab)
+          if (!interactiveLayers.includes(lyrName)) {
+            this.setTooltip([])
+            this.webmap.getCanvas().style.cursor = ''
+            if (hoveredStateId[lyrName]) {
+              this.webmap.setFeatureState(
+                { source: lyrSrc, id: hoveredStateId[lyrName] },
+                { hover: false }
+              );
+            }
+            hoveredStateId[lyrName] = null;
+            return
+          }
 
-    let hoveredStateId = {};
+          this.makeTooltipOnHover(e, tooltip)
 
-    LAYERS_W_MOUSEOVER.forEach((lyrRef) => {
-      let lyrName = lyrRef[0]
-      let lyrSrc = lyrRef[1]
+          if (e.features.length > 0) {
+            if (hoveredStateId[lyrName]) {
+              this.webmap.setFeatureState(
+                { source: lyrSrc, id: hoveredStateId[lyrName] },
+                { hover: false }
+              );
+            }
+            hoveredStateId[lyrName] = e.features[0].id;
+            this.webmap.setFeatureState(
+              { source: lyrSrc, id: hoveredStateId[lyrName] },
+              { hover: true }
+            );
+          }
+        });
 
-      // console.log(lyrName, lyrSrc);
+        // When the mouse leaves the HOVER-* layer, update the feature state of the
+        // previously hovered feature.
+        this.webmap.on('mouseleave', lyrName, () => {
+          this.setTooltip([])
 
-      hoveredStateId[lyrName] = null;
-      // When the user moves their mouse over the HOVER-* layer, we'll update the
-      // feature state for the feature under the mouse.
-      this.webmap.on('mousemove', lyrName, (e) => {
-
-        this.makeTooltipOnHover(e, tooltip)
-
-        this.webmap.getCanvas().style.cursor = e.features.length ? 'pointer' : '';
-        if (e.features.length > 0) {
+          this.webmap.getCanvas().style.cursor = '';
           if (hoveredStateId[lyrName]) {
             this.webmap.setFeatureState(
               { source: lyrSrc, id: hoveredStateId[lyrName] },
               { hover: false }
             );
           }
-          hoveredStateId[lyrName] = e.features[0].id;
-          this.webmap.setFeatureState(
-            { source: lyrSrc, id: hoveredStateId[lyrName] },
-            { hover: true }
-          );
-        }
-      });
+          hoveredStateId[lyrName] = null;
+        });
+      })
 
-      // When the mouse leaves the HOVER-* layer, update the feature state of the
-      // previously hovered feature.
-      this.webmap.on('mouseleave', lyrName, (e) => {
+    });
 
-        this.makeTooltipOnHover(e, tooltip)
+    // ----------------------------------------------
+    // BIND LAYER INTERACTIVITY MAP EVENTS TO ACTIONS
 
-        this.webmap.getCanvas().style.cursor = '';
-        if (hoveredStateId[lyrName]) {
-          this.webmap.setFeatureState(
-            { source: lyrSrc, id: hoveredStateId[lyrName] },
-            { hover: false }
-          );
-        }
-        hoveredStateId[lyrName] = null;
-      });
-
-    })
+    this.webmap.on('click', (e) => this.handleMapClick(e))
 
   }
 
@@ -276,11 +312,17 @@ class ReactMap extends Component {
    * to turn differences between existing and next style sheets into mapbox
    * expressions used to programmatically modify the stylesheet
    */
-  updateMapStyle(nextPropsMapStyle) {
+  updateMapStyle(previousMapStyle, nextMapStyle) {
 
     // if the mapStyles prop (passed in from redux) is null/empty, nothing
     // to do here
-    if (this.props.mapStyle === null || isEmpty(this.props.mapStyle)) {
+    if (
+      !this.webmap ||
+      previousMapStyle === null ||
+      isEmpty(previousMapStyle) ||
+      nextMapStyle === null ||
+      isEmpty(nextMapStyle)
+    ) {
       return
     };
 
@@ -289,10 +331,10 @@ class ReactMap extends Component {
     // uses the stylesheets read into Immutable objects for the comparison
 
     // 'oldStyle' is what we have in redux
-    const oldStyle = Immutable.fromJS(this.props.mapStyle);
+    const oldStyle = Immutable.fromJS(previousMapStyle);
 
     // newStyle is what we've just received
-    const newStyle = Immutable.fromJS(nextPropsMapStyle);
+    const newStyle = Immutable.fromJS(nextMapStyle);
 
     // diffstyles crosswalks the difference in mapStyle to the types
     // of mapboxGL map methods that would need to be executed to make the change.
@@ -304,26 +346,116 @@ class ReactMap extends Component {
       // if changes are detected, then we apply each one to the map
       // this executes map methods to do things like pan, zoom, change layer
       // visibility and filters, and CRUD data sources
+      changes.forEach((change) => this.executeMapChange(thisMap, change));
+    }
+  }
 
-      changes.forEach((change) => {
+  getSourceLayerIds(map, sourceId) {
+    const style = map.getStyle && map.getStyle()
+    if (!style || !style.layers) {
+      return []
+    }
 
-        // NOTE: this is a workaround for the setGeoJSONSourceData command,
-        // which was throwing an error when called. We simply do what it otherwise
-        // would have done to the style via the map's method.
-        if (change.command == "setGeoJSONSourceData") {
-          // thisMap.setGeoJSONSourceData.apply(thisMap, change.args)
-          // console.log(change.args)
-          let src = thisMap.getSource(change.args[0])
-          // console.log(src)
-          if (src) {
-            src.setData(change.args[1])
-          }
-        } else {
-          // console.log(thisMap)
-          // console.log(thisMap[change.command])
-          thisMap[change.command].apply(thisMap, change.args);
+    return style.layers
+      .filter(layer => layer.source === sourceId)
+      .map(layer => layer.id)
+  }
+
+  executeMapChange(map, change) {
+    const { command, args = [] } = change
+
+    if (command === "setGeoJSONSourceData") {
+      const sourceId = args[0]
+      const source = map.getSource(sourceId)
+      if (source && typeof source.setData === "function") {
+        source.setData(args[1])
+      } else {
+        console.warn(`[mapStyle] setGeoJSONSourceData skipped: source "${sourceId}" is missing or non-geojson`)
+      }
+      return
+    }
+
+    if (command === "removeLayer") {
+      const layerId = args[0]
+      if (!map.getLayer(layerId)) {
+        if (DEBUG) console.debug(`[mapStyle] removeLayer noop: layer "${layerId}" is already absent`)
+        return
+      }
+      try {
+        map.removeLayer(layerId)
+      } catch (error) {
+        console.warn(`[mapStyle] removeLayer failed for layer "${layerId}"`, error)
+      }
+      return
+    }
+
+    if (command === "removeSource") {
+      const sourceId = args[0]
+      if (!map.getSource(sourceId)) {
+        if (DEBUG) console.debug(`[mapStyle] removeSource noop: source "${sourceId}" is already absent`)
+        return
+      }
+
+      // Defensive cleanup: Mapbox requires removing dependent layers before a source.
+      this.getSourceLayerIds(map, sourceId).forEach((layerId) => {
+        if (!map.getLayer(layerId)) {
+          return
         }
-      });
+        try {
+          map.removeLayer(layerId)
+          if (DEBUG) console.debug(`[mapStyle] removed dependent layer "${layerId}" before source "${sourceId}"`)
+        } catch (error) {
+          console.warn(`[mapStyle] failed removing dependent layer "${layerId}" for source "${sourceId}"`, error)
+        }
+      })
+
+      try {
+        map.removeSource(sourceId)
+      } catch (error) {
+        console.warn(`[mapStyle] removeSource failed for source "${sourceId}"`, error)
+      }
+      return
+    }
+
+    if (command === "addSource") {
+      const sourceId = args[0]
+      if (map.getSource(sourceId)) {
+        if (DEBUG) console.debug(`[mapStyle] addSource noop: source "${sourceId}" already exists`)
+        return
+      }
+      try {
+        map.addSource(...args)
+      } catch (error) {
+        console.warn(`[mapStyle] addSource failed for source "${sourceId}"`, error)
+      }
+      return
+    }
+
+    if (command === "addLayer") {
+      const layerId = args[0] && args[0].id ? args[0].id : "unknown-layer"
+      if (layerId !== "unknown-layer" && map.getLayer(layerId)) {
+        if (DEBUG) console.debug(`[mapStyle] addLayer noop: layer "${layerId}" already exists`)
+        return
+      }
+      try {
+        map.addLayer(...args)
+      } catch (error) {
+        console.warn(`[mapStyle] addLayer failed for layer "${layerId}"`, error)
+      }
+      return
+    }
+
+    const mapMethod = map[command]
+    if (typeof mapMethod !== "function") {
+      console.warn(`[mapStyle] unsupported command "${command}"`)
+      return
+    }
+
+    try {
+      mapMethod.apply(map, args)
+    } catch (error) {
+      const primaryId = args[0] !== undefined ? ` (${String(args[0])})` : ""
+      console.warn(`[mapStyle] command "${command}" failed${primaryId}`, error)
     }
   }
 

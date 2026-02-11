@@ -1,0 +1,22 @@
+/* Typography */
+/* $web-font-path: "https://fonts.googleapis.com/css?family=Open+Sans|Oswald:700" !default; */
+/* $web-font-path: "https://fonts.googleapis.com/css?family=Open+Sans|Oswald:500&display=swap" !default; */
+/* $headings-font-family: "Oswald", "Arial Narrow Bold", sans-serif !default; */
+/* $accent-font-family: 'Open Sans Condensed', sans-serif; */
+/* $body-font-family: "Open Sans", "Arial", "Helvetica", sans-serif !default; */
+
+body {
+    /* font-family: $body-font-family !important; */
+    font-size: 1.1rem !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;    
+    line-height: 1.5rem !important;
+  }
+  
+  /* .navbar .navbar-brand { */
+  /*   font-family: $headings-font-family !important; */
+  /* } */
+
+.card {
+  border-radius: 0px;
+}

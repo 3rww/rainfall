@@ -1,10 +1,11 @@
 import React from "react";
 import { Tabs, Tab, Row, Col, Image, Card } from "react-bootstrap";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
-import { ROOT } from "../../store/config";
+import { API_URL_ROOT, ROOT } from "../../store/config";
 
-import "./aboutContent.scss";
+import "./aboutContent.css";
 
 const what1 = `
 Have you ever wondered how rainfall is actually measured? Technical instruments, called rain gauges, are designed to collect and accurately measure rainfall during wet weather events. However, a rain gauge can only provide a specific rainfall measurement for the limited geographic area where the gauge is located.
@@ -64,7 +65,7 @@ Query results will be listed in a panel below on each page and shown on the map.
 The output table for each query result contains:
 
 * a gauge or pixel ID
-* a date/time of the observation (presented as standard ISO 8061 datetime text). For hourly and daily aggregations, the start and end time of the observation is indicated using the standard ISO 8061 datetime range format, with start and end delimited by a "/".
+* date/time columns formatted for spreadsheet compatibility as 'MM/DD/YYYY HH:mm:ss'. For hourly and daily aggregations, the observation window is exported as separate \`start_ts\` and \`end_ts\` columns.
 * a rainfall amount (in inches) 
 * a source code, which indicates where the rainfall measurement came from. While all results include this, only Calibrated Radar Rainfall data will potentially indicate different codes, depending on the calibration methodology.
 
@@ -87,7 +88,7 @@ The following table describes the source code.
 const how2 = `
 ## 3RWW Data API
 
-The rainfall data is served up from 3RWW's Data **A**pplication **P**rogramming **I**nterface (API). Currently a few functions are documented and available through [${process.env.REACT_APP_API_URL_ROOT}](${process.env.REACT_APP_API_URL_ROOT}).
+The rainfall data is served up from 3RWW's Data **A**pplication **P**rogramming **I**nterface (API). Currently a few functions are documented and available through [${API_URL_ROOT}](${API_URL_ROOT}).
 
 For API usage examples, see [this Jupyter notebook](https://github.com/3rww/notebooks/blob/master/rainfall/Engaging%20Rain%20Gauges.ipynb).
 
@@ -115,7 +116,7 @@ export const AboutContent = () => {
           </p>
           <Card body className="about-logo-background mb-5">
             <p>This app is made possible with support from:</p>
-            <Row noGutters>
+            <Row className="g-0">
               <Col sm={5}>
                 <Image
                   className="about-logo mx-auto"
@@ -145,17 +146,17 @@ export const AboutContent = () => {
               </Col>
             </Row>
           </Card>
-          <ReactMarkdown children={what2} />
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{what2}</ReactMarkdown>
         </div>
       </Tab>
       <Tab eventKey="what1" title="Methods">
         <div className="about-body">
-          <ReactMarkdown children={what1} />
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{what1}</ReactMarkdown>
         </div>
       </Tab>
       <Tab eventKey="how1" title="Getting Data">
         <div className="about-body">
-          <ReactMarkdown children={how1} />
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{how1}</ReactMarkdown>
         </div>
       </Tab>
       <Tab eventKey="more" title="Demos">
@@ -165,25 +166,30 @@ export const AboutContent = () => {
             Our January 2021 webinar provides an overview of the rainfall system
             and a how-to for using this site.
           </p>
-          <div className="embed-responsive embed-responsive-16by9">
+          <div className="ratio ratio-16x9">
             <iframe
-              className="embed-responsive-item"
               src="https://www.youtube.com/embed/mwOu2QRx6oU"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-            ></iframe>
+            />
           </div>
           <hr></hr>
           <h3>Boundary-based selections</h3>
-          <p>A quick demo of the boundary-based selection feature:          
-          </p>
-            <iframe src="https://capture.dropbox.com/embed/XSWyyjHt6nXx2PdN?source=copy-embed" width="560" height="315" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>          
+          <p>A quick demo of the boundary-based selection feature:</p>
+          <div className="ratio ratio-16x9">
+            <iframe
+              src="https://capture.dropbox.com/embed/XSWyyjHt6nXx2PdN?source=copy-embed"
+              title="Boundary-based selections demo"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
         </div>
       </Tab>
       <Tab eventKey="how2" title="Under the Hood">
         <div className="about-body">
-          <ReactMarkdown children={how2} />
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{how2}</ReactMarkdown>
         </div>
       </Tab>
     </Tabs>

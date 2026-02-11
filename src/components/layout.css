@@ -1,10 +1,6 @@
-.container {
-  min-height: 100%;
-  overflow: hidden;
-}
-
-.fill {
-  min-height: 100%;
+.layout-root {
+  flex: 1 1 auto;
+  min-height: 0;
   height: 100%;
   width: 100%;
   max-width: 100%;
@@ -12,20 +8,28 @@
   margin-left: 0px;
   padding-left: 0px !important;
   padding-right: 0px !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-// @media (min-width: 576px) { 
-//   .map, .map-container {
-//       height: 100% !important;
-//   }
-// }
+.layout-main-row {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* @media (min-width: 576px) {  */
+/*   .map, .map-container { */
+/*       height: 100% !important; */
+/*   } */
+/* } */
 
 .sidebar-column {
   height: 100%;
   overflow-y: auto;
   position: relative;
-  // box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25);
-  // z-index: 100;
+  /* box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25); */
+  /* z-index: 100; */
 }
 
 .map-column {

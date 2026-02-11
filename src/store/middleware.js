@@ -7,6 +7,7 @@ import {
   requestRainfallData,
   requestRainfallDataSuccess,
   requestRainfallDataFail,
+  removeFetchHistoryItem,
   asyncAction,
   asyncActionSuccess,
   asyncActionFail,
@@ -25,10 +26,9 @@ import {
 
 import {
   selectFetchKwargs,
+  selectFetchHistory,
   selectFetchHistoryItemById,
   selectActiveFetchHistoryItem,
-  selectLatestlegacyGarrTS,
-  selectLatestlegacyGaugeTS,
   selectMapStyleSourceDataFeatures,
   selectSensorGeographyLookup
 } from './selectors'
@@ -53,11 +53,27 @@ import {
   URL_GAUGE_GEOJSON,
   CONTEXT_TYPES,
   REQUEST_TIME_INTERVAL,
+  API_URL_ROOT,
+  getRainfallDataTypePath,
+  getSelectableSensorTypesForContext,
+  shouldIncludeRollupParam,
   // BREAKS_005,
   BREAKS_050,
   // BREAKS_100,
-  SENSOR_TYPES
+  SENSOR_TYPES,
+  ENABLE_SHARE_STATE,
+  RAINFALL_MIN_DATE,
+  RAINFALL_TYPES
 } from './config'
+import {
+  clampDateTimeRange,
+  resolveAvailableBounds
+} from "./utils/dateBounds";
+
+import {
+  hydrateShareStateToRedux,
+  startShareStateSync
+} from './urlShareState'
 
 
 import store from './index'
@@ -228,29 +244,65 @@ export function initDataFetch(payload) {
       .then(() => {
 
         // set the default date/time range for all the contexts
+        const state = store.getState()
+        const latest = get(state, "stats.latest", {})
+        const now = moment().toISOString()
 
-        dispatch(pickRainfallDateTimeRange({
+        const dispatchDefaultRange = ({ contextType, rainfallDataType, lookbackAmount, lookbackUnit }) => {
+          const activeKwargs = selectFetchKwargs(state, contextType)
+          const bounds = resolveAvailableBounds({
+            contextType: contextType,
+            rainfallDataType: rainfallDataType,
+            rollup: activeKwargs.rollup,
+            latest: latest,
+            rainfallMinDate: RAINFALL_MIN_DATE,
+            now: now
+          })
+
+          const clamped = clampDateTimeRange({
+            start: bounds.max.clone().subtract(lookbackAmount, lookbackUnit),
+            end: bounds.max,
+            min: bounds.min,
+            max: bounds.max
+          })
+
+          dispatch(pickRainfallDateTimeRange({
+            contextType: contextType,
+            startDt: clamped.start.toISOString(),
+            endDt: clamped.end.toISOString()
+          }))
+        }
+
+        dispatchDefaultRange({
           contextType: CONTEXT_TYPES.legacyRealtime,
-          startDt: moment().subtract(2, 'hour').toISOString(),
-          endDt: moment().toISOString()
-        }))
+          rainfallDataType: RAINFALL_TYPES.realtime,
+          lookbackAmount: 2,
+          lookbackUnit: "hour"
+        })
 
-        let maxDateLegacyGauge = selectLatestlegacyGaugeTS(store.getState())
-        dispatch(pickRainfallDateTimeRange({
+        dispatchDefaultRange({
           contextType: CONTEXT_TYPES.legacyGauge,
-          // startDt: moment(maxDateLegacyGauge).startOf('month').toISOString(),
-          startDt: moment(maxDateLegacyGauge).subtract(1, 'month').toISOString(),
-          endDt: maxDateLegacyGauge
-        }))
+          rainfallDataType: RAINFALL_TYPES.historic,
+          lookbackAmount: 1,
+          lookbackUnit: "month"
+        })
 
-        let maxDateLegacyGarr = selectLatestlegacyGarrTS(store.getState())
-        dispatch(pickRainfallDateTimeRange({
+        dispatchDefaultRange({
           contextType: CONTEXT_TYPES.legacyGarr,
-          // startDt: moment(maxDateLegacyGarr).startOf('month').toISOString(),
-          startDt: moment(maxDateLegacyGarr).subtract(1, 'month').toISOString(),
-          endDt: maxDateLegacyGarr
-        }))
+          rainfallDataType: RAINFALL_TYPES.historic,
+          lookbackAmount: 1,
+          lookbackUnit: "month"
+        })
 
+      })
+      .then(async () => {
+        if (ENABLE_SHARE_STATE) {
+          await hydrateShareStateToRedux({
+            dispatch: dispatch,
+            getState: store.getState
+          })
+          startShareStateSync(store)
+        }
       })
       .then(() => dispatch(stopThinking("Initial data load complete."))
       )
@@ -336,7 +388,7 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
             } else {
 
               // calculate totals and any stats
-              r = transformRainfallResults(r)
+              r = transformRainfallResults(r, { contextType, sensor })
 
               // dispatch the success action, which puts the data in the correct 
               // places, updates the status in the ui, etc.
@@ -434,6 +486,16 @@ export function fetchRainfallDataFromApiV2(payload) {
     let { contextType, rainfallDataType } = payload
     // get the active batch of Fetch Kwargs
     let kwargs = selectFetchKwargs(state, contextType)
+    let rainfallDataTypePath = getRainfallDataTypePath({
+      contextType: contextType,
+      rainfallDataType: rainfallDataType,
+      rollup: kwargs.rollup
+    })
+    let includeRollupParam = shouldIncludeRollupParam({
+      contextType: contextType,
+      rainfallDataType: rainfallDataType,
+      rollup: kwargs.rollup
+    })
 
     // generate a unique ID, based on the hash of the kwargs
     // this will let us 1) update the correct object in fetchHistory
@@ -474,8 +536,10 @@ export function fetchRainfallDataFromApiV2(payload) {
       let requestParams = {
         start_dt: kwargs.startDt,
         end_dt: kwargs.endDt,
-        rollup: kwargs.rollup,
         f: kwargs.f
+      }
+      if (includeRollupParam) {
+        requestParams.rollup = kwargs.rollup
       }
 
       requestParams[sensor[1]] = kwargs.sensorLocations[sensor[0]].map(i => i.value).join(",")
@@ -488,7 +552,7 @@ export function fetchRainfallDataFromApiV2(payload) {
         contextType: contextType
       }))
 
-      let url = `${process.env.REACT_APP_API_URL_ROOT}v2/${sensor[0]}/${rainfallDataType}/`
+      let url = `${API_URL_ROOT}v2/${sensor[0]}/${rainfallDataTypePath}/`
       let params = requestParams
 
       // console.log(s, sensor[0], params)
@@ -537,6 +601,66 @@ export function pickDownload(payload) {
 
   }
  
+}
+
+/**
+ * delete a rainfall result item from fetch history.
+ * if the removed item is currently active, activate the newest remaining
+ * history item in the same context, or clear map result layers if none remain.
+ * @param {*} payload
+ */
+export function deleteDownload(payload) {
+
+  let { contextType, requestId } = payload
+
+  return function (dispatch, getState) {
+    let state = getState()
+    let fetchHistoryItem = selectFetchHistoryItemById(state, requestId, contextType)
+
+    if (fetchHistoryItem === undefined) {
+      return
+    }
+
+    let wasActive = fetchHistoryItem.isActive === true
+
+    dispatch(removeFetchHistoryItem({
+      contextType: contextType,
+      requestId: requestId
+    }))
+
+    if (!wasActive) {
+      return
+    }
+
+    let updatedState = getState()
+    let updatedHistory = selectFetchHistory(updatedState, contextType)
+
+    if (updatedHistory.length > 0) {
+      let newestHistoryItem = updatedHistory[updatedHistory.length - 1]
+      dispatch(pickActiveResultItem({
+        requestId: newestHistoryItem.requestId,
+        contextType: contextType
+      }))
+    } else {
+      dispatch(resetLayerSrcs({
+        lyrSrcNames: keys(SENSOR_TYPES)
+      }))
+
+      // Preserve current sensor selections when clearing the last result.
+      let activeKwargs = selectFetchKwargs(updatedState, contextType)
+      keys(SENSOR_TYPES).forEach(sensorLocationType => {
+        let selectedOptions = activeKwargs?.sensorLocations?.[sensorLocationType] || []
+        if (selectedOptions.length > 0) {
+          dispatch(highlightSensor({
+            contextType: contextType,
+            sensorLocationType: sensorLocationType,
+            selectedOptions: selectedOptions
+          }))
+        }
+      })
+    }
+  }
+
 }
 
 // /**
@@ -687,9 +811,23 @@ export function pickSensorByGeographyMiddleware(payload) {
        * second: crosswalk the selected geographies to pixels and gauges
        */
 
-    let sensorTypes = ['pixel']//, 'gauge'] TODO: gauge lookups not yet implemented
+    const allowedSensorTypes = getSelectableSensorTypesForContext(contextType)
+    const allSensorTypes = [SENSOR_TYPES.gauge, SENSOR_TYPES.pixel]
+    const disallowedSensorTypes = allSensorTypes.filter((sensorType) => (
+      !allowedSensorTypes.includes(sensorType)
+    ))
 
-    sensorTypes.forEach(st => {
+    // Ensure hidden/disallowed sensor types are cleared for single-sensor contexts.
+    disallowedSensorTypes.forEach((sensorType) => {
+      dispatch(pickSensorMiddleware({
+        contextType: contextType,
+        sensorLocationType: sensorType,
+        selectedOptions: [],
+        inputType: inputType
+      }))
+    })
+
+    allowedSensorTypes.forEach(st => {
 
       // if (selectedOptions !== null || get(selectedOptions, 'length', 0) !== 0) {
 

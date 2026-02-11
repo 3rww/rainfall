@@ -26,6 +26,7 @@ import {
   requestRainfallDataInvalid,
   requestRainfallDataSuccess,
   requestRainfallDataFail,
+  removeFetchHistoryItem,
   asyncAction,
   asyncActionSuccess,
   asyncActionFail,
@@ -54,7 +55,6 @@ import {
   selectFetchHistory,
   selectLayersByIds,
   selectLyrSrcByName,
-  selectLayerById,
   selectMapStyleSourceDataFeatures
 } from './selectors'
 
@@ -70,13 +70,8 @@ import {
 /**
  * root reducer
  */
-export const rootReducer = createReducer(
-  // INITIAL STATE ----------------------
-  initialState,
-
-  // REDUCERS----------------------------
-  {
-    [switchTab]: (state, action) => {
+const caseReducers = {
+    [switchTab.type]: (state, action) => {
       state.progress.tab = action.payload
 
       // unset any map styles
@@ -88,10 +83,10 @@ export const rootReducer = createReducer(
      * Request JSON (+success/fail)
      * used by the fetchJSON middleware
      */
-    [asyncAction]: (state, action) => {
+    [asyncAction.type]: (state, action) => {
       state.progress.isFetching = true
     },
-    [asyncActionSuccess]: (state, action) => {
+    [asyncActionSuccess.type]: (state, action) => {
       state.progress.isFetching = false
       const { data, pathArray, keepACopy } = action.payload
       set(state, pathArray, data)
@@ -100,21 +95,21 @@ export const rootReducer = createReducer(
         set(state, refPatharray, data)
       }
     },
-    [asyncActionFail]: (state, action) => {
+    [asyncActionFail.type]: (state, action) => {
       state.progress.isFetching = false
       console.log(action.payload)
     },
-    [isFetching]: (state, action) => {
+    [isFetching.type]: (state, action) => {
       state.progress.isFetching = action.payload.isFetching
     },
-    [startThinking]: (state, action) => {
+    [startThinking.type]: (state, action) => {
       if (action.payload !== undefined) {
         console.log(action.payload)
         state.progress.messages.push(action.payload)
       }
       state.progress.isThinking = state.progress.isThinking + 1
     },
-    [stopThinking]: (state, action) => {
+    [stopThinking.type]: (state, action) => {
       if (action.payload !== undefined) {
         console.log(action.payload)
         state.progress.messages.push(action.payload)
@@ -124,7 +119,7 @@ export const rootReducer = createReducer(
     /**
      * calculate stats for rainfall events in the store
      */
-    [calcEventStats]: (state, action) => {
+    [calcEventStats.type]: (state, action) => {
       const eventsData = state.rainfallEvents.list
       let eventLatest = eventsData.map(e => e.endDt).sort()[eventsData.length - 1]
 
@@ -136,7 +131,7 @@ export const rootReducer = createReducer(
     /**
      * pick the datetime range from the calendar
      */
-    [pickRainfallDateTimeRange]: (state, action) => {
+    [pickRainfallDateTimeRange.type]: (state, action) => {
       // update the start and end datetimes store for the type of rainfall data
       // to be queried.
       const { contextType, startDt, endDt } = action.payload
@@ -151,7 +146,7 @@ export const rootReducer = createReducer(
     /**
      * pick the datetime range from the rainfall events list (historic only)
      */
-    [pickRainfallEvent]: (state, action) => {
+    [pickRainfallEvent.type]: (state, action) => {
       // get the event from the list, set it's selected state to True
       // console.log(action.payload)
       let { eventid, contextType } = action.payload
@@ -170,7 +165,7 @@ export const rootReducer = createReducer(
      * pick the sensor (the "where")
      * selectedOptions is the complete list of selected sensors
      */
-    [pickSensor]: (state, action) => {
+    [pickSensor.type]: (state, action) => {
 
       const { contextType, sensorLocationType, selectedOptions } = action.payload
 
@@ -182,7 +177,7 @@ export const rootReducer = createReducer(
       }
 
     },
-    [highlightSensor]: (state, action) => {
+    [highlightSensor.type]: (state, action) => {
       // console.log(action.payload)
       const { contextType, sensorLocationType, selectedOptions } = action.payload
 
@@ -218,7 +213,7 @@ export const rootReducer = createReducer(
     /**
      * pick the interval used for rainfall summation: 15-min, hourly, etc.
      */
-    [pickInterval]: (state, action) => {
+    [pickInterval.type]: (state, action) => {
       let { rollup, contextType } = action.payload
       selectFetchKwargs(state, contextType).rollup = rollup
     },
@@ -228,7 +223,7 @@ export const rootReducer = createReducer(
      * used to indicate that rainfall is being requested, 
      * w/ success & failure actions
      */
-    [requestRainfallData]: (state, action) => {
+    [requestRainfallData.type]: (state, action) => {
 
       let { fetchKwargs, requestId, contextType, status, messages } = action.payload
 
@@ -250,11 +245,16 @@ export const rootReducer = createReducer(
       }
 
     },
+    [removeFetchHistoryItem.type]: (state, action) => {
+      let { contextType, requestId } = action.payload
+      state.fetchKwargs[contextType].history = selectFetchHistory(state, contextType)
+        .filter(i => i.requestId !== requestId)
+    },
     /**
      * upon successful rainfall data request, turn off fetching status, save
      * the data, save the fetch kwargs as processed, and save the API status.
      */
-    [requestRainfallDataSuccess]: (state, action) => {
+    [requestRainfallDataSuccess.type]: (state, action) => {
 
       let { requestId, contextType, results, processedKwargs, status, messages } = action.payload
 
@@ -282,10 +282,13 @@ export const rootReducer = createReducer(
      * downloaded rainfall dataset
      */
 
-    [requestRainfallDataFail]: (state, action) => {
+    [requestRainfallDataFail.type]: (state, action) => {
       let { requestId, results, status, messages } = action.payload
       console.log(requestId, status)
       let fetchItem = selectAnyFetchHistoryItemById(state, requestId)
+      if (fetchItem === undefined) {
+        return
+      }
       fetchItem.isFetching = fetchItem.isFetching - 1
       fetchItem.status = status
       fetchItem.messages = messages
@@ -295,15 +298,20 @@ export const rootReducer = createReducer(
      * set a rainfall query result as active, and join its data into the 
      * corresponding layer
      */
-    [pickActiveResultItem]: (state, action) => {
+    [pickActiveResultItem.type]: (state, action) => {
 
       let { requestId, contextType } = action.payload
+
+      // The request can be deleted from history while async callbacks are in flight.
+      let i = selectFetchHistoryItemById(state, requestId, contextType)
+      if (i === undefined) {
+        return
+      }
 
       // turn off all other items
       selectFetchHistoryItemsByIdInverse(state, requestId, contextType)
         .forEach(i => i.isActive = false)
       // turn on this item
-      let i = selectFetchHistoryItemById(state, requestId, contextType)
       i.isActive = true
 
       // take the results from this item and join them to the layer sources
@@ -339,7 +347,7 @@ export const rootReducer = createReducer(
      * If a list of names is provided, it will only do it for those layers;
      * otherwise it does it for all of them.
      */
-    [resetLayerSrcs]: (state, action) => {
+    [resetLayerSrcs.type]: (state, action) => {
       let { lyrSrcNames } = action.payload
 
       if (lyrSrcNames === undefined) {
@@ -363,14 +371,14 @@ export const rootReducer = createReducer(
     /**
      * set parameters used to filter list of rainfall events
      */
-    [filterEventByHours]: (state, action) => {
+    [filterEventByHours.type]: (state, action) => {
       state.eventFilters.maxHours = action.payload.maxHours
       // state.eventFilters.minHours = action.payload.minHours
     },
     /**
      * MAP LOADING AND STYLING ACTIONS
      */
-    [mapLoaded]: (state, action) => {
+    [mapLoaded.type]: (state, action) => {
 
       // set map loading state
       if (!state.progress.mapLoaded) {
@@ -379,7 +387,7 @@ export const rootReducer = createReducer(
 
       return state
     },
-    [setStyle]: (state, action) => {
+    [setStyle.type]: (state, action) => {
       state.mapStyle = action.payload
       if (!state.progress.initialStyleLoaded) {
         state.progress.initialStyleLoaded = true
@@ -391,7 +399,7 @@ export const rootReducer = createReducer(
      * at a specified position.
      * See `MAP_LAYERS` in ./config.js for an example of what is consumed here.
      */
-    [addLayers]: (state, action) => {
+    [addLayers.type]: (state, action) => {
       forEach(action.payload, (v, k) => {
         // if an index is provided, use for layer order
         if (has(v, 'INDEX')) {
@@ -409,7 +417,7 @@ export const rootReducer = createReducer(
      * generic action called from middleware, used to set a piece of state, e.g.,
      * with the response from an async call
      */
-    [setState]: (state, action) => {
+    [setState.type]: (state, action) => {
       const { data, path, how } = action.payload
 
       if (how === "replace") {
@@ -421,7 +429,7 @@ export const rootReducer = createReducer(
         set(state, path, [...existing, ...data])
       }
     },
-    [buildLayerStyle]: (state, action) => {
+    [buildLayerStyle.type]: (state, action) => {
       // NOTE: Not in use
 
       let { requestId, contextType, sensor } = action.payload
@@ -484,7 +492,7 @@ export const rootReducer = createReducer(
      * skew the calculation of the breaks and colors. This doesn't affect the
      * tabular/downloaded data.
      */
-    [setLayerStyle]: (state, action) => {
+    [setLayerStyle.type]: (state, action) => {
 
       // expand the payload
       let { requestId, contextType, sensor } = action.payload
@@ -550,21 +558,37 @@ export const rootReducer = createReducer(
 
 
     },
-    [applyColorStretch]: (state, action) => {
+    [applyColorStretch.type]: (state, action) => {
 
-      let { breaks } = action.payload
+      const { breaks } = action.payload || {}
 
-      let {colorExp, legendContent} = buildRainfallColorStyleExp('total', breaks)
+      const { colorExp, legendContent } = buildRainfallColorStyleExp('total', breaks)
+      const mapLayers = get(state, ['mapStyle', 'layers'], [])
 
       LAYERS_W_RESULTS.forEach(lyrId => {
-        let lyr = selectLayerById(state, lyrId)
+        if (!Array.isArray(mapLayers)) {
+          return
+        }
+
+        const lyr = mapLayers.find(layer => layer.id === lyrId)
+        if (!lyr || !lyr.type || !lyr.paint) {
+          console.debug(`[applyColorStretch] skipping missing/unready layer "${lyrId}"`)
+          return
+        }
+
         lyr.paint[`${lyr.type}-color`] = colorExp
       })
 
-      state.mapLegend.content = legendContent
+      if (!state.mapLegend) {
+        state.mapLegend = {}
+      }
+      state.mapLegend.content = Array.isArray(legendContent) ? legendContent : []
 
     },
+}
 
-
-  }
-) 
+export const rootReducer = createReducer(initialState, (builder) => {
+  Object.entries(caseReducers).forEach(([actionType, reducer]) => {
+    builder.addCase(actionType, reducer)
+  })
+})

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 // icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSpinner, faCloudRain } from '@fortawesome/free-solid-svg-icons'
-import './thinkingOverlay.scss'
+import './thinkingOverlay.css'
 
 class ThinkingOverlay extends React.Component {
 
@@ -24,7 +24,7 @@ class ThinkingOverlay extends React.Component {
               variant="primary"
               className="thinking-spinner"
             >
-              <span className="sr-only">"Loading...</span>
+              <span className="visually-hidden">"Loading...</span>
             </Spinner> */}
           </div>
           <p className="debug-messages">{this.props.message}</p>

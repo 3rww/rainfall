@@ -20,7 +20,7 @@ Currently, this site offers search, download, and mapping capability for rainfal
 
 ### Powered By *The 3RWW Data API*
 
-The rainfall data is served up from [3RWW's Data API](https://github.com/3rww/data-api). Currently a few low-level API functions are documented and accessible through https://trwwapi.herokuapp.com/rainfall/.
+The rainfall data is served up from [3RWW's Atlas](https://atlas.3riverswetweather.org/). Currently a few low-level API functions are documented and accessible through [https://atlas.3riverswetweather.org/rainfall/](https://atlas.3riverswetweather.org/rainfall/).
 
 ## Status
 
@@ -28,62 +28,123 @@ This project is a work-in-progress. We're currently looking to replicate the wor
 
 ## Some notes on development
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project now uses [Vite](https://vite.dev/) for local development and production builds.
 
-Use Node NPM, Yarn, or PNPM to install dependencies. While we use PNPM, the commands shown the sections below are the same with any of those tools.
+Runtime baseline:
 
-NOTE: dependencies as spec'd are currently only building with Node V16.
+* Node 20 LTS
+* npm 10+
 
 ### Clone and Installation
 
 Run `git clone https://github.com/3rww/rainfall.git` to clone this codebase.
 
-Running `pnpm install` will install dependencies.
+Running `npm install` will install dependencies.
 
 ### Available Scripts
 
 In the project directory, you can run:
 
-#### `pnpm start`
+#### `npm start` (or `npm run dev`)
 
-Runs the app in the development mode.<br />
+Runs the app in development mode with Vite.<br />
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+The page will reload if you make edits.
 
-#### `pnpm test`
+#### `npm test`
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Runs tests with Vitest in jsdom mode.
 
-#### `pnpm build`
+#### `npm run test:watch`
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Runs Vitest in watch mode.
 
-The build is minified and the filenames include the hashes.<br /> Your app is ready to be deployed!
+#### `npm run build`
 
-#### `pnpm serve`
+Builds the app for production to the `dist` folder.
 
-Locally serves the **built** site  [http://localhost:3000](http://localhost:3000). 
+#### `npm run preview`
 
-#### `pnpm deploy`
+Locally serves the built app from `dist` on port 3000.
 
-Runs the `build` script and commits the changes the `gh-pages` branch, and pushes it to GitHub pages.
+#### `npm run deploy`
 
-#### `pnpm eject`
+Runs the `build` script and publishes `dist` to the `gh-pages` branch.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Environment Variables
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Use Vite-prefixed environment keys:
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+* `VITE_API_URL_ROOT`
+* `VITE_MAPBOX_TOKEN`
+* `VITE_MAPBOX_STYLE_BASEMAP`
+* `VITE_RAINFALL_MIN_DATE`
+* `VITE_API_REQUEST_INTERVAL_MS`
+* `VITE_ENABLE_SHARE_STATE` (default `false`; set `true` to enable `#s=...` share-state sync)
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Shareable URL State (`#s=...`)
+
+The app can preserve the active rainfall context and selected sensors in the URL hash.
+
+Format:
+
+* URL: `https://.../rainfall#s=<token>`
+* Token codec: `base64url(deflate(utf8(json)))`
+* JSON payload (canonical):
+
+```json
+{
+  "v": 1,
+  "c": "legacyRealtime",
+  "g": ["1", "2"],
+  "p": ["1201", "1202"]
+}
+```
+
+Where:
+
+* `v`: schema version
+* `c`: context/tab (`legacyRealtime`, `legacyGauge`, `legacyGarr`)
+* `g`: selected gauge IDs (strings)
+* `p`: selected pixel IDs (strings)
+
+Runtime behavior:
+
+* Feature flag: `VITE_ENABLE_SHARE_STATE=false` by default.
+* When enabled, on startup the app reads `#s` and hydrates Redux.
+* When enabled, after startup the app syncs URL hash state from Redux using `history.replaceState`.
+* When enabled, legacy `?state=<json>` links are read once and migrated to `#s=...`.
+
+Implementation note:
+
+* Compression uses browser-native `CompressionStream`/`DecompressionStream` with `"deflate"` where available. `base64url` by itself does not compress; DEFLATE is what reduces payload size.
+
+External app pseudocode:
+
+```text
+payload = {"v":1,"c":"legacyRealtime","g":["1"],"p":["1201","1202"]}
+json = JSON.stringify(payload)
+bytes = UTF8(json)
+compressed = DEFLATE(bytes)
+token = BASE64URL(compressed)
+url = "https://.../rainfall#s=" + token
+```
+
+### Deployment Notes
+
+The app is configured with `base: '/rainfall/'` for production builds in `vite.config.js` so GitHub Pages deployment works at `/rainfall/`.
+
+### Upgrade Notes
+
+* CRA and `react-scripts` were removed in favor of Vite/Vitest.
+* Service worker bootstrap code was removed (the app previously called `unregister`).
+* Bootstrap/react-bootstrap were moved to modern APIs (`Popover.Header/Body`, grid `g-0`, etc.).
+* The jQuery date range picker stack was replaced with `react-datepicker` while preserving range presets and event-modal shortcuts.
+* Static path resolution now uses `import.meta.env.BASE_URL`.
 
 ### Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+You can learn more in the [Vite documentation](https://vite.dev/guide/).
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+To learn React, check out the [React documentation](https://react.dev/).

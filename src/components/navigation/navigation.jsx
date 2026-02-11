@@ -5,7 +5,7 @@ import { Navbar, Nav, Button, Modal, Col, Row, Alert, Popover, OverlayTrigger} f
 
 // icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faInfo, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons'
 
 // import {legend} from '../data/legend'
 import { AboutContent } from './aboutContent'
@@ -14,7 +14,7 @@ import { CONTEXT_TYPES, ROOT } from '../../store/config'
 
 import { switchContext } from '../../store/middleware'
 
-import './navigation.scss';
+import './navigation.css';
 
 
 class Navigation extends Component {
@@ -22,6 +22,7 @@ class Navigation extends Component {
   constructor(props, context) {
     super(props, context);
 
+    this.handleContextSwitch = this.handleContextSwitch.bind(this);
     this.handleShow = this.handleShow.bind(this);
     this.handleClose = this.handleClose.bind(this);
     
@@ -34,7 +35,7 @@ class Navigation extends Component {
           title: (
             <Row>
               <Col lg={8}>
-                <h1>3RWW Rainfall <small><em>beta</em></small></h1>
+                <h1>3RWW Rainfall</h1>
                 <p className="lead">Map and download hyper-local rainfall measurements for Allegheny County</p>
               </Col>
               <Col>
@@ -62,6 +63,13 @@ class Navigation extends Component {
     this.setState({ show: true, showWhich: e.target.id });
   }
 
+  handleContextSwitch(contextType, e) {
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault();
+    }
+    this.props.switchContext(contextType);
+  }
+
   render() {
 
     return (
@@ -70,22 +78,22 @@ class Navigation extends Component {
 
           <Navbar.Brand className="d-none d-sm-block">
             <img className="nav-brand-logo" src={`${ROOT}static/assets/3rww_logo_full_inverse_transparent.png`} alt="3RWW Logo" />&nbsp;
-            Rainfall <small><em>beta</em></small>
+            Rainfall
             {/* <small className="text-muted d-none d-lg-inline">by 3 Rivers Wet Weather</small> */}
           </Navbar.Brand>
           <Navbar.Brand className="d-block d-sm-none" style={{ fontSize: 0.9 + 'rem' }}>
             <img className="nav-brand-logo-xs" src={`${ROOT}static/assets/3rww_logo_full_inverse_transparent.png`} alt="3RWW Logo" />&nbsp;
-            Rainfall <small><em>beta</em></small>
+            Rainfall
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
           <Navbar.Collapse id="basic-navbar-nav">
-            <Nav variant="pills" className="mr-auto" defaultActiveKey={CONTEXT_TYPES.legacyRealtime}>
+            <Nav variant="pills" className="me-auto py-2" defaultActiveKey={CONTEXT_TYPES.legacyRealtime}>
               <Nav.Item>
                 <Nav.Link
                   active={this.props.tab === CONTEXT_TYPES.legacyRealtime}
                   eventKey={CONTEXT_TYPES.legacyRealtime}
-                  onSelect={this.props.switchContext}
+                  onClick={(e) => this.handleContextSwitch(CONTEXT_TYPES.legacyRealtime, e)}
                 >
                   Real-Time Rainfall
                 </Nav.Link>
@@ -94,18 +102,18 @@ class Navigation extends Component {
                 <Nav.Link
                   active={this.props.tab === CONTEXT_TYPES.legacyGauge}
                   eventKey={CONTEXT_TYPES.legacyGauge}
-                  onSelect={this.props.switchContext}
+                  onClick={(e) => this.handleContextSwitch(CONTEXT_TYPES.legacyGauge, e)}
                 >Historical Rain Gauge</Nav.Link>
               </Nav.Item>
               <Nav.Item>
                 <Nav.Link
                   active={this.props.tab === CONTEXT_TYPES.legacyGarr}
                   eventKey={CONTEXT_TYPES.legacyGarr}
-                  onSelect={this.props.switchContext}
+                  onClick={(e) => this.handleContextSwitch(CONTEXT_TYPES.legacyGarr, e)}
                 >Calibrated Radar Rainfall</Nav.Link>
               </Nav.Item>
             </Nav>
-            <Nav className="ml-auto">
+            <Nav className="ms-auto">
               {/* Global Notification Button */}
               {this.props.globalNotice.show ? (
                 <OverlayTrigger
@@ -113,8 +121,8 @@ class Navigation extends Component {
                   placement={'bottom'}
                   overlay={
                     <Popover id="global-notice-popover">
-                      <Popover.Title as="h3">{this.props.globalNotice.title}</Popover.Title>
-                      <Popover.Content>{this.props.globalNotice.content}</Popover.Content>
+                      <Popover.Header as="h3">{this.props.globalNotice.title}</Popover.Header>
+                      <Popover.Body>{this.props.globalNotice.content}</Popover.Body>
                     </Popover>
                   }
                 >

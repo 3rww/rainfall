@@ -10,7 +10,7 @@ import ThinkingOverlay from './thinking/thinkingOverlay'
 import { RAINFALL_TYPES, CONTEXT_TYPES, SENSOR_TYPES } from '../store/config'
 import { switchContext } from '../store/middleware'
 
-import './layout.scss'
+import './layout.css'
 
 /**
 * Layout Component. Everything on the page under the Nav: Controls and Map.
@@ -20,7 +20,7 @@ class Layout extends React.Component {
 
     return (
 
-      <div className="fill no-gutters">
+      <div className="layout-root">
 
         <ThinkingOverlay />
 
@@ -30,7 +30,7 @@ class Layout extends React.Component {
           </Col>
         </Row>
 
-        <Row className="fill no-gutters">
+        <Row className="layout-main-row g-0">
 
         <Col sm={7} className="map-column">
             <ReactMap

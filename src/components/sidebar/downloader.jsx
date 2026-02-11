@@ -15,7 +15,7 @@ import DownloadsList from './downloadList'
 import { fetchRainfallDataFromApiV2 } from '../../store/middleware'
 import { selectSelectedSensors, selectFetchHistory } from '../../store/selectors'
 
-import './downloader.scss'
+import './downloader.css'
 
 
 class RainfallDownloader extends React.Component {

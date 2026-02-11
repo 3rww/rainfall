@@ -40,7 +40,7 @@ class EventFilter extends React.Component {
           min="1" 
           max="24"
           defaultValue={`${this.state.currentPos}`}
-          className="custom-range"
+          className="form-range"
           id="duration-slider"
           onChange={this.slideIt}
         />        

@@ -8,7 +8,7 @@ import DownloadModal from './downloadModal'
 import { pickDownload } from '../../store/middleware'
 // import { reFetchRainfallDataFromApiV2 } from '../../store/middleware'
 
-import './downloadItem.scss'
+import './downloadItem.css'
 
 /**
 * Downloads Item Component. 
@@ -137,11 +137,11 @@ class DownloadsItem extends React.Component {
                   size="sm"
                   onClick={this.handleShow}
                 >
-                  View and Download Results Table
+                  View and Download Results
                 </Button>
 
                 {/* <ButtonToolbar aria-label="Download and Playback Toolbar">
-              <ButtonGroup className="mr-2" aria-label="First Group">
+              <ButtonGroup className="me-2" aria-label="First Group">
                <Button size="sm">View & Download</Button>
               </ButtonGroup>
               <ButtonGroup aria-label="Third group">
