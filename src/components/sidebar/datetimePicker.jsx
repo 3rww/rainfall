@@ -251,6 +251,7 @@ class DateTimePicker extends React.Component {
           show={this.state.showRangeModal}
           onHide={this.handleRangeModalClose}
           size="lg"
+          animation={false}
         >
           <Modal.Header closeButton>
             <Modal.Title>Select Date and Time Range</Modal.Title>
@@ -346,6 +347,7 @@ class DateTimePicker extends React.Component {
           show={this.state.showEventModal}
           onHide={this.handleEventModalClose}
           size="lg"
+          animation={false}
         >
           <Modal.Header closeButton>
             <Modal.Title>
