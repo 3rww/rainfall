@@ -9,7 +9,7 @@ import {
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 // import { faPlay, faPause, faStop, faMap, faHandPointer } from '@fortawesome/free-solid-svg-icons'
 
-import '../../layout.scss';
+import '../../layout.css';
 
 
 const popover = (

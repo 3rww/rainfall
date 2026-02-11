@@ -8,7 +8,7 @@ import DownloadModal from './downloadModal'
 import { pickDownload } from '../../store/middleware'
 // import { reFetchRainfallDataFromApiV2 } from '../../store/middleware'
 
-import './downloadItem.scss'
+import './downloadItem.css'
 
 /**
 * Downloads Item Component. 

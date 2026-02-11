@@ -5,7 +5,7 @@ import remarkGfm from "remark-gfm";
 
 import { API_URL_ROOT, ROOT } from "../../store/config";
 
-import "./aboutContent.scss";
+import "./aboutContent.css";
 
 const what1 = `
 Have you ever wondered how rainfall is actually measured? Technical instruments, called rain gauges, are designed to collect and accurately measure rainfall during wet weather events. However, a rain gauge can only provide a specific rainfall measurement for the limited geographic area where the gauge is located.

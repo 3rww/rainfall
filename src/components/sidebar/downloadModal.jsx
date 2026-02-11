@@ -7,7 +7,7 @@ import { saveAs } from 'file-saver'
 
 import DownloadLineChart from './downloadLineChart'
 import { buildDownloadRowsAndFields, buildDownloadChartData, CHART_TIMESTAMP_RULE } from './downloadTableUtils'
-import './downloadModal.scss'
+import './downloadModal.css'
 
 /**
 * Modal for Individual Data Downloads

@@ -9,7 +9,7 @@ import { applyColorStretch } from '../../store/actions'
 import { buildRainfallColorStyleExp } from '../../store/utils/mb'
 
 
-import './legend.scss'
+import './legend.css'
 
 const DEFAULT_LEGEND_BINS = buildRainfallColorStyleExp('total', LEGEND_BREAKS.breaks_050).legendContent
 

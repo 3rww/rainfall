@@ -11,7 +11,7 @@ import moment from 'moment'
 import { pickRainfallEvent } from '../../store/actions'
 import { selectRainfallEvents } from '../../store/selectors'
 
-import './eventsList.scss'
+import './eventsList.css'
 
 
 class EventsList extends React.Component {

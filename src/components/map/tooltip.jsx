@@ -4,7 +4,7 @@ import { paddedRound } from '../../store/utils/index'
 
 // export default class Tooltip extends React.Component {
 //   render() {
-import './tooltip.scss';
+import './tooltip.css';
 
 export const Tooltip = ({ features }) => {
 

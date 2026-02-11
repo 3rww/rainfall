@@ -34,7 +34,7 @@ import {
 } from '../../store/utils/dateBounds';
 
 import 'react-datepicker/dist/react-datepicker.css';
-import './datetimePicker.scss';
+import './datetimePicker.css';
 
 const DATE_FORMAT = 'MM/DD/YYYY hh:mm A';
 const NOTE_DATE_FORMAT = 'MM/DD/YYYY';

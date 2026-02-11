@@ -1,8 +1,9 @@
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import App from "./App";
-import "./brand.scss";
-import "./index.scss";
+import "bootswatch/dist/materia/bootstrap.min.css";
+import "./brand.css";
+import "./index.css";
 import store from "./store/index";
 import { API_URL_ROOT } from "./store/config";
 

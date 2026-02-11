@@ -9,6 +9,10 @@
     height: 35px;
 }
 
+.nav-container {
+    flex: 0 0 auto;
+}
+
 .navbar {
     padding-bottom: 0.1rem !important;
     padding-top: 0.1rem !important;

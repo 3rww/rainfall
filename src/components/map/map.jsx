@@ -22,7 +22,7 @@ import MapLegend from './legend'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
-import './map.scss'
+import './map.css'
 
 const DEBUG = ENABLE_DEBUG_LOGS
 const MAPID = 'map'

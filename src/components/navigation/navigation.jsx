@@ -14,7 +14,7 @@ import { CONTEXT_TYPES, ROOT } from '../../store/config'
 
 import { switchContext } from '../../store/middleware'
 
-import './navigation.scss';
+import './navigation.css';
 
 
 class Navigation extends Component {

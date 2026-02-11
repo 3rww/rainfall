@@ -7,7 +7,7 @@ import DownloadItem from './downloadItem'
 import { pickDownload, deleteDownload } from '../../store/middleware'
 import { selectFetchHistory } from '../../store/selectors'
 
-import './downloadList.scss'
+import './downloadList.css'
 
 /**
 * Downloads List Component. 

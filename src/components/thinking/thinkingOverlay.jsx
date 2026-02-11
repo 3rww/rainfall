@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 // icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSpinner, faCloudRain } from '@fortawesome/free-solid-svg-icons'
-import './thinkingOverlay.scss'
+import './thinkingOverlay.css'
 
 class ThinkingOverlay extends React.Component {
 
