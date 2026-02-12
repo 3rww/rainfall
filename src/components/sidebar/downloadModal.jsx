@@ -1,12 +1,18 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Modal, Button, Row, Col } from 'react-bootstrap';
+import { Modal, Button, Row, Col, Form } from 'react-bootstrap';
 import moment from 'moment'
 import { unparse } from 'papaparse'
 import { saveAs } from 'file-saver'
 
 import DownloadLineChart from './downloadLineChart'
-import { buildDownloadRowsAndFields, buildDownloadChartData, CHART_TIMESTAMP_RULE } from './downloadTableUtils'
+import {
+  buildDownloadRowsAndFields,
+  buildDownloadChartData,
+  buildSwmmInpSnippet,
+  CHART_TIMESTAMP_RULE,
+  CHART_SERIES_MODE
+} from './downloadTableUtils'
 import './downloadModal.css'
 
 /**
@@ -15,15 +21,40 @@ import './downloadModal.css'
 class DownloadModal extends React.Component {
 
   constructor(props) {
-    super();
+    super(props);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
+    this.handleDownloadInpClick = this.handleDownloadInpClick.bind(this);
+    this.handleAverageOnlyToggle = this.handleAverageOnlyToggle.bind(this);
+    this.state = {
+      showAverageOnly: true
+    };
+  }
+
+  componentDidUpdate(prevProps) {
+    if (!prevProps.show && this.props.show && !this.state.showAverageOnly) {
+      this.setState({ showAverageOnly: true });
+    }
   }
 
   handleDownloadClick(e) {
     e.preventDefault()
     var blob = new Blob([this.props.csv], { type: "application/csv" });
     saveAs(blob, "rainfall.csv", { autoBom: true })
-  }  
+  }
+
+  handleDownloadInpClick(e) {
+    e.preventDefault()
+    if (!this.props.hasSwmmData) {
+      return
+    }
+
+    const blob = new Blob([this.props.inp], { type: "text/plain;charset=utf-8" });
+    saveAs(blob, "rainfall_swmm.inp", { autoBom: true })
+  }
+
+  handleAverageOnlyToggle(e) {
+    this.setState({ showAverageOnly: e.currentTarget.checked });
+  }
 
   render() {
 
@@ -31,6 +62,13 @@ class DownloadModal extends React.Component {
     let sensorLocations = fetchKwargs.sensorLocations
     let gauges = sensorLocations.gauge
     let pixels = sensorLocations.pixel
+    let chartRows = this.state.showAverageOnly
+      ? this.props.chartRowsAverageByType
+      : this.props.chartRowsPerSensor
+    let chartSeries = this.state.showAverageOnly
+      ? this.props.chartSeriesAverageByType
+      : this.props.chartSeriesPerSensor
+    let chartMetaLabel = `${this.props.rows.length} total records across ${chartSeries.length} sensors`
 
     return (
 
@@ -40,9 +78,10 @@ class DownloadModal extends React.Component {
         size="xl"
         dialogClassName="min-vw-95"
         animation={false}
+        fullscreen={'xl-down'}
       >
         <Modal.Header closeButton>
-          <Modal.Title>
+          <Modal.Title className="w-100">
             <Row>
               <Col>
                 <h4>{moment(fetchKwargs.startDt).format("DD MMM YYYY, h:mm a")} to {moment(fetchKwargs.endDt).format("DD MMM YYYY, h:mm a")}</h4>
@@ -99,14 +138,41 @@ class DownloadModal extends React.Component {
                 CSV
               </Button>
             </Col>
+            <Col sm={3}>
+              <Button
+                className="w-100"
+                disabled={!this.props.hasSwmmData}
+                variant="outline-primary"
+                size={'sm'}
+                onClick={this.handleDownloadInpClick}
+              >
+                SWMM (.inp)
+              </Button>
+            </Col>
           </Row>
           {/* RESULTS CHART */}
           <Row>
             <Col>
               <p className="small download-modal-chart-meta">
-                <em>{`${this.props.rows.length} total records across ${this.props.chartSeries.length} sensors`}</em>
+                <em>{chartMetaLabel}</em>
               </p>
-              <DownloadLineChart rows={this.props.chartRows} series={this.props.chartSeries} />
+              <div
+                className="border-top mt-3 py-3"
+              >
+              <Form.Check
+                checked={this.state.showAverageOnly}
+                className="download-modal-average-toggle"
+                id="download-average-only-toggle"
+                label="Average by Type"
+                onChange={this.handleAverageOnlyToggle}
+                type="switch"
+              />
+              <DownloadLineChart
+                rows={chartRows}
+                series={chartSeries}
+                showLegend={this.state.showAverageOnly}
+              />
+              </div>
             </Col>
           </Row>
         </Modal.Body>
@@ -125,14 +191,26 @@ const mapStateToProps = (state, ownProps) => {
 
   let resultsTableData = ownProps.fetchHistoryItem.results || {}
   let { rows, fields } = buildDownloadRowsAndFields(resultsTableData)
-  let { rows: chartRows, series: chartSeries } = buildDownloadChartData(resultsTableData, {
+  let { rows: chartRowsPerSensor, series: chartSeriesPerSensor } = buildDownloadChartData(resultsTableData, {
     timestampRule: CHART_TIMESTAMP_RULE.start
   })
-  
+  let { rows: chartRowsAverageByType, series: chartSeriesAverageByType } = buildDownloadChartData(resultsTableData, {
+    timestampRule: CHART_TIMESTAMP_RULE.start,
+    seriesMode: CHART_SERIES_MODE.averageByType
+  })
+  const inp = buildSwmmInpSnippet(resultsTableData, {
+    rollup: ownProps.fetchHistoryItem?.fetchKwargs?.rollup,
+    timestampRule: CHART_TIMESTAMP_RULE.start
+  })
+
   return {
     rows: rows,
-    chartRows: chartRows,
-    chartSeries: chartSeries,
+    chartRowsPerSensor: chartRowsPerSensor,
+    chartSeriesPerSensor: chartSeriesPerSensor,
+    chartRowsAverageByType: chartRowsAverageByType,
+    chartSeriesAverageByType: chartSeriesAverageByType,
+    hasSwmmData: chartSeriesPerSensor.length > 0,
+    inp: inp,
     csv: (rows.length > 0 ? unparse({ fields, data: rows }) : ""),
   }
 }

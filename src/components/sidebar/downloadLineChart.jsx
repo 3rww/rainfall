@@ -25,7 +25,7 @@ const CHART_COLORS = [
 const formatAxisTimestamp = (timestampMs) => moment(timestampMs).format("MM/DD HH:mm");
 const formatTooltipTimestamp = (timestampMs) => moment(timestampMs).format("MM/DD/YYYY h:mm a");
 
-const DownloadLineChart = ({ rows, series }) => {
+const DownloadLineChart = ({ rows, series, showLegend = true }) => {
   const hasChartData = Array.isArray(rows) && rows.length > 0 && Array.isArray(series) && series.length > 0;
 
   if (!hasChartData) {
@@ -37,7 +37,7 @@ const DownloadLineChart = ({ rows, series }) => {
   }
 
   return (
-    <div className="download-chart-wrapper" role="img" aria-label="Rainfall results line chart by sensor">
+    <div className="download-chart-wrapper" role="img" aria-label="Rainfall results line chart">
       <ResponsiveContainer width="100%" height={460}>
         <LineChart data={rows} margin={{ top: 16, right: 24, left: 0, bottom: 16 }}>
           <CartesianGrid strokeDasharray="4 4" />
@@ -53,7 +53,7 @@ const DownloadLineChart = ({ rows, series }) => {
             formatter={(value, _name, item) => [value, item?.name]}
             labelFormatter={formatTooltipTimestamp}
           />
-          <Legend />
+          {showLegend ? <Legend /> : null}
           {series.map((seriesItem, index) => (
             <Line
               connectNulls={false}
