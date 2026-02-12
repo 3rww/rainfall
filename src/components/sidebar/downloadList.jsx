@@ -4,7 +4,7 @@ import { Row, Col, ListGroup, Spinner, CloseButton } from 'react-bootstrap';
 import { includes } from 'lodash-es'
 
 import DownloadItem from './downloadItem'
-import { pickDownload, deleteDownload } from '../../store/middleware'
+import { pickDownload, deleteDownload } from '../../store/features/appThunks'
 import { selectFetchHistory } from '../../store/selectors'
 
 import './downloadList.css'

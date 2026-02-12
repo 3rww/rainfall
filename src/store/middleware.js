@@ -478,12 +478,10 @@ const _fetchRainfallDataFromApiV2 = (dispatch, requestId, sensor, contextType, u
 export function fetchRainfallDataFromApiV2(payload) {
 
   // console.log(payload)
-
-  let state = store.getState()
-
-  return function (dispatch) {
+  return function (dispatch, getState) {
 
     let { contextType, rainfallDataType } = payload
+    let state = getState()
     // get the active batch of Fetch Kwargs
     let kwargs = selectFetchKwargs(state, contextType)
     let rainfallDataTypePath = getRainfallDataTypePath({
@@ -683,13 +681,13 @@ export function switchContext(payload) {
 
   let contextType = payload
   
-  return function(dispatch) {
+  return function(dispatch, getState) {
   
     // switch the tab
     dispatch(switchTab(contextType))
 
     // select the active item in the context (which we just set above)
-    let fhi = selectActiveFetchHistoryItem(store.getState())
+    let fhi = selectActiveFetchHistoryItem(getState())
 
     if (fhi === undefined) {
       dispatch(resetLayerSrcs({lyrSrcNames: keys(SENSOR_TYPES)}))
@@ -726,8 +724,6 @@ export function switchContext(payload) {
  */
 export function pickSensorMiddleware(payload, isMappable=true) {
 
-  let state = store.getState()
-
   // console.log(payload)
 
   const { contextType, sensorLocationType, selectedOptions, inputType } = payload
@@ -735,7 +731,8 @@ export function pickSensorMiddleware(payload, isMappable=true) {
   // const sensorFeature = { ...payload }
   // console.log(sensorFeature)
 
-  return async function (dispatch) {
+  return async function (dispatch, getState) {
+    let state = getState()
 
     let newOpts = []
     let oldOpts = []
@@ -792,12 +789,10 @@ export function pickSensorMiddleware(payload, isMappable=true) {
  * @returns 
  */
 export function pickSensorByGeographyMiddleware(payload) {
-
-  let state = store.getState()
-
   const { selectedOptions, sensorLocationType, contextType, inputType } = payload
 
-  return async function (dispatch) {
+  return async function (dispatch, getState) {
+    let state = getState()
 
     // console.log(payload)
 

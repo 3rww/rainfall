@@ -1,5 +1,4 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { Modal, Button, Row, Col, Form } from 'react-bootstrap';
 import moment from 'moment'
 import { unparse } from 'papaparse'
@@ -28,6 +27,7 @@ class DownloadModal extends React.Component {
     this.state = {
       showAverageOnly: true
     };
+    this.derivedCache = null;
   }
 
   componentDidUpdate(prevProps) {
@@ -36,19 +36,122 @@ class DownloadModal extends React.Component {
     }
   }
 
+  getResultsTableData() {
+    return this.props.fetchHistoryItem?.results || {}
+  }
+
+  getRollup() {
+    return this.props.fetchHistoryItem?.fetchKwargs?.rollup
+  }
+
+  getOrCreateDerivedCache() {
+    const resultsTableData = this.getResultsTableData()
+    const rollup = this.getRollup()
+
+    if (
+      this.derivedCache
+      && this.derivedCache.resultsTableData === resultsTableData
+      && this.derivedCache.rollup === rollup
+    ) {
+      return this.derivedCache
+    }
+
+    this.derivedCache = {
+      resultsTableData,
+      rollup,
+      rowCount: null,
+      rowsAndFields: null,
+      chartAverageByType: null,
+      chartPerSensor: null,
+      inp: null
+    }
+
+    return this.derivedCache
+  }
+
+  getRowsAndFields() {
+    const cache = this.getOrCreateDerivedCache()
+    if (cache.rowsAndFields === null) {
+      cache.rowsAndFields = buildDownloadRowsAndFields(cache.resultsTableData)
+    }
+    return cache.rowsAndFields
+  }
+
+  getRowCount() {
+    const cache = this.getOrCreateDerivedCache()
+    if (cache.rowCount !== null) {
+      return cache.rowCount
+    }
+
+    cache.rowCount = Object.values(cache.resultsTableData).reduce((sum, sensorRows) => {
+      if (!Array.isArray(sensorRows)) {
+        return sum
+      }
+
+      const sensorRowCount = sensorRows.reduce((sensorSum, sensorRow) => (
+        sensorSum + (Array.isArray(sensorRow?.data) ? sensorRow.data.length : 0)
+      ), 0)
+
+      return sum + sensorRowCount
+    }, 0)
+
+    return cache.rowCount
+  }
+
+  getAverageChartData() {
+    const cache = this.getOrCreateDerivedCache()
+    if (cache.chartAverageByType === null) {
+      cache.chartAverageByType = buildDownloadChartData(cache.resultsTableData, {
+        timestampRule: CHART_TIMESTAMP_RULE.start,
+        seriesMode: CHART_SERIES_MODE.averageByType
+      })
+    }
+    return cache.chartAverageByType
+  }
+
+  getPerSensorChartData() {
+    const cache = this.getOrCreateDerivedCache()
+    if (cache.chartPerSensor === null) {
+      cache.chartPerSensor = buildDownloadChartData(cache.resultsTableData, {
+        timestampRule: CHART_TIMESTAMP_RULE.start
+      })
+    }
+    return cache.chartPerSensor
+  }
+
+  getInp() {
+    const cache = this.getOrCreateDerivedCache()
+    if (cache.inp === null) {
+      cache.inp = buildSwmmInpSnippet(cache.resultsTableData, {
+        rollup: cache.rollup,
+        timestampRule: CHART_TIMESTAMP_RULE.start
+      })
+    }
+    return cache.inp
+  }
+
+  hasAnyResultsData() {
+    return this.getRowCount() > 0
+  }
+
   handleDownloadClick(e) {
     e.preventDefault()
-    var blob = new Blob([this.props.csv], { type: "application/csv" });
+    const { rows, fields } = this.getRowsAndFields()
+    const csv = rows.length > 0 ? unparse({ fields, data: rows }) : ""
+    if (csv.length === 0) {
+      return
+    }
+    var blob = new Blob([csv], { type: "application/csv" });
     saveAs(blob, "rainfall.csv", { autoBom: true })
   }
 
   handleDownloadInpClick(e) {
     e.preventDefault()
-    if (!this.props.hasSwmmData) {
+    if (!this.hasAnyResultsData()) {
       return
     }
 
-    const blob = new Blob([this.props.inp], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([this.getInp()], { type: "text/plain;charset=utf-8" });
     saveAs(blob, "rainfall_swmm.inp", { autoBom: true })
   }
 
@@ -63,13 +166,18 @@ class DownloadModal extends React.Component {
     let gauges = sensorLocations.gauge
     let pixels = sensorLocations.pixel
     let totalSensors = gauges.length + pixels.length
-    let chartRows = this.state.showAverageOnly
-      ? this.props.chartRowsAverageByType
-      : this.props.chartRowsPerSensor
-    let chartSeries = this.state.showAverageOnly
-      ? this.props.chartSeriesAverageByType
-      : this.props.chartSeriesPerSensor
-    let chartMetaLabel = `${this.props.rows.length} total records across ${totalSensors} sensors`
+    const averageChartData = this.getAverageChartData()
+    const perSensorChartData = this.state.showAverageOnly
+      ? null
+      : this.getPerSensorChartData()
+    const chartRows = this.state.showAverageOnly
+      ? averageChartData.rows
+      : perSensorChartData.rows
+    const chartSeries = this.state.showAverageOnly
+      ? averageChartData.series
+      : perSensorChartData.series
+    let chartMetaLabel = `${this.getRowCount()} total records across ${totalSensors} sensors`
+    const hasSwmmData = this.hasAnyResultsData()
 
     return (
 
@@ -142,7 +250,7 @@ class DownloadModal extends React.Component {
             <Col sm={3}>
               <Button
                 className="w-100"
-                disabled={!this.props.hasSwmmData}
+                disabled={!hasSwmmData}
                 variant="outline-primary"
                 size={'sm'}
                 onClick={this.handleDownloadInpClick}
@@ -188,32 +296,4 @@ class DownloadModal extends React.Component {
   }
 }
 
-const mapStateToProps = (state, ownProps) => {
-
-  let resultsTableData = ownProps.fetchHistoryItem.results || {}
-  let { rows, fields } = buildDownloadRowsAndFields(resultsTableData)
-  let { rows: chartRowsPerSensor, series: chartSeriesPerSensor } = buildDownloadChartData(resultsTableData, {
-    timestampRule: CHART_TIMESTAMP_RULE.start
-  })
-  let { rows: chartRowsAverageByType, series: chartSeriesAverageByType } = buildDownloadChartData(resultsTableData, {
-    timestampRule: CHART_TIMESTAMP_RULE.start,
-    seriesMode: CHART_SERIES_MODE.averageByType
-  })
-  const inp = buildSwmmInpSnippet(resultsTableData, {
-    rollup: ownProps.fetchHistoryItem?.fetchKwargs?.rollup,
-    timestampRule: CHART_TIMESTAMP_RULE.start
-  })
-
-  return {
-    rows: rows,
-    chartRowsPerSensor: chartRowsPerSensor,
-    chartSeriesPerSensor: chartSeriesPerSensor,
-    chartRowsAverageByType: chartRowsAverageByType,
-    chartSeriesAverageByType: chartSeriesAverageByType,
-    hasSwmmData: chartSeriesPerSensor.length > 0,
-    inp: inp,
-    csv: (rows.length > 0 ? unparse({ fields, data: rows }) : ""),
-  }
-}
-
-export default connect(mapStateToProps)(DownloadModal);
+export default DownloadModal;

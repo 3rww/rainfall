@@ -5,8 +5,8 @@ import moment from 'moment'
 import { includes } from 'lodash-es'
 
 import DownloadModal from './downloadModal'
-import { pickDownload } from '../../store/middleware'
-// import { reFetchRainfallDataFromApiV2 } from '../../store/middleware'
+import { pickDownload } from '../../store/features/appThunks'
+// import { reFetchRainfallDataFromApiV2 } from '../../store/features/appThunks'
 
 import './downloadItem.css'
 
@@ -31,14 +31,13 @@ class DownloadsItem extends React.Component {
   }
 
   handleShow(e) {
-
-    this.setState({ show: true });
-    if (!this.props.fetchHistoryItem.isActive) {
-      console.log(e)
-      console.log("Loading data from", this.props.fetchHistoryItem.requestId, "to the map")
-      this.props.dispatchPickDownload()
-    }
-
+    this.setState({ show: true }, () => {
+      if (!this.props.fetchHistoryItem.isActive) {
+        console.log(e)
+        console.log("Loading data from", this.props.fetchHistoryItem.requestId, "to the map")
+        this.props.dispatchPickDownload()
+      }
+    });
   }
 
   // handleDownloadClick() {
@@ -180,22 +179,17 @@ class DownloadsItem extends React.Component {
           ) : (null)
         } */}
 
-        <DownloadModal
-          show={this.state.show}
-          onHide={this.handleClose}
-          fetchHistoryItem={this.props.fetchHistoryItem}
-        />
+        {this.state.show ? (
+          <DownloadModal
+            show={this.state.show}
+            onHide={this.handleClose}
+            fetchHistoryItem={this.props.fetchHistoryItem}
+          />
+        ) : null}
 
       </div>
 
     )
-  }
-}
-
-const mapStateToProps = (state, ownProps) => {
-  return {
-    ...ownProps,
-
   }
 }
 
@@ -212,4 +206,4 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(DownloadsItem);
+export default connect(null, mapDispatchToProps)(DownloadsItem);

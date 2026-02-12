@@ -12,7 +12,7 @@ import GeodataPicker from './geomPicker';
 import IntervalPicker from './intervalPicker'
 import DownloadsList from './downloadList'
 
-import { fetchRainfallDataFromApiV2 } from '../../store/middleware'
+import { fetchRainfallDataFromApiV2 } from '../../store/features/appThunks'
 import { selectSelectedSensors, selectFetchHistory } from '../../store/selectors'
 
 import './downloader.css'

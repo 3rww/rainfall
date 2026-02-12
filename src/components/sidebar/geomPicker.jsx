@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { createSelector } from '@reduxjs/toolkit';
 import {
   Row,
   Col,
@@ -27,7 +28,7 @@ import {
 import {
   pickSensorMiddleware,
   pickSensorByGeographyMiddleware
-} from '../../store/middleware'
+} from '../../store/features/appThunks'
 import {
   pluralize
 } from '../../store/utils/index'
@@ -193,37 +194,41 @@ class GeodataPicker extends React.Component {
   }
 }
 
-function mapStateToProps(state, ownProps) {
+const makeMapStateToProps = () => {
+  const selectPixelOptions = createSelector(
+    [(state) => selectMapStyleSourceDataFeatures(state, 'pixel')],
+    (pixelFeatures) => pixelFeatures
+      .map((feature) => ({ value: feature.properties.id, label: `${feature.properties.id}` }))
+  );
 
-  // the active tab
-  var context = selectContext(state)
+  const selectGaugeOptions = createSelector(
+    [(state) => selectMapStyleSourceDataFeatures(state, 'gauge')],
+    (gaugeFeatures) => gaugeFeatures
+      .filter((feature) => feature.properties.active === true)
+      .map((feature) => ({ value: feature.properties.id, label: `${feature.properties.id}: ${feature.properties.name}` }))
+  );
 
-  // pixel selection options
-  var pixelOpts = selectMapStyleSourceDataFeatures(state, 'pixel')
-    .map(i => ({ value: i.properties.id, label: `${i.properties.id}` }))
-  var selectedPixels = selectPickedSensors(state, ownProps.contextType, 'pixel')
+  return (state, ownProps) => {
+    const context = selectContext(state);
+    const pixelOpts = selectPixelOptions(state);
+    const selectedPixels = selectPickedSensors(state, ownProps.contextType, 'pixel');
+    const gaugeOpts = selectGaugeOptions(state);
+    const selectedGauges = selectPickedSensors(state, ownProps.contextType, 'gauge');
+    const geographyOpts = selectGeographyLookupsAsGroupedOptions(state);
+    const selectedGeographies = selectPickedSensors(state, ownProps.contextType, 'basin');
 
-  // gauge selection options
-  var gaugeOpts = selectMapStyleSourceDataFeatures(state, 'gauge')
-    .filter(i => i.properties.active === true)
-    .map(i => ({ value: i.properties.id, label: `${i.properties.id}: ${i.properties.name}` }))
-  var selectedGauges = selectPickedSensors(state, ownProps.contextType, 'gauge')
-
-  // geography selection options
-  var geographyOpts = selectGeographyLookupsAsGroupedOptions(state)
-  var selectedGeographies = selectPickedSensors(state, ownProps.contextType, 'basin')
-
-  return {
-    gaugeOpts: gaugeOpts,
-    pixelOpts: pixelOpts,
-    geographyOpts: geographyOpts,
-    selectedBasin: selectedGeographies,
-    selectedGauges: selectedGauges,
-    selectedPixels: selectedPixels,
-    pixelCount: selectedPixels.length,
-    gaugeCount: selectedGauges.length,
-    context: context
-  }
+    return {
+      gaugeOpts,
+      pixelOpts,
+      geographyOpts,
+      selectedBasin: selectedGeographies,
+      selectedGauges,
+      selectedPixels,
+      pixelCount: selectedPixels.length,
+      gaugeCount: selectedGauges.length,
+      context
+    };
+  };
 }
 
 /**
@@ -263,4 +268,4 @@ const mapDispatchToProps = (dispatch, ownProps) => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(GeodataPicker);
+export default connect(makeMapStateToProps, mapDispatchToProps)(GeodataPicker);

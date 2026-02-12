@@ -1,35 +1,17 @@
-import React from 'react';
-import { connect } from "react-redux";
+import React from "react";
 import Navigation from './components/navigation/navigation';
 import Layout from './components/layout';
+import { useAppSelector } from "./store/hooks";
 
-class App extends React.Component {
+const App = () => {
+  const loading = useAppSelector((state) => state.initMap.loading);
 
-  // componentDidMount() {
+  return (
+    <div className="app-shell">
+      <Navigation isloading={loading} />
+      <Layout />
+    </div>
+  );
+};
 
-  //   // initial data fetches, including
-  //   // * events
-  //   // * pixels
-  //   // * gauges
-  //   this.props.initFetchData()
-
-  // }
-
-  render() {
-    return (
-
-      <div className="app-shell">
-        <Navigation isloading={this.props.loading}/>
-        <Layout />
-      </div>
-
-    );
-  }
-
-}
-
-function mapStateToProps(state) {
-  return { ...state.initMap }
-}
-
-export default connect(mapStateToProps)(App)
+export default App;
