@@ -153,10 +153,10 @@ class Navigation extends Component {
         <Modal
           show={this.state.show}
           onHide={this.handleClose}
-          size="lg"
+          size="xl"
         >
           <Modal.Header closeButton>
-            <Modal.Title>
+            <Modal.Title className="w-100">
               {(this.state.showWhich) ? this.state.content[this.state.showWhich].title : (null)}
             </Modal.Title>
           </Modal.Header>

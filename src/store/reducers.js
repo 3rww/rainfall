@@ -141,7 +141,7 @@ const caseReducers = {
       // also deselect any events if previously selected
       selectRainfallEvents(state).list
         .filter(e => e.selected)
-        .forEach(e => e.selected === false)
+        .forEach(e => e.selected = false)
     },
     /**
      * pick the datetime range from the rainfall events list (historic only)
