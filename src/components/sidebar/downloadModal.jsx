@@ -62,13 +62,14 @@ class DownloadModal extends React.Component {
     let sensorLocations = fetchKwargs.sensorLocations
     let gauges = sensorLocations.gauge
     let pixels = sensorLocations.pixel
+    let totalSensors = gauges.length + pixels.length
     let chartRows = this.state.showAverageOnly
       ? this.props.chartRowsAverageByType
       : this.props.chartRowsPerSensor
     let chartSeries = this.state.showAverageOnly
       ? this.props.chartSeriesAverageByType
       : this.props.chartSeriesPerSensor
-    let chartMetaLabel = `${this.props.rows.length} total records across ${chartSeries.length} sensors`
+    let chartMetaLabel = `${this.props.rows.length} total records across ${totalSensors} sensors`
 
     return (
 

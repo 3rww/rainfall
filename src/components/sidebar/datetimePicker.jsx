@@ -375,7 +375,8 @@ class DateTimePicker extends React.Component {
             {(this.props.startDt !== false && this.props.endDt !== false) ? (
               <InputGroup className="datetimepicker-control">
                 <FormControl
-                  plaintext
+                  size="sm"
+                  // plaintext
                   readOnly
                   placeholder="start and end date/times"
                   value={`${this.props.startDt.format(DATE_FORMAT)} to ${this.props.endDt.format(DATE_FORMAT)}`}
