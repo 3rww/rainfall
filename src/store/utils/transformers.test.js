@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { transformRainfallResults } from "./transformers";
+import {
+  transformDataApiEventsJSON,
+  transformRainfallResults
+} from "./transformers";
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
@@ -160,5 +163,52 @@ describe("transformRainfallResults", () => {
     expect(result.data[2].data.map((point) => point.val)).toEqual([0.2]);
     expect(result.data.find((series) => series.id === null)).toBeUndefined();
     expect(result.data.reduce((sum, series) => sum + series.data.length, 0)).toBe(5);
+  });
+});
+
+describe("transformDataApiEventsJSON", () => {
+  it("de-duplicates exact duplicate events", () => {
+    const payload = [
+      {
+        event_label: "storm-a",
+        start_dt: "2025-07-01T00:00:00Z",
+        end_dt: "2025-07-01T03:00:00Z",
+        duration: 3
+      },
+      {
+        event_label: "storm-a",
+        start_dt: "2025-07-01T00:00:00Z",
+        end_dt: "2025-07-01T03:00:00Z",
+        duration: 3
+      }
+    ];
+
+    const result = transformDataApiEventsJSON(clone(payload));
+
+    expect(result).toHaveLength(1);
+    expect(result[0].eventid).toBe("storm-a");
+  });
+
+  it("keeps distinct events when timestamps differ", () => {
+    const payload = [
+      {
+        event_label: "storm-a",
+        start_dt: "2025-07-01T00:00:00Z",
+        end_dt: "2025-07-01T03:00:00Z",
+        duration: 3
+      },
+      {
+        event_label: "storm-a",
+        start_dt: "2025-07-02T00:00:00Z",
+        end_dt: "2025-07-02T03:00:00Z",
+        duration: 3
+      }
+    ];
+
+    const result = transformDataApiEventsJSON(clone(payload));
+
+    expect(result).toHaveLength(2);
+    expect(result[0].eventid).toBe("storm-a");
+    expect(result[1].eventid).toBe("storm-a");
   });
 });

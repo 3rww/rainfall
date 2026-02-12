@@ -16,7 +16,7 @@ import DatePicker from 'react-datepicker';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faList } from '@fortawesome/free-solid-svg-icons';
 
-import EventsList from './eventsList';
+import EventsHeatmap from './eventsHeatmap';
 import { pickRainfallDateTimeRange } from '../../store/actions';
 import {
   selectFetchKwargs,
@@ -239,7 +239,7 @@ class DateTimePicker extends React.Component {
     const minDateText = this.props.minDate.format(NOTE_DATE_FORMAT);
     const maxDateText = this.props.maxDate.format(NOTE_DATE_FORMAT);
 
-    return `${intervalLabel} ${contextLabel} data is available between ${minDateText} and ${maxDateText}`;
+    return `${intervalLabel} ${contextLabel} data is currently available between ${minDateText} and ${maxDateText}`;
   }
 
   render() {
@@ -346,18 +346,24 @@ class DateTimePicker extends React.Component {
         <Modal
           show={this.state.showEventModal}
           onHide={this.handleEventModalClose}
-          size="lg"
+          size="xl"
+          fullscreen={"lg-down"}
+          contentClassName="datetimepicker-event-modal-content"
           animation={false}
         >
           <Modal.Header closeButton>
             <Modal.Title>
               Select A Rainfall Event
+              <br></br>       
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <EventsList
+              <p className="small text-muted">
+                Select a day from the calendar below to see rainfall event(s) on that day, and select those to use as date/time range for your rainfall data download.
+              </p>                   
+            <EventsHeatmap
               contextType={this.props.contextType}
-              handleClose={this.handleEventModalClose}
+              onEventSelected={this.handleEventModalClose}
             />
           </Modal.Body>
           <Modal.Footer>
@@ -375,7 +381,8 @@ class DateTimePicker extends React.Component {
             {(this.props.startDt !== false && this.props.endDt !== false) ? (
               <InputGroup className="datetimepicker-control">
                 <FormControl
-                  plaintext
+                  size="sm"
+                  // plaintext
                   readOnly
                   placeholder="start and end date/times"
                   value={`${this.props.startDt.format(DATE_FORMAT)} to ${this.props.endDt.format(DATE_FORMAT)}`}

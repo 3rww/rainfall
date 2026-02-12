@@ -1,6 +1,22 @@
 import moment from 'moment'
 import { flatMap, get, groupBy } from 'lodash-es'
 
+const getEventDedupeKey = (event) => (
+  `${event?.eventid ?? ''}|${event?.startDt ?? ''}|${event?.endDt ?? ''}`
+)
+
+const dedupeEvents = (events = []) => {
+  const seen = new Set()
+  return events.filter((event) => {
+    const key = getEventDedupeKey(event)
+    if (seen.has(key)) {
+      return false
+    }
+    seen.add(key)
+    return true
+  })
+}
+
 export const transformToMapboxSourceObject = geojson => {
   return {
     type: "geojson",
@@ -76,7 +92,7 @@ export const transformRainfallGaugesToMapboxSourceObject = geojson => {
 
 
 export const transformEventsJSON = (eventsJson) => {
-  return eventsJson.events
+  const events = eventsJson.events
     .slice(0)
     .reverse()
     .map((e, i) => ({
@@ -92,10 +108,12 @@ export const transformEventsJSON = (eventsJson) => {
       return event
     })
     .filter(e => e.hours > 0)
+
+  return dedupeEvents(events)
 }
 
 export const transformDataApiEventsJSON = (eventsJson) => {
-  return eventsJson
+  const events = eventsJson
     .map((e, i) => ({
       ...e,
       startDt: e.start_dt,
@@ -110,6 +128,8 @@ export const transformDataApiEventsJSON = (eventsJson) => {
       return event
     })
     .filter(e => e.hours > 0)
+
+  return dedupeEvents(events)
 }
 
 // export const join_tables = (t1, t2, on) => (
