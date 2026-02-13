@@ -1,17 +1,22 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
+import { useStore } from 'react-redux';
 import Immutable from 'immutable';
 import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import { isEmpty, has, forEach } from 'lodash-es';
 
 import {
-  setStyle,
+  setStyle
+} from '../../store/features/mapStyleSlice';
+import {
   mapLoaded,
+  setInitialStyleLoaded,
   startThinking,
   stopThinking
-} from '../../store/actions';
-import { initDataFetch, pickSensorMiddleware } from '../../store/features/appThunks';
+} from '../../store/features/progressSlice';
+import { initDataFetch } from '../../store/features/appInitThunks';
+import { pickSensorMiddleware } from '../../store/features/selectionThunks';
 import { ENABLE_DEBUG_LOGS, LAYERS_W_MOUSEOVER, getInteractiveMapLayersForContext } from '../../store/config';
 import diffStyles from '../../utilities/styleSpecDiff';
 import { transformFeatureToOption } from '../../store/utils/transformers';
@@ -29,10 +34,12 @@ const MAPID = 'map';
 
 const ReactMap = ({ activeTab, token, zoom }) => {
   const dispatch = useAppDispatch();
+  const store = useStore();
   const mapStyle = useAppSelector((state) => state.mapStyle);
   const initMap = useAppSelector((state) => state.initMap);
 
   const webmapRef = useRef(null);
+  const mapContainerRef = useRef(null);
   const tooltipContainerRef = useRef(null);
   const tooltipRootRef = useRef(null);
   const activeTabRef = useRef(activeTab);
@@ -131,8 +138,17 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     if (command === 'setGeoJSONSourceData') {
       const sourceId = args[0];
       const source = map.getSource(sourceId);
+      const rawData = args[1];
+      const normalizedData = (
+        rawData
+        && typeof rawData === 'object'
+        && rawData.type === 'geojson'
+        && rawData.data
+      )
+        ? rawData.data
+        : rawData;
       if (source && typeof source.setData === 'function') {
-        source.setData(args[1]);
+        source.setData(normalizedData);
       } else {
         console.warn(`[mapStyle] setGeoJSONSourceData skipped: source "${sourceId}" is missing or non-geojson`);
       }
@@ -282,6 +298,22 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     const webmap = new mapboxgl.Map(mapConfig);
     webmapRef.current = webmap;
 
+    const resizeMap = () => {
+      if (webmapRef.current) {
+        webmapRef.current.resize();
+      }
+    };
+
+    const resizeObserver = (
+      typeof ResizeObserver !== 'undefined' && mapContainerRef.current
+        ? new ResizeObserver(() => resizeMap())
+        : null
+    );
+    if (resizeObserver && mapContainerRef.current) {
+      resizeObserver.observe(mapContainerRef.current);
+    }
+    window.addEventListener('resize', resizeMap);
+
     tooltipContainerRef.current = document.createElement('div');
     tooltipRootRef.current = createRoot(tooltipContainerRef.current);
     const tooltip = new mapboxgl.Marker({
@@ -317,10 +349,15 @@ const ReactMap = ({ activeTab, token, zoom }) => {
         });
       });
 
+      // Ensure map canvas dimensions reflect final flex layout on first paint.
+      resizeMap();
+      requestAnimationFrame(() => resizeMap());
+
       dispatch(setStyle(webmap.getStyle()));
+      dispatch(setInitialStyleLoaded(true));
       dispatch(mapLoaded(webmap.loaded()));
       dispatch(stopThinking('Map loaded'));
-      dispatch(initDataFetch());
+      dispatch(initDataFetch({ subscribe: store.subscribe }));
 
       const hoveredStateId = {};
       LAYERS_W_MOUSEOVER.forEach((layerRef) => {
@@ -382,9 +419,18 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     webmap.on('click', (event) => handleMapClick(event));
 
     return () => {
+      window.removeEventListener('resize', resizeMap);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
       if (tooltipRootRef.current) {
-        tooltipRootRef.current.unmount();
+        const tooltipRoot = tooltipRootRef.current;
         tooltipRootRef.current = null;
+        // In development strict mode, cleanup can run while React is still
+        // processing renders. Defer unmount to avoid re-entrant root warnings.
+        setTimeout(() => {
+          tooltipRoot.unmount();
+        }, 0);
       }
       if (webmapRef.current) {
         webmapRef.current.remove();
@@ -405,7 +451,7 @@ const ReactMap = ({ activeTab, token, zoom }) => {
 
   return (
     <div className="map-and-legend-container">
-      <div className="map" id={MAPID}></div>
+      <div className="map" id={MAPID} ref={mapContainerRef}></div>
       <div className="legend-container container-fluid">
         <MapLegend />
       </div>

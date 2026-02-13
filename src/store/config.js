@@ -216,7 +216,7 @@ export const MAP_LAYERS = [
         [
           "interpolate",
           ["linear"],
-          ["get", "total"],
+          ["to-number", ["get", "total"], 0],
           0,
           '#fafa6e',
           10,
@@ -371,7 +371,7 @@ export const MAP_LAYERS = [
         [
           "interpolate",
           ["linear"],
-          ["get", "total"],
+          ["to-number", ["get", "total"], 0],
           0,
           '#fafa6e',
           10,

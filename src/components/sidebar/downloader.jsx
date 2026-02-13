@@ -12,7 +12,7 @@ import GeodataPicker from './geomPicker';
 import IntervalPicker from './intervalPicker'
 import DownloadsList from './downloadList'
 
-import { fetchRainfallDataFromApiV2 } from '../../store/features/appThunks'
+import { fetchRainfallDataFromApiV2 } from '../../store/features/rainfallThunks'
 import { selectSelectedSensors, selectFetchHistory } from '../../store/selectors'
 
 import './downloader.css'
@@ -54,7 +54,7 @@ class RainfallDownloader extends React.Component {
               <Button
                 onClick={this.handleDownloadClick}
                 disabled={!this.props.hasKwargs}
-                block
+                className="w-100"
               >
                 Get Rainfall Data
               </Button>

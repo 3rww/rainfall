@@ -5,7 +5,7 @@ import chroma from 'chroma-js';
 import { createSelector } from '@reduxjs/toolkit';
 
 import { LEGEND_BREAKS } from '../../store/config';
-import { applyColorStretch } from '../../store/actions';
+import { applyColorStretch } from '../../store/features/mapStyleSlice';
 import { buildRainfallColorStyleExp } from '../../store/utils/mb';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
@@ -65,9 +65,9 @@ const MapLegend = () => {
       </Col>
       <Col sm={2}>
         <Form>
-          <Form.Check defaultChecked custom size="sm" value="breaks_005" label="0.5 in." name="legendRadios" type="radio" id="legend-radio-1" onChange={handleSelectLegend} />
-          <Form.Check custom size="sm" value="breaks_050" label="5 in." name="legendRadios" type="radio" id="legend-radio-2" onChange={handleSelectLegend} />
-          <Form.Check custom size="sm" value="breaks_100" label="10 in." name="legendRadios" type="radio" id="legend-radio-3" onChange={handleSelectLegend} />
+          <Form.Check defaultChecked size="sm" value="breaks_005" label="0.5 in." name="legendRadios" type="radio" id="legend-radio-1" onChange={handleSelectLegend} />
+          <Form.Check size="sm" value="breaks_050" label="5 in." name="legendRadios" type="radio" id="legend-radio-2" onChange={handleSelectLegend} />
+          <Form.Check size="sm" value="breaks_100" label="10 in." name="legendRadios" type="radio" id="legend-radio-3" onChange={handleSelectLegend} />
         </Form>
       </Col>
     </Row>

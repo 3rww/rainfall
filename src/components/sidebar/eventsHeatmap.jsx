@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { Badge, Button } from "react-bootstrap";
 import moment from "moment";
 
-import { pickRainfallEvent } from "../../store/actions";
+import { pickRainfallEvent } from "../../store/features/rainfallThunks";
 import { selectRainfallEvents, selectSelectedEvent } from "../../store/selectors";
 import {
   buildYearSections,

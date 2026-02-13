@@ -5,8 +5,7 @@ import moment from 'moment'
 import { includes } from 'lodash-es'
 
 import DownloadModal from './downloadModal'
-import { pickDownload } from '../../store/features/appThunks'
-// import { reFetchRainfallDataFromApiV2 } from '../../store/features/appThunks'
+import { pickDownload } from '../../store/features/downloadThunks'
 
 import './downloadItem.css'
 
@@ -56,6 +55,11 @@ class DownloadsItem extends React.Component {
     let hasResults = fhi.results !== false
     let pKwargs = fhi.processedKwargs
     let failedJob = includes(['deferred', 'failed', "does not exist", 'error'], fhi.status)
+    const failureMessages = (
+      Array.isArray(fhi.messages) && fhi.messages.length > 0
+        ? fhi.messages
+        : [`Rainfall request failed (${fhi.status || 'unknown status'}). Please try again.`]
+    );
 
     // let reGetButton = includes(
     //   ['deferred', 'failed', "does not exist", 'error'], 
@@ -157,7 +161,11 @@ class DownloadsItem extends React.Component {
         {/* Error Alerts */}
         {
           failedJob ? (
-            fhi.messages.map((m, i) => <Alert dismissible key={i} variant="danger"><small>{m}</small></Alert> )
+            failureMessages.map((message, index) => (
+              <Alert dismissible key={index} variant="danger">
+                <small>{`${message}`}</small>
+              </Alert>
+            ))
           ) : (
             null
           )

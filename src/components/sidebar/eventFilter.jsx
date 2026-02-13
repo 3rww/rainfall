@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import {Row, Col, Container} from 'react-bootstrap';
 import { debounce } from 'lodash-es'
-import { filterEventByHours } from '../../store/actions';
+import { filterEventByHours } from '../../store/features/rainfallEventsSlice';
 
 
 class EventFilter extends React.Component {
@@ -53,7 +53,7 @@ class EventFilter extends React.Component {
 
 function mapStateToProps(state) {
   return {
-   eventFilters: state.eventFilters
+   eventFilters: state.rainfallEvents?.filters
   }
  }
  
@@ -65,4 +65,4 @@ function mapStateToProps(state) {
   }
  }
  
- export default connect(mapStateToProps, mapDispatchToProps)(EventFilterControls);
+ export default connect(mapStateToProps, mapDispatchToProps)(EventFilter);

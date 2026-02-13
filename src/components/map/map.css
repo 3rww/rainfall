@@ -1,24 +1,26 @@
 .map-and-legend-container {
-    height: 300px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 320px;
 }
 
 .map {
-    height: 220px;
+    flex: 1 1 auto;
+    min-height: 240px;
 }
 
 .legend-container {
-    height: 80px;
+    flex: 0 0 auto;
+    min-height: 80px;
 }
 
 @media (min-width: 576px) { 
     .map-and-legend-container {
-        height: 100% !important;
+        min-height: 0;
     }    
     .map {
-        height: 90% !important;
-    }
-    .legend-container {
-        height: 10% !important;
+        min-height: 0;
     }    
 }
 
@@ -35,5 +37,4 @@
     overflow: auto;
     background: rgba(255, 255, 255, 0.8);
 }
-
 

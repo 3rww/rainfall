@@ -8,7 +8,7 @@ import moment from 'moment'
 
 // import EventFilterControls from './filters';
 
-import { pickRainfallEvent } from '../../store/actions'
+import { pickRainfallEvent } from '../../store/features/rainfallThunks'
 import { selectRainfallEvents } from '../../store/selectors'
 
 import './eventsList.css'

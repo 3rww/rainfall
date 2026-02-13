@@ -3,7 +3,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Form, Row, Col } from 'react-bootstrap'
 
-import { pickInterval } from '../../store/actions'
+import { pickInterval } from '../../store/features/fetchKwargsSlice'
 import { getIntervalOptionsForContext } from '../../store/config'
 
 

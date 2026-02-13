@@ -22,19 +22,21 @@ import {
   selectPickedSensors,
   selectContext
 } from '../../store/selectors'
-// import {
-//   pickSensor
-// } from '../../store/actions'
 import {
   pickSensorMiddleware,
   pickSensorByGeographyMiddleware
-} from '../../store/features/appThunks'
+} from '../../store/features/selectionThunks'
 import {
   pluralize
 } from '../../store/utils/index'
 
 import { CONTEXT_TYPES } from '../../store/config'
 
+const isValidOptionValue = (value) => (
+  value !== undefined
+  && value !== null
+  && `${value}`.trim() !== ''
+);
 
 class GeodataPicker extends React.Component {
   constructor(props) {
@@ -104,6 +106,8 @@ class GeodataPicker extends React.Component {
                     </Col>
                     <Col md={9}>
                       <Select
+                        instanceId="geom-picker-gauge"
+                        inputId="geom-picker-gauge-input"
                         isMulti
                         value={this.props.selectedGauges}
                         onChange={this.props.handleSelectGauge}
@@ -137,6 +141,8 @@ class GeodataPicker extends React.Component {
                     </Col>
                     <Col md={9}>
                       <Select
+                        instanceId="geom-picker-pixel"
+                        inputId="geom-picker-pixel-input"
                         isMulti
                         value={this.props.selectedPixels}
                         onChange={this.props.handleSelectPixel}
@@ -166,6 +172,8 @@ class GeodataPicker extends React.Component {
                 <Row className="g-0">
                   <Col md={12}>
                     <Select
+                      instanceId="geom-picker-geography"
+                      inputId="geom-picker-geography-input"
                       placeholder="Select radar pixels by basin, municipality, or watershed"
                       isMulti
                       // value={this.props.selectedBasin}
@@ -198,14 +206,16 @@ const makeMapStateToProps = () => {
   const selectPixelOptions = createSelector(
     [(state) => selectMapStyleSourceDataFeatures(state, 'pixel')],
     (pixelFeatures) => pixelFeatures
-      .map((feature) => ({ value: feature.properties.id, label: `${feature.properties.id}` }))
+      .filter((feature) => isValidOptionValue(feature?.properties?.id))
+      .map((feature) => ({ value: `${feature.properties.id}`, label: `${feature.properties.id}` }))
   );
 
   const selectGaugeOptions = createSelector(
     [(state) => selectMapStyleSourceDataFeatures(state, 'gauge')],
     (gaugeFeatures) => gaugeFeatures
       .filter((feature) => feature.properties.active === true)
-      .map((feature) => ({ value: feature.properties.id, label: `${feature.properties.id}: ${feature.properties.name}` }))
+      .filter((feature) => isValidOptionValue(feature?.properties?.id))
+      .map((feature) => ({ value: `${feature.properties.id}`, label: `${feature.properties.id}: ${feature.properties.name}` }))
   );
 
   return (state, ownProps) => {
@@ -215,7 +225,7 @@ const makeMapStateToProps = () => {
     const gaugeOpts = selectGaugeOptions(state);
     const selectedGauges = selectPickedSensors(state, ownProps.contextType, 'gauge');
     const geographyOpts = selectGeographyLookupsAsGroupedOptions(state);
-    const selectedGeographies = selectPickedSensors(state, ownProps.contextType, 'basin');
+    const selectedGeographies = selectPickedSensors(state, ownProps.contextType, 'geographies');
 
     return {
       gaugeOpts,

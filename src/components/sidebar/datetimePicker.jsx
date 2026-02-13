@@ -17,7 +17,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faList } from '@fortawesome/free-solid-svg-icons';
 
 import EventsHeatmap from './eventsHeatmap';
-import { pickRainfallDateTimeRange } from '../../store/actions';
+import { pickRainfallDateTimeRange } from '../../store/features/fetchKwargsSlice';
 import {
   selectFetchKwargs,
   selectLatestTimestamps
