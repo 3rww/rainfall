@@ -31,6 +31,7 @@ import './map.css';
 
 const DEBUG = ENABLE_DEBUG_LOGS;
 const MAPID = 'map';
+const E2E_TEST_MODE = import.meta.env.VITE_E2E_TEST === 'true';
 
 const ReactMap = ({ activeTab, token, zoom }) => {
   const dispatch = useAppDispatch();
@@ -297,6 +298,18 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     mapboxgl.accessToken = token;
     const webmap = new mapboxgl.Map(mapConfig);
     webmapRef.current = webmap;
+    let didInitializeApp = false;
+
+    const initializeApp = (loaded = true, message = 'Map loaded') => {
+      if (didInitializeApp) {
+        return;
+      }
+      didInitializeApp = true;
+      dispatch(setInitialStyleLoaded(true));
+      dispatch(mapLoaded(loaded));
+      dispatch(stopThinking(message));
+      dispatch(initDataFetch({ subscribe: store.subscribe }));
+    };
 
     const resizeMap = () => {
       if (webmapRef.current) {
@@ -320,6 +333,14 @@ const ReactMap = ({ activeTab, token, zoom }) => {
       element: tooltipContainerRef.current,
       offset: [105, 0]
     }).setLngLat([0, 0]).addTo(webmap);
+
+    const fallbackInitTimer = (
+      E2E_TEST_MODE
+        ? setTimeout(() => {
+          initializeApp(true, 'Map loaded (e2e fallback)');
+        }, 1500)
+        : null
+    );
 
     webmap.on('load', () => {
       webmap.addControl(new MapboxGeocoder({
@@ -354,10 +375,7 @@ const ReactMap = ({ activeTab, token, zoom }) => {
       requestAnimationFrame(() => resizeMap());
 
       dispatch(setStyle(webmap.getStyle()));
-      dispatch(setInitialStyleLoaded(true));
-      dispatch(mapLoaded(webmap.loaded()));
-      dispatch(stopThinking('Map loaded'));
-      dispatch(initDataFetch({ subscribe: store.subscribe }));
+      initializeApp(webmap.loaded(), 'Map loaded');
 
       const hoveredStateId = {};
       LAYERS_W_MOUSEOVER.forEach((layerRef) => {
@@ -419,6 +437,9 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     webmap.on('click', (event) => handleMapClick(event));
 
     return () => {
+      if (fallbackInitTimer) {
+        clearTimeout(fallbackInitTimer);
+      }
       window.removeEventListener('resize', resizeMap);
       if (resizeObserver) {
         resizeObserver.disconnect();

@@ -58,6 +58,8 @@ export const URL_GEOGRAPHY_LOOKUP = `${ROOT}static/data/geography-lookup.json`;
 
 // Service Parms -----------------------------------------
 export const REQUEST_TIME_INTERVAL = Number(import.meta.env.VITE_API_REQUEST_INTERVAL_MS || 2000);
+export const API_POLL_MAX_ATTEMPTS = Number(import.meta.env.VITE_API_POLL_MAX_ATTEMPTS || 120);
+export const API_POLL_MAX_MS = Number(import.meta.env.VITE_API_POLL_MAX_MS || 300000);
 
 
 // rainfall data constants ----------------------------------

@@ -1,5 +1,4 @@
 import axios from 'axios';
-import moment from 'moment';
 
 import {
   BREAKS_050,
@@ -20,6 +19,7 @@ import {
   clampDateTimeRange,
   resolveAvailableBounds
 } from '../utils/dateBounds';
+import { nowDateTime } from '../utils/dateTime';
 import {
   transformDataApiEventsJSON,
   transformRainfallGaugesToMapboxSourceObject,
@@ -135,7 +135,7 @@ const fetchReferenceDatasets = (dispatch) => Promise.all([
 const applyDefaultDateRanges = ({ dispatch, getState }) => {
   const state = getState();
   const latest = state?.stats?.latest || {};
-  const now = moment().toISOString();
+  const now = nowDateTime().toISOString();
 
   const dispatchDefaultRange = ({ contextType, rainfallDataType, lookbackAmount, lookbackUnit }) => {
     const activeKwargs = selectFetchKwargs(state, contextType);

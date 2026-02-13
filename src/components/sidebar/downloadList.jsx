@@ -1,126 +1,86 @@
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useCallback } from 'react';
 import { Row, Col, ListGroup, Spinner, CloseButton } from 'react-bootstrap';
-import { includes } from 'lodash-es'
+import { includes } from 'lodash-es';
 
-import DownloadItem from './downloadItem'
-import { pickDownload, deleteDownload } from '../../store/features/downloadThunks'
-import { selectFetchHistory } from '../../store/selectors'
+import DownloadItem from './downloadItem';
+import { pickDownload, deleteDownload } from '../../store/features/downloadThunks';
+import { selectFetchHistory } from '../../store/selectors';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
-import './downloadList.css'
+import './downloadList.css';
 
-/**
-* Downloads List Component. 
-*/
-class DownloadsList extends React.Component {
+const DownloadsList = ({ contextType, rainfallDataType, rainfallSensorType }) => {
+  const dispatch = useAppDispatch();
 
-  constructor(props, context) {
-    super(props, context);
-    this.handleListClick = this.handleListClick.bind(this);
-    this.handleDeleteClick = this.handleDeleteClick.bind(this);
-  }
+  const fetchHistory = useAppSelector((state) => selectFetchHistory(state, contextType));
 
-  handleListClick(fh) {
-    this.props.pickDownload(fh)
-  }
+  const handleListClick = useCallback((fetchHistoryItem) => {
+    dispatch(pickDownload({ ...fetchHistoryItem, contextType }));
+  }, [contextType, dispatch]);
 
-  handleDeleteClick(e, requestId) {
-    e.preventDefault()
-    e.stopPropagation()
-    this.props.deleteDownload({ requestId: requestId })
-  }
+  const handleDeleteClick = useCallback((event, requestId) => {
+    event.preventDefault();
+    event.stopPropagation();
+    dispatch(deleteDownload({ requestId, contextType }));
+  }, [contextType, dispatch]);
 
-  render() {
+  return (
+    <ListGroup variant="flush">
+      {fetchHistory.slice(0).reverse().map((item) => {
+        const failedJob = includes(['deferred', 'failed', 'does not exist', 'error', 'timed_out', 'canceled'], item.status);
 
-    // console.log(this.props)
+        let listColor;
+        if (item.isActive && item.status === 'finished') {
+          listColor = 'primary';
+        } else if (failedJob) {
+          listColor = 'danger';
+        } else {
+          listColor = '';
+        }
 
-    return (
+        return (
+          <ListGroup.Item
+            key={item.requestId}
+            as="div"
+            className="mx-0 download-list-item"
+            action
+            onClick={() => handleListClick(item)}
+            variant={listColor}
+          >
+            <CloseButton
+              className="download-list-item-delete"
+              aria-label="Delete rainfall query result"
+              onClick={(event) => handleDeleteClick(event, item.requestId)}
+            />
 
-      <ListGroup variant="flush">
+            <Row className="g-0 download-list-item-row">
+              <Col sm={item.isFetching ? 11 : 12} className="download-list-item-content">
+                <DownloadItem
+                  fetchHistoryItem={item}
+                  contextType={contextType}
+                  rainfallDataType={rainfallDataType}
+                  rainfallSensorType={rainfallSensorType}
+                />
+              </Col>
 
-        {this.props.fetchHistory.slice(0).reverse().map((i) => {
-
-          let failedJob = includes(['deferred', 'failed', "does not exist", 'error'], i.status)
-
-          let listColor
-          if (i.isActive && i.status === 'finished') {
-            listColor = "primary"
-          } else if (failedJob) {
-            listColor = "danger"
-          } else {
-            listColor = ""
-          }
-
-          return (
-            <ListGroup.Item
-              key={i.requestId}
-              // active={i.isActive}
-              as="div"
-              className="mx-0 download-list-item"
-              action
-              onClick={() => this.handleListClick(i)}
-              variant={listColor}
-            >
-              <CloseButton
-                className="download-list-item-delete"
-                aria-label="Delete rainfall query result"
-                onClick={(e) => this.handleDeleteClick(e, i.requestId)}
-              />
-
-              <Row className="g-0 download-list-item-row">
-                <Col sm={ i.isFetching ? (11) : (12) } className="download-list-item-content">
-                  <DownloadItem
-                    fetchHistoryItem={i}
-                    contextType={this.props.contextType}
-                    rainfallDataType={this.props.rainfallDataType}
-                    rainfallSensorType={this.props.rainfallSensorType}
-                  />
+              {item.isFetching ? (
+                <Col sm={1} className="download-list-item-spinner">
+                  <Spinner
+                    animation="border"
+                    variant="primary"
+                  >
+                    <span className="visually-hidden">
+                      Fetching rainfall data...
+                    </span>
+                  </Spinner>
                 </Col>
-                
-                  {
-                    i.isFetching ? (
-                      <Col sm={1} className="download-list-item-spinner">
-                        <Spinner
-                          animation="border"
-                          variant="primary"
-                        >
-                          <span className="visually-hidden">
-                            "Fetching rainfall data...
-                          </span>
-                        </Spinner>
-                      </Col>
-                    ) : (null)
-                  }
-              </Row>
-              
-            </ListGroup.Item>
-          )
-        })}
+              ) : null}
+            </Row>
+          </ListGroup.Item>
+        );
+      })}
+    </ListGroup>
+  );
+};
 
-      </ListGroup>
-
-    )
-  }
-}
-
-const mapStateToProps = (state, ownProps) => {
-  let fh = selectFetchHistory(state, ownProps.contextType)
-  return {
-    fetchHistory: fh,
-    hasDownloads: fh.length > 0,
-    rainfallDataType: ownProps.rainfallDataType
-  }
-}
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    pickDownload: payload => {
-      dispatch(pickDownload({...payload, contextType: ownProps.contextType}))
-    },
-    deleteDownload: payload => {
-      dispatch(deleteDownload({...payload, contextType: ownProps.contextType}))
-    }
-  }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(DownloadsList);
+export default DownloadsList;

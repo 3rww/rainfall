@@ -1,8 +1,5 @@
 import React from 'react';
-
 import { Row, Col, Button, ButtonGroup, Popover, OverlayTrigger } from 'react-bootstrap';
-
-
 
 const popover = (
   <Popover id="popover-basic">
@@ -13,44 +10,36 @@ const popover = (
   </Popover>
 );
 
-export default class LegacyRealtimeRainfallPage extends React.Component {
+const LegacyCalibratedRadarPage = () => (
+  <Row>
+    <Col>
+      <h1>Real-time Rainfall (Provisional)</h1>
+      <p>
+        <small>
+          <OverlayTrigger trigger="click" placement="right" overlay={popover}>
+            <Button variant="light" size="sm">Disclaimer</Button>
+          </OverlayTrigger>
+        </small>
+      </p>
 
-  render() {
+      <h2>Recent Rainfall</h2>
+      <p>Click on a pixel or gauge on the map to see the last 12 hours of rainfall data.</p>
+      <p>For an animated view of rainfall (in 15-min. increments) over the last 2-hour, 4-hour or 6-hour tme period, click here:</p>
 
-    return (
+      <ButtonGroup aria-label="Basic example">
+        <Button variant="secondary">2-Hour Loop</Button>
+        <Button variant="secondary">4-Hour Loop</Button>
+        <Button variant="secondary">6-Hour Loop</Button>
+        <Button variant="secondary"></Button>
+      </ButtonGroup>
 
-      <Row>
-        <Col>
-          <h1>Real-time Rainfall (Provisional)</h1>
-          <p><small>
-              <OverlayTrigger trigger="click" placement="right" overlay={popover}>
-                <Button variant="light" size="sm">Disclaimer</Button>
-              </OverlayTrigger>
-          </small>
-          </p>
+      <h2>Cumulative Rainfall</h2>
+      <Button>Show cumulative rainfall on the map over the last 30-60 days</Button>
 
-          <h2>Recent Rainfall</h2>
+      <h2>Provisional Data Download</h2>
+      <p>To download provisional rainfall data captured from the gauges or radar pixels over the last 30-60 days of rainfall, click here</p>
+    </Col>
+  </Row>
+);
 
-          <p>Click on a pixel or gauge on the map to see the last 12 hours of rainfall data.</p>
-
-          <p>For an animated view of rainfall (in 15-min. increments) over the last 2-hour, 4-hour or 6-hour tme period, click here: </p>
-
-          <ButtonGroup aria-label="Basic example">
-            <Button variant="secondary">2-Hour Loop</Button>
-            <Button variant="secondary">4-Hour Loop</Button>
-            <Button variant="secondary">6-Hour Loop</Button>
-            <Button variant="secondary"></Button>
-          </ButtonGroup>
-
-          <h2>Cumulative Rainfall</h2>
-          <Button>Show cumulative rainfall on the map over the last 30-60 days</Button>
-
-          <h2>Provisional Data Download</h2>
-          <p>To download provisional rainfall data captured from the gauges or radar pixels over the last 30-60 days of rainfall, click here</p>
-        </Col>
-      </Row>
-
-    )
-
-  }
-}
+export default LegacyCalibratedRadarPage;

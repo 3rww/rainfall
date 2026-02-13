@@ -22,22 +22,71 @@ export const selectActiveFetchKwargs = (state) => (
   state.fetchKwargs[selectContext(state)].active
 )
 
-export const selectSelectedSensors = (state, contextType) => {
-  let selectedSensors = {}
-  forEach(
-    selectFetchKwargs(state, contextType).sensorLocations, 
-    (sensors, sensorType) => {
-      if (sensors.length > 0) {
+const selectSensorLocationsForContext = (state, contextType) => (
+  state.fetchKwargs?.[contextType]?.active?.sensorLocations || EMPTY_OBJECT
+)
+
+export const makeSelectSelectedSensors = () => createSelector(
+  [selectSensorLocationsForContext],
+  (sensorLocations) => {
+    let selectedSensors = null
+    forEach(sensorLocations, (sensors, sensorType) => {
+      if (Array.isArray(sensors) && sensors.length > 0) {
+        if (selectedSensors === null) {
+          selectedSensors = {}
+        }
         selectedSensors[sensorType] = sensors
       }
-    }
-  )
-  return selectedSensors
-}
+    })
+    return selectedSensors || EMPTY_OBJECT
+  }
+)
+
+const sharedSelectedSensorsSelector = makeSelectSelectedSensors()
+
+export const selectSelectedSensors = (state, contextType) => (
+  sharedSelectedSensorsSelector(state, contextType)
+)
 
 export const selectFetchHistory = (state, contextType) => {
   return state.fetchKwargs[contextType].history
 }
+
+export const selectFetchHistoryItemLifecycle = (state, requestId, contextType) => {
+  const item = selectFetchHistoryItemById(state, requestId, contextType)
+  if (!item) {
+    return 'idle'
+  }
+  return item.lifecycle || 'idle'
+}
+
+export const selectFetchHistoryLifecycleSummary = createSelector(
+  [(state) => state.fetchKwargs],
+  (fetchKwargs) => {
+    const summary = {
+      idle: 0,
+      pending: 0,
+      partial: 0,
+      succeeded: 0,
+      failed: 0,
+      timed_out: 0,
+      canceled: 0
+    }
+
+    forEach(fetchKwargs, (contextData) => {
+      ;(contextData?.history || []).forEach((item) => {
+        const lifecycle = item?.lifecycle || 'idle'
+        if (Object.prototype.hasOwnProperty.call(summary, lifecycle)) {
+          summary[lifecycle] += 1
+        } else {
+          summary.idle += 1
+        }
+      })
+    })
+
+    return summary
+  }
+)
 
 export const selectActiveFetchHistory = (state) => (
   state.fetchKwargs[selectContext(state)].history
@@ -169,9 +218,9 @@ export const selectMapStyleSourceDataFeatures = (state, name) => {
 export const selectMapStyleSourceDataIDs = (state, name) => {
   let srcData = selectMapStyleSourceDataFeatures(state, name)
   if (!isEmpty(srcData)) {
-    return srcData.features.map(f => f.id)
+    return srcData.map(f => f.id)
   }
-  return []
+  return EMPTY_ARRAY
 }
 
 // export const selectPixelLookupsBasinsOnly = (state) => {
@@ -207,6 +256,16 @@ export const selectGeographyLookupsAsGroupedOptions = createSelector(
 // selecting rainfall events data
 
 export const selectRainfallEvents = (state) => state.rainfallEvents
+
+export const selectFilteredRainfallEvents = createSelector(
+  [selectRainfallEvents],
+  (rainfallEvents) => {
+    const maxHours = Number(rainfallEvents?.filters?.maxHours ?? 24)
+    return (rainfallEvents?.list || []).filter((event) => (
+      maxHours >= 24 ? true : event.hours <= maxHours
+    ))
+  }
+)
 
 export const selectEvent = (state, eventid) => (
   selectRainfallEvents(state).list.find((e) => e.eventid === eventid)

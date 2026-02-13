@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
-import moment from 'moment';
 import { initialState } from '../initialState';
 import { pickRainfallDateTimeRange } from './fetchKwargsSlice';
+import { toValidDateTime } from '../utils/dateTime';
 
 const rainfallEventsSlice = createSlice({
   name: 'rainfallEvents',
@@ -30,7 +30,8 @@ const rainfallEventsSlice = createSlice({
       const eventLatest = eventsData.map((event) => event.endDt).sort()[eventsData.length - 1];
       state.stats.latest = eventLatest;
       state.stats.longest = Math.max(...eventsData.map((event) => event.hours));
-      state.stats.maxDate = moment(eventLatest).endOf('month').format();
+      const maxDate = toValidDateTime(eventLatest);
+      state.stats.maxDate = maxDate ? maxDate.endOf('month').format() : null;
     },
     filterEventByHours: (state, action) => {
       state.filters.maxHours = Number(action.payload?.maxHours ?? state.filters.maxHours);

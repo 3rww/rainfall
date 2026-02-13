@@ -1,5 +1,4 @@
 import React from "react";
-import moment from "moment";
 import {
   CartesianGrid,
   Legend,
@@ -10,6 +9,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
+import { formatDateTime } from "../../store/utils/dateTime";
 
 const CHART_COLORS = [
   "#0077b6",
@@ -22,8 +22,8 @@ const CHART_COLORS = [
   "#8f2d56"
 ];
 
-const formatAxisTimestamp = (timestampMs) => moment(timestampMs).format("MM/DD HH:mm");
-const formatTooltipTimestamp = (timestampMs) => moment(timestampMs).format("MM/DD/YYYY h:mm a");
+const formatAxisTimestamp = (timestampMs) => formatDateTime(timestampMs, "MM/DD HH:mm");
+const formatTooltipTimestamp = (timestampMs) => formatDateTime(timestampMs, "MM/DD/YYYY h:mm a");
 
 const DownloadLineChart = ({ rows, series, showLegend = true }) => {
   const hasChartData = Array.isArray(rows) && rows.length > 0 && Array.isArray(series) && series.length > 0;

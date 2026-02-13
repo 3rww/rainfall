@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import moment from "moment";
+import { parseZonedDateTime } from "../../store/utils/dateTime";
 
 import {
   buildDownloadChartData,
@@ -113,7 +113,7 @@ describe("download table datetime normalization", () => {
 
   it("extractChartTimestamp uses the start of a range by default", () => {
     const rawTimestamp = "2025-10-01T00:00:00-04:00/2025-10-01T01:00:00-04:00";
-    const expectedStartMs = moment.parseZone("2025-10-01T00:00:00-04:00", moment.ISO_8601, true).valueOf();
+    const expectedStartMs = parseZonedDateTime("2025-10-01T00:00:00-04:00", true).valueOf();
 
     expect(extractChartTimestamp(rawTimestamp)).toBe(expectedStartMs);
     expect(extractChartTimestamp(rawTimestamp, CHART_TIMESTAMP_RULE.start)).toBe(expectedStartMs);
@@ -139,8 +139,8 @@ describe("download table datetime normalization", () => {
     const { rows, series } = buildDownloadChartData(resultsTableData, {
       seriesMode: CHART_SERIES_MODE.perSensor
     });
-    const firstTimestampMs = moment.parseZone("2025-10-01T00:00:00-04:00", moment.ISO_8601, true).valueOf();
-    const secondTimestampMs = moment.parseZone("2025-10-01T00:15:00-04:00", moment.ISO_8601, true).valueOf();
+    const firstTimestampMs = parseZonedDateTime("2025-10-01T00:00:00-04:00", true).valueOf();
+    const secondTimestampMs = parseZonedDateTime("2025-10-01T00:15:00-04:00", true).valueOf();
 
     expect(series).toEqual([
       { key: "gauge:8", label: "Gauge 8", sensorType: "gauge", sensorId: "8" },
@@ -171,7 +171,7 @@ describe("download table datetime normalization", () => {
     };
 
     const { rows, series } = buildDownloadChartData(resultsTableData);
-    const validTimestampMs = moment.parseZone("2025-10-01T00:20:00-04:00", moment.ISO_8601, true).valueOf();
+    const validTimestampMs = parseZonedDateTime("2025-10-01T00:20:00-04:00", true).valueOf();
 
     expect(series).toEqual([
       { key: "pixel:100", label: "Pixel 100", sensorType: "pixel", sensorId: "100" }
@@ -202,7 +202,7 @@ describe("download table datetime normalization", () => {
     const { rows, series } = buildDownloadChartData(resultsTableData, {
       seriesMode: CHART_SERIES_MODE.averageByType
     });
-    const timestampMs = moment.parseZone("2025-10-01T00:00:00-04:00", moment.ISO_8601, true).valueOf();
+    const timestampMs = parseZonedDateTime("2025-10-01T00:00:00-04:00", true).valueOf();
 
     expect(series).toEqual([
       { key: "avg:gauge", label: "Gauge Average", sensorType: "gauge" },
@@ -231,7 +231,7 @@ describe("download table datetime normalization", () => {
     const { rows } = buildDownloadChartData(resultsTableData, {
       seriesMode: CHART_SERIES_MODE.averageByType
     });
-    const timestampMs = moment.parseZone("2025-10-01T00:00:00-04:00", moment.ISO_8601, true).valueOf();
+    const timestampMs = parseZonedDateTime("2025-10-01T00:00:00-04:00", true).valueOf();
 
     expect(rows).toEqual([
       { timestampMs: timestampMs, "avg:gauge": 0.333 }
@@ -256,8 +256,8 @@ describe("download table datetime normalization", () => {
     const { rows } = buildDownloadChartData(resultsTableData, {
       seriesMode: CHART_SERIES_MODE.averageByType
     });
-    const firstTimestampMs = moment.parseZone("2025-10-01T00:00:00-04:00", moment.ISO_8601, true).valueOf();
-    const secondTimestampMs = moment.parseZone("2025-10-01T00:15:00-04:00", moment.ISO_8601, true).valueOf();
+    const firstTimestampMs = parseZonedDateTime("2025-10-01T00:00:00-04:00", true).valueOf();
+    const secondTimestampMs = parseZonedDateTime("2025-10-01T00:15:00-04:00", true).valueOf();
 
     expect(rows).toEqual([
       { timestampMs: firstTimestampMs, "avg:gauge": 0.3, "avg:pixel": 0.5 },
@@ -284,7 +284,7 @@ describe("download table datetime normalization", () => {
     const { rows, series } = buildDownloadChartData(resultsTableData, {
       seriesMode: CHART_SERIES_MODE.averageByType
     });
-    const timestampMs = moment.parseZone("2025-10-01T00:00:00-04:00", moment.ISO_8601, true).valueOf();
+    const timestampMs = parseZonedDateTime("2025-10-01T00:00:00-04:00", true).valueOf();
 
     expect(series).toEqual([
       { key: "avg:gauge", label: "Gauge Average", sensorType: "gauge" },

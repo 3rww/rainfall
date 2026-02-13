@@ -1,65 +1,64 @@
-import React, { useMemo, useState } from "react";
-import { connect } from "react-redux";
-import { Badge, Button } from "react-bootstrap";
-import moment from "moment";
+import React, { useMemo, useState, useCallback } from 'react';
+import { Badge, Button } from 'react-bootstrap';
 
-import { pickRainfallEvent } from "../../store/features/rainfallThunks";
-import { selectRainfallEvents, selectSelectedEvent } from "../../store/selectors";
+import { pickRainfallEvent } from '../../store/features/rainfallThunks';
+import {
+  selectFilteredRainfallEvents,
+  selectSelectedEvent
+} from '../../store/selectors';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { formatDateTime, toDateTime } from '../../store/utils/dateTime';
 import {
   buildYearSections,
   getCellIntensity,
   groupEventsByDay
-} from "./eventsHeatmapUtils";
+} from './eventsHeatmapUtils';
 
-import "./eventsHeatmap.css";
+import './eventsHeatmap.css';
 
 const WEEKDAY_LABELS = [
-  { index: 0, label: "Mon" },
-  { index: 2, label: "Wed" },
-  { index: 4, label: "Fri" }
+  { index: 0, label: 'Mon' },
+  { index: 2, label: 'Wed' },
+  { index: 4, label: 'Fri' }
 ];
 
-const DAY_LABEL_FORMAT = "ddd, MMM D, YYYY";
-const EVENT_LABEL_FORMAT = "DD MMM YYYY, h:mm a";
+const DAY_LABEL_FORMAT = 'ddd, MMM D, YYYY';
+const EVENT_LABEL_FORMAT = 'DD MMM YYYY, h:mm a';
 
 const cellAriaLabel = (cell) => {
-  const dateLabel = moment(cell.dayKey, "YYYY-MM-DD").format(DAY_LABEL_FORMAT);
-  const countLabel = `${cell.count} rainfall event${cell.count === 1 ? "" : "s"}`;
+  const dateLabel = formatDateTime(toDateTime(cell.dayKey, { format: 'YYYY-MM-DD', strict: true }), DAY_LABEL_FORMAT);
+  const countLabel = `${cell.count} rainfall event${cell.count === 1 ? '' : 's'}`;
   return `${dateLabel}, ${countLabel}`;
 };
 
-const EventsHeatmap = ({
-  events,
-  selectedEventId,
-  dispatchPickRainfallEvent,
-  onEventSelected
-}) => {
+const EventsHeatmap = ({ contextType, onEventSelected }) => {
+  const dispatch = useAppDispatch();
   const [activeDayKey, setActiveDayKey] = useState(null);
+
+  const events = useAppSelector(selectFilteredRainfallEvents);
+  const selectedEvent = useAppSelector(selectSelectedEvent);
+
+  const selectedEventId = selectedEvent?.eventid || null;
 
   const eventsByDay = useMemo(() => groupEventsByDay(events), [events]);
   const yearSections = useMemo(() => buildYearSections(eventsByDay), [eventsByDay]);
   const activeDayEvents = activeDayKey ? (eventsByDay[activeDayKey] || []) : [];
   const activeDayYear = activeDayKey ? Number(activeDayKey.slice(0, 4)) : null;
 
-  const pickEvent = (eventid) => {
-    dispatchPickRainfallEvent(eventid);
-    if (typeof onEventSelected === "function") {
+  const pickEvent = useCallback((eventid) => {
+    dispatch(pickRainfallEvent({ eventid, contextType }));
+    if (typeof onEventSelected === 'function') {
       onEventSelected();
     }
-  };
+  }, [contextType, dispatch, onEventSelected]);
 
-  const handleDayClick = (cell) => {
+  const handleDayClick = useCallback((cell) => {
     if (!cell.inYear || cell.count === 0) {
       return;
     }
 
-    if (activeDayKey === cell.dayKey) {
-      setActiveDayKey(null);
-      return;
-    }
-
-    setActiveDayKey(cell.dayKey);
-  };
+    setActiveDayKey((prev) => (prev === cell.dayKey ? null : cell.dayKey));
+  }, []);
 
   if (!yearSections.length) {
     return (
@@ -71,21 +70,11 @@ const EventsHeatmap = ({
 
   return (
     <div className="events-heatmap">
-      {/* <div className="events-heatmap-legend" aria-label="Event density legend">
-        <span className="events-heatmap-legend-text">Less</span>
-        {[0, 1, 2, 3, 4].map((level) => (
-          <span
-            className={`events-heatmap-legend-cell intensity-${level}`}
-            key={`legend-${level}`}
-          />
-        ))}
-        <span className="events-heatmap-legend-text">More</span>
-      </div>       */}
       {yearSections.map((section) => (
         <section
           className="events-heatmap-year-section"
           key={section.year}
-          style={{ "--event-week-count": section.weeks.length }}
+          style={{ '--event-week-count': section.weeks.length }}
         >
           <h6 className="events-heatmap-year-title mb-2">{section.year}</h6>
           <div className="events-heatmap-scroll">
@@ -119,14 +108,14 @@ const EventsHeatmap = ({
                       const intensity = getCellIntensity(cell.count);
                       const isSelectedEventDay = cell.events.some((event) => event.eventid === selectedEventId);
                       const classes = [
-                        "events-heatmap-day",
+                        'events-heatmap-day',
                         `intensity-${intensity}`,
-                        cell.inYear ? "" : "is-outside-year",
-                        activeDayKey === cell.dayKey ? "is-active-day" : "",
-                        isSelectedEventDay ? "is-selected-event" : ""
+                        cell.inYear ? '' : 'is-outside-year',
+                        activeDayKey === cell.dayKey ? 'is-active-day' : '',
+                        isSelectedEventDay ? 'is-selected-event' : ''
                       ]
                         .filter(Boolean)
-                        .join(" ");
+                        .join(' ');
 
                       return (
                         <button
@@ -149,14 +138,8 @@ const EventsHeatmap = ({
           {activeDayYear === section.year && activeDayEvents.length > 0 ? (
             <div className="events-heatmap-day-picker">
               <p className="events-heatmap-day-picker-title">
-                {moment(activeDayKey, "YYYY-MM-DD").format(DAY_LABEL_FORMAT)}
-                {" "}
-                has
-                {" "}
-                {activeDayEvents.length}
-                {" "}
-                event
-                {activeDayEvents.length === 1 ? ":" : "s. Select one:"}
+                {formatDateTime(toDateTime(activeDayKey, { format: 'YYYY-MM-DD', strict: true }), DAY_LABEL_FORMAT)} has {activeDayEvents.length} event
+                {activeDayEvents.length === 1 ? ':' : 's. Select one:'}
               </p>
               <div className="events-heatmap-event-list">
                 {activeDayEvents.map((event, index) => (
@@ -168,9 +151,7 @@ const EventsHeatmap = ({
                     variant="outline-primary"
                   >
                     <span className="events-heatmap-event-label">
-                      {moment(event.startDt).format(EVENT_LABEL_FORMAT)}
-                      {" to "}
-                      {moment(event.endDt).format(EVENT_LABEL_FORMAT)}
+                      {formatDateTime(event.startDt, EVENT_LABEL_FORMAT)} to {formatDateTime(event.endDt, EVENT_LABEL_FORMAT)}
                     </span>
                     <Badge bg="secondary">{event.hours}h</Badge>
                   </Button>
@@ -185,24 +166,4 @@ const EventsHeatmap = ({
   );
 };
 
-const mapStateToProps = (state) => {
-  const rainfallEvents = selectRainfallEvents(state);
-  const maxHours = Number(rainfallEvents?.filters?.maxHours ?? 24);
-  const selectedEvent = selectSelectedEvent(state);
-  const events = (rainfallEvents?.list || []).filter((event) => (
-    maxHours >= 24 ? true : event.hours <= maxHours
-  ));
-
-  return {
-    events,
-    selectedEventId: selectedEvent?.eventid || null
-  };
-};
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-  dispatchPickRainfallEvent: (eventid) => {
-    dispatch(pickRainfallEvent({ eventid, contextType: ownProps.contextType }));
-  }
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(EventsHeatmap);
+export default EventsHeatmap;

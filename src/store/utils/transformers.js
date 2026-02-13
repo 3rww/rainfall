@@ -1,5 +1,5 @@
-import moment from 'moment'
 import { flatMap, get, groupBy } from 'lodash-es'
+import { diffDateTime } from './dateTime'
 
 const getEventDedupeKey = (event) => (
   `${event?.eventid ?? ''}|${event?.startDt ?? ''}|${event?.endDt ?? ''}`
@@ -99,7 +99,7 @@ export const transformEventsJSON = (eventsJson) => {
       ...e,
       startDt: e.start_dt,
       endDt: e.end_dt,
-      hours: moment(e.end_dt).diff(moment(e.start_dt), 'hours'),
+      hours: diffDateTime(e.end_dt, e.start_dt, 'hours'),
       isFetching: false,
       selected: false
     }))

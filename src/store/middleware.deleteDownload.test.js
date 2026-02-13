@@ -4,6 +4,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { CONTEXT_TYPES } from "./config";
 import { initialState } from "./initialState";
 import { rootReducer } from "./reducers";
+import listenerMiddleware from "./listenerMiddleware";
 import { deleteDownload } from "./features/downloadThunks";
 
 const CONTEXT = CONTEXT_TYPES.legacyRealtime;
@@ -105,6 +106,7 @@ const buildState = ({ history, activeSensorLocations = { gauge: [], pixel: [] } 
 
 const buildStore = (preloadedState) => configureStore({
   reducer: rootReducer,
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(listenerMiddleware.middleware),
   preloadedState,
   devTools: false
 });

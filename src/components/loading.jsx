@@ -1,7 +1,3 @@
-import React from 'react'
+const Loading = () => null;
 
-export default class Loading extends React.Component {
-    render() {
-        
-    }
-}
+export default Loading;

@@ -12,11 +12,11 @@
     "bootstrap": "^5.3.0",
     "bootswatch": "^5.3.0",
     "chroma-js": "^3.0.0",
+    "dayjs": "^1.11.19",
     "file-saver": "^2.0.0",
     "immutable": "^4.3.0",
     "lodash-es": "^4.17.21",
     "mapbox-gl": "^3.0.0",
-    "moment": "^2.30.0",
     "object-hash": "^3.0.0",
     "papaparse": "^5.0.0",
     "prop-types": "^15.8.0",
@@ -37,6 +37,8 @@
     "preview": "vite preview --host --port 3000",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "npx playwright test",
+    "test:e2e:headed": "npx playwright test --headed --project=chromium",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
@@ -54,6 +56,7 @@
     ]
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@vitejs/plugin-react": "^5.0.0",
     "gh-pages": "^6.0.0",
     "jsdom": "^26.0.0",
