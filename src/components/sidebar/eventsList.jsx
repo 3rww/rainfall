@@ -11,6 +11,9 @@ import './eventsList.css';
 const EventsList = ({ contextType, onEventSelected }) => {
   const dispatch = useAppDispatch();
   const events = useAppSelector(selectFilteredRainfallEvents);
+  const rainfallEventsState = useAppSelector((state) => state.rainfallEvents);
+  const loadStatus = rainfallEventsState?.loadStatus;
+  const error = rainfallEventsState?.error;
 
   const handleListClick = useCallback((eventid) => {
     dispatch(pickRainfallEvent({ eventid, contextType }));
@@ -20,6 +23,22 @@ const EventsList = ({ contextType, onEventSelected }) => {
   }, [contextType, dispatch, onEventSelected]);
 
   if (!events.length) {
+    if (loadStatus === 'loading') {
+      return (
+        <p className="small mb-0 text-muted">
+          <em>Loading rainfall events...</em>
+        </p>
+      );
+    }
+
+    if (loadStatus === 'failed') {
+      return (
+        <p className="small mb-0 text-danger">
+          <em>{error || 'Unable to load rainfall events.'}</em>
+        </p>
+      );
+    }
+
     return (
       <p className="small mb-0">
         <em>No rainfall events are available.</em>
@@ -67,6 +86,16 @@ const EventsList = ({ contextType, onEventSelected }) => {
             );
           })}
         </ListGroup>
+        {loadStatus === 'loading' ? (
+          <p className="small text-muted mt-2 mb-0">
+            <em>Loading more rainfall events...</em>
+          </p>
+        ) : null}
+        {loadStatus === 'failed' ? (
+          <p className="small text-warning mt-2 mb-0">
+            <em>Some rainfall events may be missing: {error || 'loading stopped before all pages were fetched.'}</em>
+          </p>
+        ) : null}
       </Col>
     </Row>
   );

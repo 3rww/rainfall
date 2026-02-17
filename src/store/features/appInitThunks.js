@@ -33,9 +33,17 @@ import { pickRainfallDateTimeRange } from './fetchKwargsSlice';
 import { setGlobalConfig } from './globalConfigSlice';
 import { addLayers, applyColorStretch, setSourceData } from './mapStyleSlice';
 import { setFetching, startThinking, stopThinking } from './progressSlice';
-import { setRainfallEvents } from './rainfallEventsSlice';
+import {
+  appendRainfallEventsPage,
+  completeRainfallEventsLoad,
+  failRainfallEventsLoad,
+  setRainfallEvents,
+  startRainfallEventsLoad
+} from './rainfallEventsSlice';
 import { setLookups, setRefLayerData } from './refDataSlice';
 import { setLatestTimestamps } from './statsSlice';
+
+const MAX_EVENT_PAGE_REQUESTS = 250;
 
 const applyPathUpdate = ({ dispatch, data, pathArray, keepACopy }) => {
   const [rootKey, key1, key2] = pathArray || [];
@@ -101,12 +109,6 @@ const fetchReferenceDatasets = (dispatch) => Promise.all([
     keepACopy: false
   })),
   dispatch(fetchJSON({
-    url: EVENTS_API_URL,
-    pathArray: ['rainfallEvents', 'list'],
-    transformer: transformDataApiEventsJSON,
-    keepACopy: false
-  })),
-  dispatch(fetchJSON({
     url: TIMESTAMPS_API_URL,
     pathArray: ['stats', 'latest'],
     transformer: false,
@@ -131,6 +133,77 @@ const fetchReferenceDatasets = (dispatch) => Promise.all([
     keepACopy: true
   }))
 ]);
+
+const normalizeEventsPagePayload = (payload) => {
+  if (Array.isArray(payload)) {
+    return {
+      count: payload.length,
+      next: null,
+      results: payload
+    };
+  }
+
+  return {
+    count: Number.isFinite(payload?.count) ? Number(payload.count) : null,
+    next: payload?.next || null,
+    results: Array.isArray(payload?.results) ? payload.results : []
+  };
+};
+
+export const fetchRainfallEventsPaginated = () => async (dispatch) => {
+  dispatch(startRainfallEventsLoad());
+
+  const visitedUrls = new Set();
+  let nextUrl = EVENTS_API_URL;
+  let pagesFetched = 0;
+
+  while (nextUrl) {
+    if (pagesFetched >= MAX_EVENT_PAGE_REQUESTS) {
+      dispatch(failRainfallEventsLoad({
+        error: `Rainfall events exceeded ${MAX_EVENT_PAGE_REQUESTS} pages; stopping load.`,
+        nextPageUrl: nextUrl
+      }));
+      return false;
+    }
+
+    if (visitedUrls.has(nextUrl)) {
+      dispatch(failRainfallEventsLoad({
+        error: `Rainfall events pagination loop detected at "${nextUrl}".`,
+        nextPageUrl: nextUrl
+      }));
+      return false;
+    }
+
+    visitedUrls.add(nextUrl);
+
+    try {
+      const response = await axios({
+        url: nextUrl,
+        method: 'GET'
+      });
+
+      const pagePayload = normalizeEventsPagePayload(response.data);
+      const pageEvents = transformDataApiEventsJSON(pagePayload.results);
+      dispatch(appendRainfallEventsPage({
+        events: pageEvents,
+        totalCount: pagePayload.count,
+        nextPageUrl: pagePayload.next
+      }));
+
+      nextUrl = pagePayload.next;
+      pagesFetched += 1;
+    } catch (error) {
+      dispatch(failRainfallEventsLoad({
+        error: error?.message || 'An error occurred while loading rainfall events.',
+        nextPageUrl: nextUrl
+      }));
+      return false;
+    }
+  }
+
+  dispatch(completeRainfallEventsLoad());
+  return true;
+};
 
 const applyDefaultDateRanges = ({ dispatch, getState }) => {
   const state = getState();
@@ -187,9 +260,11 @@ const applyDefaultDateRanges = ({ dispatch, getState }) => {
 export const initDataFetch = (payload = {}) => async (dispatch, getState) => {
   dispatch(startThinking('Loading reference data and map layers'));
   dispatch(setFetching(true));
+  let shouldLoadRainfallEvents = false;
 
   try {
     await fetchReferenceDatasets(dispatch);
+    shouldLoadRainfallEvents = true;
 
     dispatch(addLayers(MAP_LAYERS));
     dispatch(applyColorStretch({ breaks: BREAKS_050 }));
@@ -207,5 +282,8 @@ export const initDataFetch = (payload = {}) => async (dispatch, getState) => {
   } finally {
     dispatch(setFetching(false));
     dispatch(stopThinking('Initial data load complete.'));
+    if (shouldLoadRainfallEvents) {
+      dispatch(fetchRainfallEventsPaginated());
+    }
   }
 };

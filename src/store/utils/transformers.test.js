@@ -211,4 +211,45 @@ describe("transformDataApiEventsJSON", () => {
     expect(result[0].eventid).toBe("storm-a");
     expect(result[1].eventid).toBe("storm-a");
   });
+
+  it("reads events from paginated results payload", () => {
+    const payload = {
+      count: 2,
+      next: "https://example.local/rainfall/v2/rainfall-events/?format=json&page=2",
+      previous: null,
+      results: [
+        {
+          event_label: "storm-a",
+          start_dt: "2025-07-01T00:00:00Z",
+          end_dt: "2025-07-01T03:00:00Z",
+          duration: 3
+        },
+        {
+          event_label: "storm-b",
+          start_dt: "2025-07-03T00:00:00Z",
+          end_dt: "2025-07-03T02:00:00Z",
+          duration: 2
+        }
+      ]
+    };
+
+    const result = transformDataApiEventsJSON(clone(payload));
+
+    expect(result).toHaveLength(2);
+    expect(result[0].eventid).toBe("storm-a");
+    expect(result[1].eventid).toBe("storm-b");
+  });
+
+  it("returns empty array for paginated payload with empty results", () => {
+    const payload = {
+      count: 0,
+      next: null,
+      previous: null,
+      results: []
+    };
+
+    const result = transformDataApiEventsJSON(clone(payload));
+
+    expect(result).toEqual([]);
+  });
 });

@@ -5,6 +5,13 @@ export const MOCK_EVENT = {
   event_label: "EVT-1001"
 };
 
+const MOCK_EVENT_2 = {
+  start_dt: "2025-10-02T00:00:00-04:00",
+  end_dt: "2025-10-02T03:00:00-04:00",
+  duration: 3,
+  event_label: "EVT-1002"
+};
+
 const MOCK_STYLE = {
   version: 8,
   name: "mock-style",
@@ -120,6 +127,11 @@ const emptyResponse = (route, contentType = "text/plain") => route.fulfill({
 
 export const registerMockApiRoutes = async (page, options = {}) => {
   const mode = options.mode || "success";
+  const mockEvents = Array.isArray(options.mockEvents) && options.mockEvents.length > 0
+    ? options.mockEvents
+    : [MOCK_EVENT, MOCK_EVENT_2];
+  const eventsPageSize = Number(options.eventsPageSize || 1);
+  const eventsDelayMs = Number(options.eventsDelayMs || 0);
   const rainfallRequests = [];
   const lastRequestBySensor = new Map();
 
@@ -157,8 +169,29 @@ export const registerMockApiRoutes = async (page, options = {}) => {
       return emptyResponse(route, "application/x-protobuf");
     }
 
-    if (path === "/rainfall-events/") {
-      return jsonResponse(route, [MOCK_EVENT]);
+    if (path === "/v2/rainfall-events/") {
+      if (eventsDelayMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, eventsDelayMs));
+      }
+
+      const pageParam = Number(requestUrl.searchParams.get("page") || "1");
+      const pageNumber = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
+      const startIndex = (pageNumber - 1) * eventsPageSize;
+      const endIndex = startIndex + eventsPageSize;
+      const results = mockEvents.slice(startIndex, endIndex);
+      const next = endIndex < mockEvents.length
+        ? `http://mock.api/v2/rainfall-events/?format=json&page=${pageNumber + 1}`
+        : null;
+      const previous = pageNumber > 1
+        ? `http://mock.api/v2/rainfall-events/?format=json&page=${pageNumber - 1}`
+        : null;
+
+      return jsonResponse(route, {
+        count: mockEvents.length,
+        next,
+        previous,
+        results
+      });
     }
 
     if (path === "/v2/latest-observations/") {

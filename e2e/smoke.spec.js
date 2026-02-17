@@ -57,6 +57,29 @@ test("app load renders map and controls", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Get Rainfall Data" })).toBeVisible();
 });
 
+test("app stays interactive while paginated events load in the background", async ({ page }) => {
+  await registerMockApiRoutes(page, {
+    mode: "success",
+    eventsDelayMs: 1200,
+    eventsPageSize: 1
+  });
+
+  await page.goto("/");
+  await closeAboutModalIfVisible(page);
+  await page.waitForFunction(() => Boolean(window.__APP_STORE__), null, { timeout: 10000 });
+
+  await expect(page.locator("#map")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Get Rainfall Data" })).toBeVisible();
+
+  await expect.poll(async () => page.evaluate(() => {
+    return window.__APP_STORE__.getState().rainfallEvents.loadStatus;
+  }), { timeout: 10000 }).toBe("loading");
+
+  await expect.poll(async () => page.evaluate(() => {
+    return window.__APP_STORE__.getState().rainfallEvents.list.length;
+  }), { timeout: 10000 }).toBeGreaterThan(1);
+});
+
 test("context switch preserves selected sensors in dropdown", async ({ page }) => {
   await registerMockApiRoutes(page, { mode: "success" });
 

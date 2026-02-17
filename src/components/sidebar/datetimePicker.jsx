@@ -8,7 +8,8 @@ import {
   FormControl,
   Row,
   Col,
-  Spinner
+  Spinner,
+  ProgressBar
 } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 
@@ -143,6 +144,15 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
 
   const currentKwargs = useAppSelector((state) => selectFetchKwargs(state, contextType));
   const latestTimestamps = useAppSelector(selectLatestTimestamps);
+  const rainfallEvents = useAppSelector((state) => state.rainfallEvents);
+  const eventsLoadStatus = rainfallEvents?.loadStatus;
+  const eventsLoadedCount = Number(rainfallEvents?.loadedCount || 0);
+  const eventsTotalCount = rainfallEvents?.totalCount;
+  const eventsError = rainfallEvents?.error;
+  const hasKnownEventTotal = Number.isFinite(eventsTotalCount) && eventsTotalCount > 0;
+  const eventsLoadProgress = hasKnownEventTotal
+    ? Math.min(100, Math.round((eventsLoadedCount / eventsTotalCount) * 100))
+    : 0;
 
   const pickerModel = useMemo(() => buildPickerModel({
     contextType,
@@ -423,7 +433,28 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
               {activeEventModalTab === EVENT_MODAL_TABS.heatmap
                 ? 'Select a day from the calendar below to see rainfall event(s) on that day, and select those to use as date/time range for your rainfall data download.'
                 : 'Select an event from the list below to use as date/time range for your rainfall data download.'}
-            </p>              
+            </p>
+            {eventsLoadStatus === 'loading' ? (
+              <div className="pt-2">
+                <ProgressBar
+                  animated={!hasKnownEventTotal}
+                  now={eventsLoadProgress}
+                  striped
+                  variant="primary"
+                  label={hasKnownEventTotal ? `${eventsLoadProgress}%` : undefined}
+                />
+                <p className="small text-muted mb-1">
+                  Loading rainfall events
+                  {hasKnownEventTotal ? ` (${eventsLoadedCount} of ${eventsTotalCount} loaded)` : ` (${eventsLoadedCount} loaded)`}
+                  ...
+                </p>                
+              </div>
+            ) : null}
+            {eventsLoadStatus === 'failed' ? (
+              <p className="small text-warning pt-2 mb-0">
+                Some rainfall events may be missing: {eventsError || 'loading stopped before all pages were fetched.'}
+              </p>
+            ) : null}
             </div>
           </Modal.Header>
           <Modal.Body>
