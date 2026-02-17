@@ -113,7 +113,11 @@ export const transformEventsJSON = (eventsJson) => {
 }
 
 export const transformDataApiEventsJSON = (eventsJson) => {
-  const events = eventsJson
+  const sourceEvents = Array.isArray(eventsJson)
+    ? eventsJson
+    : (Array.isArray(eventsJson?.results) ? eventsJson.results : []);
+
+  const events = sourceEvents
     .map((e, i) => ({
       ...e,
       startDt: e.start_dt,

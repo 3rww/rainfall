@@ -87,6 +87,12 @@ export const initialState = {
   rainfallEvents: {
     // list of rainfall events; populated via an async call to the API at load time.
     list: [],
+    loadStatus: 'idle',
+    error: null,
+    totalCount: null,
+    loadedCount: 0,
+    loadedPages: 0,
+    nextPageUrl: null,
     // maxDateTime stores the max datetime found in the events array. It's eval'd an on-app load and 
     // used to set limits on selectable datetimes for the historic data
     stats: {

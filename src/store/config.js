@@ -49,7 +49,7 @@ export const ENABLE_DEBUG_LOGS = parseBooleanEnvFlag(import.meta.env.VITE_ENABLE
 // Service URLs -----------------------------------------
 export const GLOBAL_CONFIG_URL = `${ROOT}static/config.json`;
 export const EVENTS_JSON_URL = `${ROOT}static/data/events.json`;
-export const EVENTS_API_URL = `${API_URL_ROOT}rainfall-events/?format=json`;
+export const EVENTS_API_URL = `${API_URL_ROOT}v2/rainfall-events/?format=json`;
 export const TIMESTAMPS_API_URL = `${API_URL_ROOT}v2/latest-observations/?format=json`;
 export const URL_GARRD_GEOJSON = `${API_URL_ROOT}pixels/`; // ROOT + "static/data/pixels.geojson"
 export const URL_GAUGE_GEOJSON = `${API_URL_ROOT}gauges/`; // ROOT + "static/data/gauges.geojson"

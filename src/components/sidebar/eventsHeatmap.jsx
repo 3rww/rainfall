@@ -37,6 +37,9 @@ const EventsHeatmap = ({ contextType, onEventSelected }) => {
   const eventsByDay = useAppSelector(selectFilteredRainfallEventsByDay);
   const yearSections = useAppSelector(selectFilteredRainfallEventYearSections);
   const selectedEvent = useAppSelector(selectSelectedEvent);
+  const rainfallEventsState = useAppSelector((state) => state.rainfallEvents);
+  const loadStatus = rainfallEventsState?.loadStatus;
+  const error = rainfallEventsState?.error;
 
   const selectedEventId = selectedEvent?.eventid || null;
 
@@ -59,6 +62,22 @@ const EventsHeatmap = ({ contextType, onEventSelected }) => {
   }, []);
 
   if (!yearSections.length) {
+    if (loadStatus === 'loading') {
+      return (
+        <p className="small mb-0 text-muted">
+          <em>Loading rainfall events...</em>
+        </p>
+      );
+    }
+
+    if (loadStatus === 'failed') {
+      return (
+        <p className="small mb-0 text-danger">
+          <em>{error || 'Unable to load rainfall events.'}</em>
+        </p>
+      );
+    }
+
     return (
       <p className="small mb-0">
         <em>No rainfall events are available.</em>
@@ -159,7 +178,16 @@ const EventsHeatmap = ({ contextType, onEventSelected }) => {
           ) : null}
         </section>
       ))}
-
+      {loadStatus === 'loading' ? (
+        <p className="small text-muted mt-2 mb-0">
+          <em>Loading more rainfall events...</em>
+        </p>
+      ) : null}
+      {loadStatus === 'failed' ? (
+        <p className="small text-warning mt-2 mb-0">
+          <em>Some rainfall events may be missing: {error || 'loading stopped before all pages were fetched.'}</em>
+        </p>
+      ) : null}
     </div>
   );
 };
