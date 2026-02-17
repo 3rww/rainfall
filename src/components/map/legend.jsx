@@ -65,8 +65,8 @@ const MapLegend = () => {
       </Col>
       <Col sm={2}>
         <Form>
-          <Form.Check defaultChecked size="sm" value="breaks_005" label="0.5 in." name="legendRadios" type="radio" id="legend-radio-1" onChange={handleSelectLegend} />
-          <Form.Check size="sm" value="breaks_050" label="5 in." name="legendRadios" type="radio" id="legend-radio-2" onChange={handleSelectLegend} />
+          <Form.Check size="sm" value="breaks_005" label="0.5 in." name="legendRadios" type="radio" id="legend-radio-1" onChange={handleSelectLegend} />
+          <Form.Check defaultChecked size="sm" value="breaks_050" label="5 in." name="legendRadios" type="radio" id="legend-radio-2" onChange={handleSelectLegend} />
           <Form.Check size="sm" value="breaks_100" label="10 in." name="legendRadios" type="radio" id="legend-radio-3" onChange={handleSelectLegend} />
         </Form>
       </Col>

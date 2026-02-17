@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { MD5 } from 'object-hash';
 import { includes } from 'lodash-es';
 
 import {
@@ -23,6 +22,7 @@ import {
 } from './fetchKwargsSlice';
 import { pickRainfallEvent as pickRainfallEventAction } from './rainfallEventsSlice';
 import { applyActiveResultToMap } from './downloadThunks';
+import { buildRequestKey } from '../utils/requestKey';
 import { transformRainfallResults } from '../utils/transformers';
 
 const pollingJobs = new Map();
@@ -253,7 +253,7 @@ export const fetchRainfallDataFromApiV2 = (payload) => (dispatch, getState) => {
     rollup: kwargs.rollup
   });
 
-  const requestId = MD5(kwargs);
+  const requestId = buildRequestKey(kwargs);
   const matchingRequest = selectFetchHistoryItemById(state, requestId, contextType);
 
   if (matchingRequest && matchingRequest.isActive === false) {

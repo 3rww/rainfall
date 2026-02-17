@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useStore } from 'react-redux';
-import Immutable from 'immutable';
 import mapboxgl from 'mapbox-gl';
-import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import { isEmpty, has, forEach } from 'lodash-es';
 
 import {
@@ -266,16 +264,11 @@ const ReactMap = ({ activeTab, token, zoom }) => {
       return;
     }
 
-    const oldStyle = Immutable.fromJS(previousMapStyle);
-    const newStyle = Immutable.fromJS(nextMapStyle);
-
-    if (!Immutable.is(oldStyle, newStyle)) {
-      const changes = diffStyles(oldStyle.toJS(), newStyle.toJS());
-      if (DEBUG) {
-        console.log(`updating mapStyle (${changes.map((change) => change.command)})`);
-      }
-      changes.forEach((change) => executeMapChange(map, change));
+    const changes = diffStyles(previousMapStyle, nextMapStyle);
+    if (DEBUG) {
+      console.log(`updating mapStyle (${changes.map((change) => change.command)})`);
     }
+    changes.forEach((change) => executeMapChange(map, change));
   }, [executeMapChange]);
 
   useEffect(() => {
@@ -343,16 +336,28 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     );
 
     webmap.on('load', () => {
-      webmap.addControl(new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl,
-        placeholder: 'Fly me to...',
-        marker: false,
-        collapsed: true,
-        clearAndBlurOnEsc: true,
-        clearOnBlur: true,
-        countries: 'us'
-      }));
+      import('@mapbox/mapbox-gl-geocoder')
+        .then((geocoderModule) => {
+          const MapboxGeocoder = geocoderModule.default || geocoderModule;
+          const activeMap = webmapRef.current;
+          if (!activeMap) {
+            return;
+          }
+
+          activeMap.addControl(new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl,
+            placeholder: 'Fly me to...',
+            marker: false,
+            collapsed: true,
+            clearAndBlurOnEsc: true,
+            clearOnBlur: true,
+            countries: 'us'
+          }));
+        })
+        .catch((error) => {
+          console.warn('[map] geocoder control disabled: failed to load @mapbox/mapbox-gl-geocoder', error);
+        });
 
       webmap.addControl(new mapboxgl.NavigationControl());
       webmap.addControl(new mapboxgl.AttributionControl({

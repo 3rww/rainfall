@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Modal,
   Button,
@@ -11,7 +11,6 @@ import {
   Spinner,
   ProgressBar
 } from 'react-bootstrap';
-import DatePicker from 'react-datepicker';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faList } from '@fortawesome/free-solid-svg-icons';
@@ -39,8 +38,9 @@ import {
 } from '../../store/utils/dateTime';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
-import 'react-datepicker/dist/react-datepicker.css';
 import './datetimePicker.css';
+
+const DateRangeModal = lazy(() => import('./dateRangeModal'));
 
 const DATE_FORMAT = 'MM/DD/YYYY hh:mm A';
 const NOTE_DATE_FORMAT = 'MM/DD/YYYY';
@@ -233,6 +233,10 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
     setPendingEnd(clamped.end ? clamped.end.toDate() : pickerModel.maxDate.toDate());
   }, [pickerModel.endDt, pickerModel.maxDate, pickerModel.minDate, pickerModel.startDt]);
 
+  const handleRangeModalHide = useCallback(() => {
+    setShowRangeModal(false);
+  }, []);
+
   const handleApplyRange = useCallback(() => {
     if (!pendingStart || !pendingEnd) {
       return;
@@ -267,21 +271,45 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
     });
 
     if (!isWithinBounds) {
-        console.log('[DateTimePicker] preset range outside available bounds', {
-          label,
-          contextType,
-          rollup: pickerModel.rollup,
-          attemptedStart: toDateTime(attemptedStart).toISOString(),
-          attemptedEnd: toDateTime(attemptedEnd).toISOString(),
-          min: pickerModel.minDate.toISOString(),
-          max: pickerModel.maxDate.toISOString()
-        });
+      console.log('[DateTimePicker] preset range outside available bounds', {
+        label,
+        contextType,
+        rollup: pickerModel.rollup,
+        attemptedStart: toDateTime(attemptedStart).toISOString(),
+        attemptedEnd: toDateTime(attemptedEnd).toISOString(),
+        min: pickerModel.minDate.toISOString(),
+        max: pickerModel.maxDate.toISOString()
+      });
       return;
     }
 
     setPendingStart(attemptedStart.toDate());
     setPendingEnd(attemptedEnd.toDate());
   }, [contextType, pickerModel.maxDate, pickerModel.minDate, pickerModel.rollup]);
+
+  const handlePendingStartChange = useCallback((date) => {
+    const clamped = clampDateTimeRange({
+      start: date,
+      end: pendingEnd,
+      min: pickerModel.minDate,
+      max: pickerModel.maxDate
+    });
+
+    setPendingStart(clamped.start ? clamped.start.toDate() : null);
+    setPendingEnd(clamped.end ? clamped.end.toDate() : null);
+  }, [pendingEnd, pickerModel.maxDate, pickerModel.minDate]);
+
+  const handlePendingEndChange = useCallback((date) => {
+    const clamped = clampDateTimeRange({
+      start: pendingStart,
+      end: date,
+      min: pickerModel.minDate,
+      max: pickerModel.maxDate
+    });
+
+    setPendingStart(clamped.start ? clamped.start.toDate() : null);
+    setPendingEnd(clamped.end ? clamped.end.toDate() : null);
+  }, [pendingStart, pickerModel.maxDate, pickerModel.minDate]);
 
   const availabilityNote = useMemo(() => {
     const contextLabel = CONTEXT_AVAILABILITY_LABELS[contextType] || 'rainfall';
@@ -304,97 +332,25 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
 
   return (
     <div>
-      <Modal
-        show={showRangeModal}
-        onHide={() => setShowRangeModal(false)}
-        size="lg"
-        animation={false}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Select Date and Time Range</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Row className="g-3">
-            <Col xs={3} className="border-end">
-              <div className="btn-group-vertical w-100" role="group" aria-label="Quick Ranges">
-                {Object.entries(pickerModel.ranges).map(([label, range]) => (
-                  <Button
-                    key={`${contextType}-${label}`}
-                    variant="outline-primary"
-                    size="sm"
-                    onClick={() => handlePresetPick(label, range)}
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </div>
-            </Col>
-            <Col xs={9}>
-              <Row>
-                <Col md={6}>
-                  <p className="lead mb-0">Start</p>
-                  <DatePicker
-                    selected={pendingStart}
-                    onChange={(date) => {
-                      const clamped = clampDateTimeRange({
-                        start: date,
-                        end: pendingEnd,
-                        min: pickerModel.minDate,
-                        max: pickerModel.maxDate
-                      });
-                      setPendingStart(clamped.start ? clamped.start.toDate() : null);
-                      setPendingEnd(clamped.end ? clamped.end.toDate() : null);
-                    }}
-                    showTimeSelect
-                    timeIntervals={15}
-                    dateFormat="MM/dd/yyyy hh:mm aa"
-                    minDate={pickerModel.minDate.toDate()}
-                    maxDate={pickerModel.maxDate.toDate()}
-                    className="form-control"
-                  />
-                </Col>
-                <Col md={6}>
-                  <p className="lead mb-0">End</p>
-                  <DatePicker
-                    selected={pendingEnd}
-                    onChange={(date) => {
-                      const clamped = clampDateTimeRange({
-                        start: pendingStart,
-                        end: date,
-                        min: pickerModel.minDate,
-                        max: pickerModel.maxDate
-                      });
-                      setPendingStart(clamped.start ? clamped.start.toDate() : null);
-                      setPendingEnd(clamped.end ? clamped.end.toDate() : null);
-                    }}
-                    showTimeSelect
-                    timeIntervals={15}
-                    dateFormat="MM/dd/yyyy hh:mm aa"
-                    minDate={pendingStart || pickerModel.minDate.toDate()}
-                    maxDate={pickerModel.maxDate.toDate()}
-                    className="form-control"
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col>
-                  <p className="datetimepicker-range-note mb-0">
-                    {availabilityNote}
-                  </p>
-                </Col>
-              </Row>
-            </Col>
-          </Row>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowRangeModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleApplyRange}>
-            Apply
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      {showRangeModal ? (
+        <Suspense fallback={null}>
+          <DateRangeModal
+            show={showRangeModal}
+            onHide={handleRangeModalHide}
+            onApply={handleApplyRange}
+            contextType={contextType}
+            ranges={pickerModel.ranges}
+            pendingStart={pendingStart}
+            pendingEnd={pendingEnd}
+            onPresetPick={handlePresetPick}
+            onStartChange={handlePendingStartChange}
+            onEndChange={handlePendingEndChange}
+            minDate={pickerModel.minDate}
+            maxDate={pickerModel.maxDate}
+            availabilityNote={availabilityNote}
+          />
+        </Suspense>
+      ) : null}
 
       <Modal
         show={showEventModal}
@@ -429,32 +385,32 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
                   </Nav.Link>
                 </Nav.Item>
               </Nav>
-            <p className="small text-muted pt-2 mb-0">
-              {activeEventModalTab === EVENT_MODAL_TABS.heatmap
-                ? 'Select a day from the calendar below to see rainfall event(s) on that day, and select those to use as date/time range for your rainfall data download.'
-                : 'Select an event from the list below to use as date/time range for your rainfall data download.'}
-            </p>
-            {eventsLoadStatus === 'loading' ? (
-              <div className="pt-2">
-                <ProgressBar
-                  animated={!hasKnownEventTotal}
-                  now={eventsLoadProgress}
-                  striped
-                  variant="primary"
-                  label={hasKnownEventTotal ? `${eventsLoadProgress}%` : undefined}
-                />
-                <p className="small text-muted mb-1">
-                  Loading rainfall events
-                  {hasKnownEventTotal ? ` (${eventsLoadedCount} of ${eventsTotalCount} loaded)` : ` (${eventsLoadedCount} loaded)`}
-                  ...
-                </p>                
-              </div>
-            ) : null}
-            {eventsLoadStatus === 'failed' ? (
-              <p className="small text-warning pt-2 mb-0">
-                Some rainfall events may be missing: {eventsError || 'loading stopped before all pages were fetched.'}
+              <p className="small text-muted pt-2 mb-0">
+                {activeEventModalTab === EVENT_MODAL_TABS.heatmap
+                  ? 'Select a day from the calendar below to see rainfall event(s) on that day, and select those to use as date/time range for your rainfall data download.'
+                  : 'Select an event from the list below to use as date/time range for your rainfall data download.'}
               </p>
-            ) : null}
+              {eventsLoadStatus === 'loading' ? (
+                <div className="pt-2">
+                  <ProgressBar
+                    animated={!hasKnownEventTotal}
+                    now={eventsLoadProgress}
+                    striped
+                    variant="primary"
+                    label={hasKnownEventTotal ? `${eventsLoadProgress}%` : undefined}
+                  />
+                  <p className="small text-muted mb-1">
+                    Loading rainfall events
+                    {hasKnownEventTotal ? ` (${eventsLoadedCount} of ${eventsTotalCount} loaded)` : ` (${eventsLoadedCount} loaded)`}
+                    ...
+                  </p>
+                </div>
+              ) : null}
+              {eventsLoadStatus === 'failed' ? (
+                <p className="small text-warning pt-2 mb-0">
+                  Some rainfall events may be missing: {eventsError || 'loading stopped before all pages were fetched.'}
+                </p>
+              ) : null}
             </div>
           </Modal.Header>
           <Modal.Body>
