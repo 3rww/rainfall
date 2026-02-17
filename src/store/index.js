@@ -1,8 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { rootReducer } from "./reducers";
+import { rootReducer } from "./rootReducer";
+import listenerMiddleware from "./listenerMiddleware";
 
 const store = configureStore ({
   reducer: rootReducer,
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(listenerMiddleware.middleware),
   devTools: true
 });
 /** NOTE

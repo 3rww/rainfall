@@ -1,4 +1,6 @@
-import { highlightSensor, pickSensor, switchTab } from "./actions";
+import { pickSensor } from "./features/fetchKwargsSlice";
+import { highlightSensor } from "./features/mapStyleSlice";
+import { switchTab } from "./features/progressSlice";
 import { CONTEXT_TYPES, ENABLE_SHARE_STATE } from "./config";
 import { selectMapStyleSourceDataFeatures } from "./selectors";
 import { transformFeatureToOption } from "./utils/transformers";

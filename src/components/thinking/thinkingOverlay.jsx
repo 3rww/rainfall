@@ -1,49 +1,32 @@
 import React from 'react';
-import { connect } from 'react-redux';
-// import Spinner from 'react-bootstrap/Spinner';
-// icons
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSpinner, faCloudRain } from '@fortawesome/free-solid-svg-icons'
-import './thinkingOverlay.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner, faCloudRain } from '@fortawesome/free-solid-svg-icons';
+import { useAppSelector } from '../../store/hooks';
 
-class ThinkingOverlay extends React.Component {
+import './thinkingOverlay.css';
 
-  render() {
-    if (this.props.isAppThinking) {
-      return (
-        <div className="thinking-overlay">
-          <div className="d-flex thinking-content">
-            {/* <div className="d-flex justify-content-center my-auto"> */}
-            <span className="fa-layers fa-fw">
-                <FontAwesomeIcon icon={faSpinner} pulse size="8x"/>
-                <FontAwesomeIcon icon={faCloudRain} size="4x" transform="right-8"/>
-              </span>
-              
-            {/* <Spinner
-              animation="grow"
-              variant="primary"
-              className="thinking-spinner"
-            >
-              <span className="visually-hidden">"Loading...</span>
-            </Spinner> */}
-          </div>
-          <p className="debug-messages">{this.props.message}</p>
-        </div>
-      )
-    } else {
-      return (null)
-    }
+const ThinkingOverlay = () => {
+  const isAppThinking = useAppSelector((state) => state.progress.isThinking > 0);
+  const message = useAppSelector((state) => {
+    const messages = state.progress.messages;
+    return messages[messages.length - 1];
+  });
 
+  if (!isAppThinking) {
+    return null;
   }
 
-}
+  return (
+    <div className="thinking-overlay">
+      <div className="d-flex thinking-content">
+        <span className="fa-layers fa-fw">
+          <FontAwesomeIcon icon={faSpinner} pulse size="8x" />
+          <FontAwesomeIcon icon={faCloudRain} size="4x" transform="right-8" />
+        </span>
+      </div>
+      <p className="debug-messages">{message}</p>
+    </div>
+  );
+};
 
-function mapStateToProps(state) {
-  let msgs = state.progress.messages
-  return { 
-    isAppThinking: state.progress.isThinking > 0,
-    message: msgs[msgs.length - 1]
-  }
-}
-
-export default connect(mapStateToProps)(ThinkingOverlay)
+export default ThinkingOverlay;

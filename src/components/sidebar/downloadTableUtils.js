@@ -1,4 +1,8 @@
-import moment from "moment";
+import {
+  parseZonedDateTime,
+  setDateTimeOffset,
+  toDateTime
+} from "../../store/utils/dateTime";
 
 export const EXCEL_DATETIME_FORMAT = "MM/DD/YYYY HH:mm:ss";
 export const SWMM_DATETIME_FORMAT = "MM/DD/YYYY HH:mm";
@@ -45,10 +49,10 @@ const parseSwmmTimestamp = (rawTimestamp, rule = CHART_TIMESTAMP_RULE.start) => 
 
   const rangeParts = rawTimestamp.split("/");
   if (rangeParts.length === 2) {
-    const start = moment.parseZone(rangeParts[0].trim(), moment.ISO_8601, true);
-    const end = moment.parseZone(rangeParts[1].trim(), moment.ISO_8601, true);
+    const start = parseZonedDateTime(rangeParts[0].trim(), true);
+    const end = parseZonedDateTime(rangeParts[1].trim(), true);
 
-    if (!start.isValid() || !end.isValid()) {
+    if (!start || !end) {
       return null;
     }
 
@@ -57,18 +61,16 @@ const parseSwmmTimestamp = (rawTimestamp, rule = CHART_TIMESTAMP_RULE.start) => 
     }
 
     if (rule === CHART_TIMESTAMP_RULE.midpoint) {
-      return moment(Math.round((start.valueOf() + end.valueOf()) / 2)).utcOffset(start.utcOffset());
+      return setDateTimeOffset(
+        toDateTime(Math.round((start.valueOf() + end.valueOf()) / 2)),
+        start.utcOffset()
+      );
     }
 
     return start;
   }
 
-  const parsed = moment.parseZone(rawTimestamp, moment.ISO_8601, true);
-  if (!parsed.isValid()) {
-    return null;
-  }
-
-  return parsed;
+  return parseZonedDateTime(rawTimestamp, true);
 };
 
 export const getSwmmIntervalFromRollup = (rollup) => {
@@ -181,8 +183,8 @@ export const formatIsoForExcel = (rawValue) => {
     return null;
   }
 
-  const parsed = moment.parseZone(rawValue, moment.ISO_8601, true);
-  if (!parsed.isValid()) {
+  const parsed = parseZonedDateTime(rawValue, true);
+  if (!parsed) {
     return null;
   }
 
@@ -290,10 +292,10 @@ export const extractChartTimestamp = (rawTimestamp, rule = CHART_TIMESTAMP_RULE.
 
   const rangeParts = rawTimestamp.split("/");
   if (rangeParts.length === 2) {
-    const start = moment.parseZone(rangeParts[0].trim(), moment.ISO_8601, true);
-    const end = moment.parseZone(rangeParts[1].trim(), moment.ISO_8601, true);
+    const start = parseZonedDateTime(rangeParts[0].trim(), true);
+    const end = parseZonedDateTime(rangeParts[1].trim(), true);
 
-    if (!start.isValid() || !end.isValid()) {
+    if (!start || !end) {
       return null;
     }
 
@@ -308,11 +310,10 @@ export const extractChartTimestamp = (rawTimestamp, rule = CHART_TIMESTAMP_RULE.
     return start.valueOf();
   }
 
-  const parsed = moment.parseZone(rawTimestamp, moment.ISO_8601, true);
-  if (!parsed.isValid()) {
+  const parsed = parseZonedDateTime(rawTimestamp, true);
+  if (!parsed) {
     return null;
   }
-
   return parsed.valueOf();
 };
 

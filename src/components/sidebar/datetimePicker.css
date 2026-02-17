@@ -12,13 +12,3 @@ button.datetimepicker-control {
   font-size: 0.9rem;
   margin-top: 0.75rem;
 }
-
-.datetimepicker-event-modal-content {
-  display: flex;
-  flex-direction: column;
-  max-height: min(85vh, 900px);
-}
-
-.datetimepicker-event-modal-content .modal-body {
-  overflow-y: auto;
-}

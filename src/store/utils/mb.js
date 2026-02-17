@@ -68,10 +68,12 @@ export const buildRainfallColorStyleExp = (attr, breaks, chromaScaleObj, colors,
       method = 'linear'
     }
     
+    const numericAttrExpression = ["to-number", ["get", attr], 0]
+
     let colorExp = [
       "interpolate",
       [method],
-      ["get", attr]
+      numericAttrExpression
     ]
     let legendContent = []
   

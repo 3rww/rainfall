@@ -1,100 +1,87 @@
-
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useCallback, useMemo } from 'react';
 import {
   Card,
-  Button,
-} from 'react-bootstrap'
-import { isEmpty } from 'lodash-es'
+  Button
+} from 'react-bootstrap';
+import { isEmpty } from 'lodash-es';
 
 import DateTimePicker from './datetimePicker';
 import GeodataPicker from './geomPicker';
-import IntervalPicker from './intervalPicker'
-import DownloadsList from './downloadList'
+import IntervalPicker from './intervalPicker';
+import DownloadsList from './downloadList';
 
-import { fetchRainfallDataFromApiV2 } from '../../store/middleware'
-import { selectSelectedSensors, selectFetchHistory } from '../../store/selectors'
+import { fetchRainfallDataFromApiV2 } from '../../store/features/rainfallThunks';
+import {
+  makeSelectSelectedSensors,
+  selectFetchHistory
+} from '../../store/selectors';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
-import './downloader.css'
+import './downloader.css';
 
+const RainfallDownloader = ({ rainfallDataType, contextType }) => {
+  const dispatch = useAppDispatch();
+  const selectSelectedSensorsByContext = useMemo(makeSelectSelectedSensors, []);
 
-class RainfallDownloader extends React.Component {
-  constructor(props) {
-    super();
-    this.handleDownloadClick = this.handleDownloadClick.bind(this);
-  }
+  const hasKwargs = useAppSelector((state) => {
+    const selectedSensors = selectSelectedSensorsByContext(state, contextType);
+    return !isEmpty(selectedSensors);
+  });
 
-  handleDownloadClick() {
-    this.props.fetchRainfallData({
-      rainfallDataType: this.props.rainfallDataType,
-      contextType: this.props.contextType
-    })
-  }
+  const hasDownloads = useAppSelector((state) => {
+    const downloadHistory = selectFetchHistory(state, contextType);
+    return downloadHistory.length > 0;
+  });
 
-  render() {
-    return (
-      <div>
-        <Card>
-            <Card.Body>
-              <DateTimePicker
-                rainfallDataType={this.props.rainfallDataType}
-                contextType={this.props.contextType}
-              />
-              <hr></hr>
-              <GeodataPicker
-                rainfallDataType={this.props.rainfallDataType}
-                contextType={this.props.contextType}
-              />
-              <hr></hr>
-              <IntervalPicker
-                rainfallDataType={this.props.rainfallDataType}
-                contextType={this.props.contextType}
-              />
-              <hr></hr>
-              <Button
-                onClick={this.handleDownloadClick}
-                disabled={!this.props.hasKwargs}
-                block
-              >
-                Get Rainfall Data
-              </Button>
-            </Card.Body>
-        </Card>
-        <br></br>
-        {this.props.hasDownloads ? (
+  const handleDownloadClick = useCallback(() => {
+    dispatch(fetchRainfallDataFromApiV2({
+      rainfallDataType,
+      contextType
+    }));
+  }, [contextType, dispatch, rainfallDataType]);
+
+  return (
+    <div>
+      <Card>
+        <Card.Body>
+          <DateTimePicker
+            rainfallDataType={rainfallDataType}
+            contextType={contextType}
+          />
+          <hr></hr>
+          <GeodataPicker
+            rainfallDataType={rainfallDataType}
+            contextType={contextType}
+          />
+          <hr></hr>
+          <IntervalPicker
+            rainfallDataType={rainfallDataType}
+            contextType={contextType}
+          />
+          <hr></hr>
+          <Button
+            onClick={handleDownloadClick}
+            disabled={!hasKwargs}
+            className="w-100"
+          >
+            Get Rainfall Data
+          </Button>
+        </Card.Body>
+      </Card>
+      <br></br>
+      {hasDownloads ? (
         <Card>
           <Card.Header>
-              Retrieved Rainfall Data
+            Retrieved Rainfall Data
           </Card.Header>
-          <DownloadsList 
-            contextType={this.props.contextType}
-            rainfallDataType={this.props.rainfallDataType}
+          <DownloadsList
+            contextType={contextType}
+            rainfallDataType={rainfallDataType}
           />
         </Card>
-        ) : (null)}
-      </div>
-    );
-  }
-}
+      ) : null}
+    </div>
+  );
+};
 
-function mapStateToProps(state, ownProps) {
-
-  let selectedSensors = selectSelectedSensors(state, ownProps.contextType)
-  let downloadHistory = selectFetchHistory(state, ownProps.contextType)
-
-  return {
-    hasKwargs: !isEmpty(selectedSensors), // if this is not empty, then we have kwargs
-    hasDownloads: downloadHistory.length > 0
-  }
-}
-
-const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    fetchRainfallData: payload => {
-      // console.log(payload)
-      dispatch(fetchRainfallDataFromApiV2(payload))
-    }
-  }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(RainfallDownloader);
+export default RainfallDownloader;

@@ -1,10 +1,10 @@
-import moment from "moment";
+import { fromDateParts, toDateTime } from "../../store/utils/dateTime";
 
 export const DAY_KEY_FORMAT = "YYYY-MM-DD";
 
 const byStartThenId = (left, right) => {
-  const leftStart = moment(left.startDt);
-  const rightStart = moment(right.startDt);
+  const leftStart = toDateTime(left.startDt);
+  const rightStart = toDateTime(right.startDt);
 
   if (leftStart.isBefore(rightStart)) {
     return -1;
@@ -20,14 +20,14 @@ export const groupEventsByDay = (events = []) => {
   const eventsByDay = {};
 
   events.forEach((event) => {
-    const start = moment(event?.startDt);
-    const end = moment(event?.endDt);
+    const start = toDateTime(event?.startDt);
+    const end = toDateTime(event?.endDt);
 
     if (!start.isValid() || !end.isValid() || end.isBefore(start)) {
       return;
     }
 
-    const cursor = start.clone().startOf("day");
+    let cursor = start.clone().startOf("day");
     const endDay = end.clone().startOf("day");
 
     while (cursor.isSameOrBefore(endDay, "day")) {
@@ -38,7 +38,7 @@ export const groupEventsByDay = (events = []) => {
       }
 
       eventsByDay[dayKey].push(event);
-      cursor.add(1, "day");
+      cursor = cursor.add(1, "day");
     }
   });
 
@@ -50,10 +50,10 @@ export const groupEventsByDay = (events = []) => {
 };
 
 const buildWeeksForYear = (year, eventsByDay) => {
-  const yearStart = moment(`${year}-01-01`).startOf("isoWeek");
-  const yearEnd = moment(`${year}-12-31`).endOf("day").endOf("isoWeek");
+  const yearStart = toDateTime(`${year}-01-01`).startOf("isoWeek");
+  const yearEnd = toDateTime(`${year}-12-31`).endOf("day").endOf("isoWeek");
   const weeks = [];
-  const cursor = yearStart.clone();
+  let cursor = yearStart.clone();
 
   while (cursor.isSameOrBefore(yearEnd, "day")) {
     const weekStart = cursor.clone();
@@ -77,7 +77,7 @@ const buildWeeksForYear = (year, eventsByDay) => {
       days
     });
 
-    cursor.add(1, "week");
+    cursor = cursor.add(1, "week");
   }
 
   return weeks;
@@ -88,10 +88,10 @@ const buildMonthLabels = (year, weeks) => {
   let lastWeekIndex = -1;
 
   for (let month = 0; month < 12; month += 1) {
-    const firstOfMonth = moment({ year, month, day: 1 });
+    const firstOfMonth = fromDateParts({ year, month, day: 1 });
     const weekIndex = weeks.findIndex((week) => {
-      const firstDay = moment(week.days[0].dayKey, DAY_KEY_FORMAT);
-      const lastDay = moment(week.days[6].dayKey, DAY_KEY_FORMAT);
+      const firstDay = toDateTime(week.days[0].dayKey, { format: DAY_KEY_FORMAT, strict: true });
+      const lastDay = toDateTime(week.days[6].dayKey, { format: DAY_KEY_FORMAT, strict: true });
       return firstOfMonth.isSameOrAfter(firstDay, "day") && firstOfMonth.isSameOrBefore(lastDay, "day");
     });
 
@@ -141,4 +141,3 @@ export const getCellIntensity = (count = 0) => {
   }
   return 4;
 };
-

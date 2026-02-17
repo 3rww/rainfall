@@ -1,21 +1,18 @@
-import moment from "moment";
-
 import {
   CONTEXT_TYPES,
   FIVE_MINUTE_ROLLUP
 } from "../config";
+import {
+  nowDateTime,
+  toValidDateTime,
+  isDateTime
+} from "./dateTime";
 
 const toValidMoment = (value) => {
-  if (moment.isMoment(value)) {
+  if (isDateTime(value)) {
     return value.isValid() ? value.clone() : null;
   }
-
-  if (value === null || value === undefined || value === false) {
-    return null;
-  }
-
-  const parsed = moment(value);
-  return parsed.isValid() ? parsed : null;
+  return toValidDateTime(value);
 };
 
 const latestMoment = (...values) => {
@@ -124,8 +121,8 @@ export const resolveAvailableBounds = ({
   void rainfallDataType;
 
   const latestValues = latest || {};
-  const nowMoment = toValidMoment(now) || moment();
-  const envMin = toValidMoment(rainfallMinDate) || moment("2000-04-01");
+  const nowMoment = toValidMoment(now) || nowDateTime();
+  const envMin = toValidMoment(rainfallMinDate) || toValidDateTime("2000-04-01");
 
   const gaugeFallbackMax = nowMoment.clone().subtract(60, "days").endOf("month");
   const garrFallbackMax = nowMoment.clone().subtract(60, "days").endOf("month");

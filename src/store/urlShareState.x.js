@@ -44,7 +44,16 @@ const loadHarness = async ({ enableShareState = "true" } = {}) => {
   const [{ configureStore }, reducers, actions, share, config] = await Promise.all([
     import("@reduxjs/toolkit"),
     import("./reducers"),
-    import("./actions"),
+    Promise.all([
+      import("./features/mapStyleSlice"),
+      import("./features/progressSlice"),
+      import("./features/fetchKwargsSlice")
+    ]).then(([mapStyleSlice, progressSlice, fetchKwargsSlice]) => ({
+      setStyle: mapStyleSlice.setStyle,
+      startThinking: progressSlice.startThinking,
+      switchTab: progressSlice.switchTab,
+      pickSensor: fetchKwargsSlice.pickSensor
+    })),
     import("./urlShareState"),
     import("./config")
   ]);
@@ -284,4 +293,3 @@ describe("urlShareState", () => {
     stopSync();
   });
 });
-

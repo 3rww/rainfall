@@ -13,6 +13,10 @@ console.log(
   "- check it out for more powerful querying capability!"
 );
 
+if (import.meta.env.VITE_E2E_TEST === "true" && typeof window !== "undefined") {
+  window.__APP_STORE__ = store;
+}
+
 const rootElement = document.getElementById("root");
 if (!rootElement) {
   throw new Error("Missing #root element");

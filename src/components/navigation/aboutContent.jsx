@@ -174,7 +174,7 @@ export const AboutContent = () => {
               allowFullScreen
             />
           </div>
-          <hr></hr>
+          {/* <hr></hr>
           <h3>Boundary-based selections</h3>
           <p>A quick demo of the boundary-based selection feature:</p>
           <div className="ratio ratio-16x9">
@@ -184,7 +184,7 @@ export const AboutContent = () => {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
-          </div>
+          </div> */}
         </div>
       </Tab>
       <Tab eventKey="how2" title="Under the Hood">

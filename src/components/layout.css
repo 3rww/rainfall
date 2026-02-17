@@ -1,7 +1,6 @@
 .layout-root {
   flex: 1 1 auto;
   min-height: 0;
-  height: 100%;
   width: 100%;
   max-width: 100%;
   margin-right: 0px;
@@ -11,11 +10,13 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 .layout-main-row {
   flex: 1 1 auto;
   min-height: 0;
+  margin: 0 !important;
 }
 
 /* @media (min-width: 576px) {  */
@@ -28,12 +29,19 @@
   height: 100%;
   overflow-y: auto;
   position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   /* box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.25); */
   /* z-index: 100; */
 }
 
 .map-column {
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0 !important;
 }
 
 .sidebar {
@@ -42,9 +50,6 @@
 }
 
 @media (min-width: 576px) {
-  .map-column {
-    padding-bottom: 120px;
-  }
   .sidebar {
     margin-bottom: 0px;
   }

@@ -1,6 +1,11 @@
 import { has, isEmpty, keys, forEach, includes, startsWith, get } from 'lodash-es'
+import { createSelector } from '@reduxjs/toolkit'
 
 import { LYR_HIGHLIGHT_PREFIX } from './config'
+import { buildYearSections, groupEventsByDay } from '../components/sidebar/eventsHeatmapUtils'
+
+const EMPTY_ARRAY = []
+const EMPTY_OBJECT = {}
 
 // ----------------------------------------------
 // selecting UI State
@@ -18,22 +23,71 @@ export const selectActiveFetchKwargs = (state) => (
   state.fetchKwargs[selectContext(state)].active
 )
 
-export const selectSelectedSensors = (state, contextType) => {
-  let selectedSensors = {}
-  forEach(
-    selectFetchKwargs(state, contextType).sensorLocations, 
-    (sensors, sensorType) => {
-      if (sensors.length > 0) {
+const selectSensorLocationsForContext = (state, contextType) => (
+  state.fetchKwargs?.[contextType]?.active?.sensorLocations || EMPTY_OBJECT
+)
+
+export const makeSelectSelectedSensors = () => createSelector(
+  [selectSensorLocationsForContext],
+  (sensorLocations) => {
+    let selectedSensors = null
+    forEach(sensorLocations, (sensors, sensorType) => {
+      if (Array.isArray(sensors) && sensors.length > 0) {
+        if (selectedSensors === null) {
+          selectedSensors = {}
+        }
         selectedSensors[sensorType] = sensors
       }
-    }
-  )
-  return selectedSensors
-}
+    })
+    return selectedSensors || EMPTY_OBJECT
+  }
+)
+
+const sharedSelectedSensorsSelector = makeSelectSelectedSensors()
+
+export const selectSelectedSensors = (state, contextType) => (
+  sharedSelectedSensorsSelector(state, contextType)
+)
 
 export const selectFetchHistory = (state, contextType) => {
   return state.fetchKwargs[contextType].history
 }
+
+export const selectFetchHistoryItemLifecycle = (state, requestId, contextType) => {
+  const item = selectFetchHistoryItemById(state, requestId, contextType)
+  if (!item) {
+    return 'idle'
+  }
+  return item.lifecycle || 'idle'
+}
+
+export const selectFetchHistoryLifecycleSummary = createSelector(
+  [(state) => state.fetchKwargs],
+  (fetchKwargs) => {
+    const summary = {
+      idle: 0,
+      pending: 0,
+      partial: 0,
+      succeeded: 0,
+      failed: 0,
+      timed_out: 0,
+      canceled: 0
+    }
+
+    forEach(fetchKwargs, (contextData) => {
+      ;(contextData?.history || []).forEach((item) => {
+        const lifecycle = item?.lifecycle || 'idle'
+        if (Object.prototype.hasOwnProperty.call(summary, lifecycle)) {
+          summary[lifecycle] += 1
+        } else {
+          summary.idle += 1
+        }
+      })
+    })
+
+    return summary
+  }
+)
 
 export const selectActiveFetchHistory = (state) => (
   state.fetchKwargs[selectContext(state)].history
@@ -91,18 +145,19 @@ export const selectAnyActiveFetchHistoryItems = (state) => {
   forEach(state.fetchKwargs, (contextData, contextType) => {
     i = i.concat(contextData.history.filter(f => f.isActive == true))
   })
+  return i
 }
 
 export const selectPickedSensors = (state, contextType, sensorLocationType) => {
   let v = state.fetchKwargs[contextType].active.sensorLocations[sensorLocationType]
   if (v === undefined) {
-    return []
+    return EMPTY_ARRAY
   }
   return v
 }
 
 export const selectAnyActiveFetches = (state) => {
-  let i;
+  let i = [];
   forEach(state.fetchKwargs, (contextData, contextType) => {
     i = i.concat(contextData.history.filter(f => f.isFetching))
   })
@@ -158,15 +213,15 @@ export const selectMapStyleSourceDataFeatures = (state, name) => {
   if (has(state.mapStyle, ['sources', name, 'data', 'features'])) {
     return state.mapStyle.sources[name].data.features
   }
-  return []
+  return EMPTY_ARRAY
 }
 
 export const selectMapStyleSourceDataIDs = (state, name) => {
   let srcData = selectMapStyleSourceDataFeatures(state, name)
   if (!isEmpty(srcData)) {
-    return srcData.features.map(f => f.id)
+    return srcData.map(f => f.id)
   }
-  return []
+  return EMPTY_ARRAY
 }
 
 // export const selectPixelLookupsBasinsOnly = (state) => {
@@ -181,27 +236,47 @@ export const selectMapStyleSourceDataIDs = (state, name) => {
 // }
 
 export const selectSensorGeographyLookup = (state, lookupPath) => {
-  return get(state.refData.lookups, lookupPath, {})
+  return get(state.refData.lookups, lookupPath, EMPTY_OBJECT)
 }
 
-export const selectGeographyLookupsAsGroupedOptions = (state) => {
-  let geographyTypes = get(state, "refData.lookups", {})
-  return keys(geographyTypes)
+const selectGeographyLookups = (state) => get(state, 'refData.lookups', EMPTY_OBJECT)
+
+export const selectGeographyLookupsAsGroupedOptions = createSelector(
+  [selectGeographyLookups],
+  (geographyTypes) => keys(geographyTypes)
     .map(gt => ({
       label: gt,
       options: keys(geographyTypes[gt]).map(g => ({
-        value:`${gt}.${g}`,
-        label:g
+        value: `${gt}.${g}`,
+        label: g
       }))
     }))
-  
-
-}
+)
 
 // ----------------------------------------------
 // selecting rainfall events data
 
 export const selectRainfallEvents = (state) => state.rainfallEvents
+
+export const selectFilteredRainfallEvents = createSelector(
+  [selectRainfallEvents],
+  (rainfallEvents) => {
+    const maxHours = Number(rainfallEvents?.filters?.maxHours ?? 24)
+    return (rainfallEvents?.list || []).filter((event) => (
+      maxHours >= 24 ? true : event.hours <= maxHours
+    ))
+  }
+)
+
+export const selectFilteredRainfallEventsByDay = createSelector(
+  [selectFilteredRainfallEvents],
+  (events) => groupEventsByDay(events)
+)
+
+export const selectFilteredRainfallEventYearSections = createSelector(
+  [selectFilteredRainfallEventsByDay],
+  (eventsByDay) => buildYearSections(eventsByDay)
+)
 
 export const selectEvent = (state, eventid) => (
   selectRainfallEvents(state).list.find((e) => e.eventid === eventid)

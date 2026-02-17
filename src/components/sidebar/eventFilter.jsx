@@ -1,68 +1,46 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import {Row, Col, Container} from 'react-bootstrap';
-import { debounce } from 'lodash-es'
-import { filterEventByHours } from '../../store/actions';
+import React, { useMemo, useState, useEffect } from 'react';
+import { debounce } from 'lodash-es';
 
+import { filterEventByHours } from '../../store/features/rainfallEventsSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
-class EventFilter extends React.Component {
+const EventFilter = () => {
+  const dispatch = useAppDispatch();
+  const maxHours = useAppSelector((state) => state.rainfallEvents?.filters?.maxHours ?? 24);
+  const [currentPos, setCurrentPos] = useState(Number(maxHours));
 
-  constructor(props) {
-   super(props);
+  useEffect(() => {
+    setCurrentPos(Number(maxHours));
+  }, [maxHours]);
 
-   this.state = {
-    currentPos: 24,
-    }
-    this.slideIt = debounce(this.slideIt.bind(this),1000);
- 
-  }
+  const debouncedDispatch = useMemo(() => debounce((value) => {
+    dispatch(filterEventByHours({ maxHours: value }));
+  }, 1000), [dispatch]);
 
-  slideIt = (v) => {
-    console.log(v)
+  useEffect(() => () => {
+    debouncedDispatch.cancel();
+  }, [debouncedDispatch]);
 
-    if (v.target !== null) {
-      let value = Number(v.target.value)
-      this.setState({ currentPos: value })
-    }
+  const handleChange = (event) => {
+    const value = Number(event.target.value);
+    setCurrentPos(value);
+    debouncedDispatch(value);
+  };
 
-    if (v.target !== null) {
-      this.props.onChangeMakeChoice(v)
-    }
-    
-  }
- 
-  render() {
-    return (
-      <div>
-        <label htmlFor="duration-slider">Filter Events | {this.state.currentPos} hours</label>
-        <input
-          type="range"
-          min="1" 
-          max="24"
-          defaultValue={`${this.state.currentPos}`}
-          className="form-range"
-          id="duration-slider"
-          onChange={this.slideIt}
-        />        
-      </div>
-    )
-  }
+  return (
+    <div>
+      <label htmlFor="duration-slider">Filter Events | {currentPos} hours</label>
+      <input
+        type="range"
+        min="1"
+        max="24"
+        value={currentPos}
+        className="form-range"
+        id="duration-slider"
+        onChange={handleChange}
+      />
+    </div>
+  );
+};
 
-
-}
-
-function mapStateToProps(state) {
-  return {
-   eventFilters: state.eventFilters
-  }
- }
- 
- const mapDispatchToProps = (dispatch, ownProps) => {
-  return {
-    onChangeMakeChoice: payload => {
-      dispatch(filterEventByHours({maxHours: payload.target.value}))
-    }
-  }
- }
- 
- export default connect(mapStateToProps, mapDispatchToProps)(EventFilterControls);
+export default EventFilter;

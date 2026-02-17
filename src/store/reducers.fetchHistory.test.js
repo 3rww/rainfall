@@ -6,7 +6,7 @@ import {
   pickActiveResultItem,
   removeFetchHistoryItem,
   requestRainfallDataFail
-} from "./actions";
+} from "./features/fetchKwargsSlice";
 import { rootReducer } from "./reducers";
 
 const CONTEXT = CONTEXT_TYPES.legacyRealtime;

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  selectFilteredRainfallEventsByDay,
+  selectFilteredRainfallEventYearSections,
   selectEarliestlegacyGauge5MinTS,
   selectEarliestlegacyGarr5MinTS,
   selectLatestlegacyRealtimeGaugeTS,
@@ -69,5 +71,49 @@ describe("latest timestamp selectors", () => {
     expect(selectLatestlegacyGauge5MinTS(state)).toBeUndefined();
     expect(selectEarliestlegacyGarr5MinTS(state)).toBeUndefined();
     expect(selectLatestlegacyGarr5MinTS(state)).toBeUndefined();
+  });
+});
+
+describe("rainfall event heatmap selectors", () => {
+  it("memoizes grouped events by day for unchanged state", () => {
+    const state = {
+      rainfallEvents: {
+        list: [
+          {
+            eventid: "event-a",
+            startDt: "2025-06-10T01:00:00Z",
+            endDt: "2025-06-10T02:00:00Z",
+            hours: 1
+          }
+        ],
+        filters: { maxHours: 24 }
+      }
+    };
+
+    const first = selectFilteredRainfallEventsByDay(state);
+    const second = selectFilteredRainfallEventsByDay(state);
+
+    expect(second).toBe(first);
+  });
+
+  it("memoizes year sections for unchanged state", () => {
+    const state = {
+      rainfallEvents: {
+        list: [
+          {
+            eventid: "event-a",
+            startDt: "2025-06-10T01:00:00Z",
+            endDt: "2025-06-10T02:00:00Z",
+            hours: 1
+          }
+        ],
+        filters: { maxHours: 24 }
+      }
+    };
+
+    const first = selectFilteredRainfallEventYearSections(state);
+    const second = selectFilteredRainfallEventYearSections(state);
+
+    expect(second).toBe(first);
   });
 });

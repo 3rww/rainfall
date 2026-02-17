@@ -1,203 +1,190 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
+import { configureStore } from "@reduxjs/toolkit";
 
-import { CONTEXT_TYPES, SENSOR_TYPES } from "./config";
-import { deleteDownload } from "./middleware";
-import {
-  highlightSensor,
-  pickActiveResultItem,
-  removeFetchHistoryItem,
-  resetLayerSrcs
-} from "./actions";
+import { CONTEXT_TYPES } from "./config";
+import { initialState } from "./initialState";
+import { rootReducer } from "./reducers";
+import listenerMiddleware from "./listenerMiddleware";
+import { deleteDownload } from "./features/downloadThunks";
 
 const CONTEXT = CONTEXT_TYPES.legacyRealtime;
 
-const buildHistoryItem = ({ requestId, isActive = false }) => ({
-  requestId,
-  isActive
+const buildFeatureCollection = (features) => ({
+  type: "FeatureCollection",
+  features
 });
 
-const buildState = ({ history, sensorLocations = { gauge: [], pixel: [] } }) => ({
-  fetchKwargs: {
-    [CONTEXT_TYPES.legacyRealtime]: {
-      active: {
-        sensorLocations
-      },
-      history
-    },
-    [CONTEXT_TYPES.legacyGauge]: {
-      active: {
-        sensorLocations: {
-          gauge: [],
-          pixel: []
-        }
-      },
-      history: []
-    },
-    [CONTEXT_TYPES.legacyGarr]: {
-      active: {
-        sensorLocations: {
-          gauge: [],
-          pixel: []
-        }
-      },
-      history: []
-    }
+const baseGaugeFeatures = [
+  {
+    id: "g-1",
+    geometry: null,
+    properties: { id: "g-1", selected: false, name: "Gauge 1" }
+  },
+  {
+    id: "g-2",
+    geometry: null,
+    properties: { id: "g-2", selected: false, name: "Gauge 2" }
   }
+];
+
+const basePixelFeatures = [
+  {
+    id: "p-1",
+    geometry: null,
+    properties: { id: "p-1", selected: false }
+  },
+  {
+    id: "p-2",
+    geometry: null,
+    properties: { id: "p-2", selected: false }
+  }
+];
+
+const buildFetchHistoryItem = ({
+  requestId,
+  isActive = false,
+  results = false,
+  sensorLocations = { gauge: [], pixel: [] }
+}) => ({
+  fetchKwargs: {
+    sensorLocations,
+    rollup: "15-minute",
+    f: "sensor",
+    startDt: "2025-01-01T00:00:00Z",
+    endDt: "2025-01-01T01:00:00Z"
+  },
+  requestId,
+  isFetching: 0,
+  isActive,
+  results,
+  status: "finished",
+  messages: []
 });
 
-const createDispatchWithStateMutation = ({ contextType, getStateRef, setStateRef }) => (
-  vi.fn((action) => {
-    if (action?.type === removeFetchHistoryItem.type) {
-      const currentState = getStateRef();
-      const updatedHistory = currentState.fetchKwargs[contextType].history
-        .filter((item) => item.requestId !== action.payload.requestId);
+const buildState = ({ history, activeSensorLocations = { gauge: [], pixel: [] } }) => {
+  const state = JSON.parse(JSON.stringify(initialState));
 
-      setStateRef({
-        ...currentState,
-        fetchKwargs: {
-          ...currentState.fetchKwargs,
-          [contextType]: {
-            ...currentState.fetchKwargs[contextType],
-            history: updatedHistory
+  const cleanGaugeData = buildFeatureCollection(baseGaugeFeatures);
+  const cleanPixelData = buildFeatureCollection(basePixelFeatures);
+
+  state.refData = {
+    gauge: { type: "geojson", data: cleanGaugeData },
+    pixel: { type: "geojson", data: cleanPixelData }
+  };
+
+  state.mapStyle = {
+    sources: {
+      gauge: {
+        type: "geojson",
+        data: buildFeatureCollection(baseGaugeFeatures.map((feature) => ({
+          ...feature,
+          properties: {
+            ...feature.properties,
+            selected: true
           }
-        }
-      });
-    }
-  })
-);
-
-describe("deleteDownload middleware", () => {
-  it("deleting a non-active item dispatches only removeFetchHistoryItem", () => {
-    let state = buildState({
-      history: [
-        buildHistoryItem({ requestId: "request-a", isActive: true }),
-        buildHistoryItem({ requestId: "request-b", isActive: false })
-      ]
-    });
-
-    const getState = vi.fn(() => state);
-    const dispatch = createDispatchWithStateMutation({
-      contextType: CONTEXT,
-      getStateRef: () => state,
-      setStateRef: (nextState) => {
-        state = nextState;
+        })))
+      },
+      pixel: {
+        type: "geojson",
+        data: buildFeatureCollection(basePixelFeatures.map((feature) => ({
+          ...feature,
+          properties: {
+            ...feature.properties,
+            selected: true
+          }
+        })))
       }
-    });
+    },
+    layers: []
+  };
 
-    deleteDownload({ contextType: CONTEXT, requestId: "request-b" })(dispatch, getState);
+  state.fetchKwargs[CONTEXT].active.sensorLocations = activeSensorLocations;
+  state.fetchKwargs[CONTEXT].history = history;
 
-    expect(dispatch).toHaveBeenCalledTimes(1);
-    expect(dispatch).toHaveBeenNthCalledWith(
-      1,
-      removeFetchHistoryItem({ contextType: CONTEXT, requestId: "request-b" })
-    );
+  return state;
+};
+
+const buildStore = (preloadedState) => configureStore({
+  reducer: rootReducer,
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().prepend(listenerMiddleware.middleware),
+  preloadedState,
+  devTools: false
+});
+
+describe("deleteDownload thunk", () => {
+  it("deleting a non-active item only removes that history entry", () => {
+    const store = buildStore(buildState({
+      history: [
+        buildFetchHistoryItem({ requestId: "request-a", isActive: true }),
+        buildFetchHistoryItem({ requestId: "request-b", isActive: false })
+      ]
+    }));
+
+    store.dispatch(deleteDownload({ contextType: CONTEXT, requestId: "request-b" }));
+
+    const nextState = store.getState();
+    expect(nextState.fetchKwargs[CONTEXT].history.map((item) => item.requestId)).toEqual(["request-a"]);
+    expect(nextState.fetchKwargs[CONTEXT].history[0].isActive).toBe(true);
   });
 
   it("deleting an active item with remaining history activates the newest remaining request", () => {
-    let state = buildState({
+    const store = buildStore(buildState({
       history: [
-        buildHistoryItem({ requestId: "request-a", isActive: false }),
-        buildHistoryItem({ requestId: "request-b", isActive: true }),
-        buildHistoryItem({ requestId: "request-c", isActive: false })
+        buildFetchHistoryItem({ requestId: "request-a", isActive: false }),
+        buildFetchHistoryItem({ requestId: "request-b", isActive: true }),
+        buildFetchHistoryItem({ requestId: "request-c", isActive: false })
       ]
-    });
+    }));
 
-    const getState = vi.fn(() => state);
-    const dispatch = createDispatchWithStateMutation({
-      contextType: CONTEXT,
-      getStateRef: () => state,
-      setStateRef: (nextState) => {
-        state = nextState;
-      }
-    });
+    store.dispatch(deleteDownload({ contextType: CONTEXT, requestId: "request-b" }));
 
-    deleteDownload({ contextType: CONTEXT, requestId: "request-b" })(dispatch, getState);
-
-    expect(dispatch).toHaveBeenCalledTimes(2);
-    expect(dispatch).toHaveBeenNthCalledWith(
-      1,
-      removeFetchHistoryItem({ contextType: CONTEXT, requestId: "request-b" })
-    );
-    expect(dispatch).toHaveBeenNthCalledWith(
-      2,
-      pickActiveResultItem({ contextType: CONTEXT, requestId: "request-c" })
-    );
+    const nextHistory = store.getState().fetchKwargs[CONTEXT].history;
+    expect(nextHistory.map((item) => item.requestId)).toEqual(["request-a", "request-c"]);
+    expect(nextHistory.find((item) => item.requestId === "request-c")?.isActive).toBe(true);
+    expect(nextHistory.find((item) => item.requestId === "request-a")?.isActive).toBe(false);
   });
 
-  it("deleting an active last item with no selected sensors only resets layer sources", () => {
-    let state = buildState({
+  it("deleting the active last item resets map sources to clean reference data", () => {
+    const store = buildStore(buildState({
       history: [
-        buildHistoryItem({ requestId: "request-a", isActive: true })
+        buildFetchHistoryItem({ requestId: "request-a", isActive: true })
       ],
-      sensorLocations: {
+      activeSensorLocations: {
         gauge: [],
         pixel: []
       }
-    });
+    }));
 
-    const getState = vi.fn(() => state);
-    const dispatch = createDispatchWithStateMutation({
-      contextType: CONTEXT,
-      getStateRef: () => state,
-      setStateRef: (nextState) => {
-        state = nextState;
-      }
-    });
+    store.dispatch(deleteDownload({ contextType: CONTEXT, requestId: "request-a" }));
 
-    deleteDownload({ contextType: CONTEXT, requestId: "request-a" })(dispatch, getState);
-
-    expect(dispatch).toHaveBeenCalledTimes(2);
-    expect(dispatch).toHaveBeenNthCalledWith(
-      1,
-      removeFetchHistoryItem({ contextType: CONTEXT, requestId: "request-a" })
-    );
-
-    const secondAction = dispatch.mock.calls[1][0];
-    expect(secondAction.type).toBe(resetLayerSrcs.type);
-    expect(secondAction.payload.lyrSrcNames.sort()).toEqual(Object.keys(SENSOR_TYPES).sort());
+    const nextState = store.getState();
+    expect(nextState.fetchKwargs[CONTEXT].history).toHaveLength(0);
+    expect(nextState.mapStyle.sources.gauge.data).toEqual(nextState.refData.gauge.data);
+    expect(nextState.mapStyle.sources.pixel.data).toEqual(nextState.refData.pixel.data);
+    expect(nextState.mapStyle.sources.gauge.data.features.every((feature) => feature.properties.selected === false)).toBe(true);
+    expect(nextState.mapStyle.sources.pixel.data.features.every((feature) => feature.properties.selected === false)).toBe(true);
   });
 
-  it("deleting an active last item re-applies selected sensor highlights", () => {
-    let state = buildState({
+  it("deleting the active last item reapplies gauge/pixel highlights from active kwargs", () => {
+    const store = buildStore(buildState({
       history: [
-        buildHistoryItem({ requestId: "request-a", isActive: true })
+        buildFetchHistoryItem({ requestId: "request-a", isActive: true })
       ],
-      sensorLocations: {
+      activeSensorLocations: {
         gauge: [{ value: "g-1", label: "Gauge 1" }],
         pixel: [{ value: "p-1", label: "Pixel 1" }]
       }
-    });
+    }));
 
-    const getState = vi.fn(() => state);
-    const dispatch = createDispatchWithStateMutation({
-      contextType: CONTEXT,
-      getStateRef: () => state,
-      setStateRef: (nextState) => {
-        state = nextState;
-      }
-    });
+    store.dispatch(deleteDownload({ contextType: CONTEXT, requestId: "request-a" }));
 
-    deleteDownload({ contextType: CONTEXT, requestId: "request-a" })(dispatch, getState);
+    const nextState = store.getState();
+    const gaugeFeatures = nextState.mapStyle.sources.gauge.data.features;
+    const pixelFeatures = nextState.mapStyle.sources.pixel.data.features;
 
-    expect(dispatch).toHaveBeenCalledTimes(4);
-    expect(dispatch).toHaveBeenNthCalledWith(
-      1,
-      removeFetchHistoryItem({ contextType: CONTEXT, requestId: "request-a" })
-    );
-
-    const secondAction = dispatch.mock.calls[1][0];
-    expect(secondAction.type).toBe(resetLayerSrcs.type);
-    expect(secondAction.payload.lyrSrcNames.sort()).toEqual(Object.keys(SENSOR_TYPES).sort());
-
-    const highlightActions = dispatch.mock.calls.slice(2).map((call) => call[0]);
-    expect(highlightActions).toHaveLength(2);
-    expect(highlightActions.map((action) => action.type)).toEqual([
-      highlightSensor.type,
-      highlightSensor.type
-    ]);
-    expect(highlightActions.map((action) => action.payload.sensorLocationType).sort()).toEqual([
-      "gauge",
-      "pixel"
-    ]);
+    expect(gaugeFeatures.find((feature) => feature.id === "g-1")?.properties?.selected).toBe(true);
+    expect(gaugeFeatures.find((feature) => feature.id === "g-2")?.properties?.selected).toBe(false);
+    expect(pixelFeatures.find((feature) => feature.id === "p-1")?.properties?.selected).toBe(true);
+    expect(pixelFeatures.find((feature) => feature.id === "p-2")?.properties?.selected).toBe(false);
   });
 });

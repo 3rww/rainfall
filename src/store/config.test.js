@@ -31,6 +31,7 @@ describe("config env parsing", () => {
   it("ENABLE_SHARE_STATE defaults to false when unset", async () => {
     vi.unstubAllEnvs();
     vi.resetModules();
+    vi.stubEnv("VITE_ENABLE_SHARE_STATE", "");
 
     const { ENABLE_SHARE_STATE } = await import("./config");
     expect(ENABLE_SHARE_STATE).toBe(false);
@@ -61,6 +62,7 @@ describe("config env parsing", () => {
   it("ENABLE_DEBUG_LOGS defaults to false when unset", async () => {
     vi.unstubAllEnvs();
     vi.resetModules();
+    vi.stubEnv("VITE_ENABLE_DEBUG_LOGS", "");
 
     const { ENABLE_DEBUG_LOGS } = await import("./config");
     expect(ENABLE_DEBUG_LOGS).toBe(false);

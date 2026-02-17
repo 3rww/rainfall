@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { pickRainfallDateTimeRange } from "./actions";
+import { pickRainfallDateTimeRange } from "./features/fetchKwargsSlice";
 import { CONTEXT_TYPES } from "./config";
 import { initialState } from "./initialState";
 import { rootReducer } from "./reducers";
@@ -49,4 +49,3 @@ describe("event reducers", () => {
     expect(nextState.rainfallEvents.list.every((event) => event.selected === false)).toBe(true);
   });
 });
-
