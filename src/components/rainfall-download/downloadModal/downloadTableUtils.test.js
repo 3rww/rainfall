@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseZonedDateTime } from "../../store/utils/dateTime";
+import { parseZonedDateTime } from "../../../store/utils/dateTime";
 
 import {
   buildDownloadChartData,

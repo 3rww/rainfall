@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { formatDateTime } from "../../store/utils/dateTime";
+import { formatDateTime } from "../../../store/utils/dateTime";
 
 const CHART_COLORS = [
   "#0077b6",

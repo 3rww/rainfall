@@ -1,15 +1,14 @@
 import React from 'react';
 import { Row, Col, Container, TabContent, TabPane } from 'react-bootstrap';
-import { useAppSelector } from "../store/hooks";
+import { useAppSelector } from '../../../store/hooks';
 
-import ReactMap from './map/map';
-import RainfallDownloader from './sidebar/downloader'
-import LegacyRealtimeRainfallPage from './sidebar/legacy/legacyRealtime'
-import ThinkingOverlay from './thinking/thinkingOverlay'
+import { ReactMap } from '../../map';
+import { RainfallDownloader, LegacyRealtimeRainfallPage } from '../../rainfall-download';
+import ThinkingOverlay from '../thinkingOverlay';
 
-import { RAINFALL_TYPES, CONTEXT_TYPES, SENSOR_TYPES } from '../store/config'
+import { RAINFALL_TYPES, CONTEXT_TYPES, SENSOR_TYPES } from '../../../store/config';
 
-import './layout.css'
+import './layout.css';
 
 /**
 * Layout Component. Everything on the page under the Nav: Controls and Map.

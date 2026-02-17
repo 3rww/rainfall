@@ -14,28 +14,28 @@ import DatePicker from 'react-datepicker';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faList } from '@fortawesome/free-solid-svg-icons';
 
-import EventsHeatmap from './eventsHeatmap';
-import EventsList from './eventsList';
-import { pickRainfallDateTimeRange } from '../../store/features/fetchKwargsSlice';
+import EventsHeatmap from '../eventsHeatmap';
+import EventsList from '../eventsList';
+import { pickRainfallDateTimeRange } from '../../../store/features/fetchKwargsSlice';
 import {
   selectFetchKwargs,
   selectLatestTimestamps
-} from '../../store/selectors';
+} from '../../../store/selectors';
 import {
   CONTEXT_TYPES,
   RAINFALL_TYPES,
   RAINFALL_MIN_DATE
-} from '../../store/config';
+} from '../../../store/config';
 import {
   clampDateTimeRange,
   isRangeWithinBounds,
   resolveAvailableBounds
-} from '../../store/utils/dateBounds';
+} from '../../../store/utils/dateBounds';
 import {
   nowDateTime,
   toDateTime
-} from '../../store/utils/dateTime';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+} from '../../../store/utils/dateTime';
+import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import './datetimePicker.css';

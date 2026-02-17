@@ -5,11 +5,11 @@ import { Navbar, Nav, Button, Modal, Col, Row, Alert, Popover, OverlayTrigger } 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 
-import { AboutContent } from './aboutContent';
+import { AboutContent } from '../aboutContent';
 
-import { CONTEXT_TYPES, ROOT } from '../../store/config';
-import { switchContext } from '../../store/features/contextThunks';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { CONTEXT_TYPES, ROOT } from '../../../store/config';
+import { switchContext } from '../../../store/features/contextThunks';
+import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 
 import './navigation.css';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ListGroup, Card } from 'react-bootstrap';
-import { paddedRound } from '../../store/utils/index'
+import { paddedRound } from '../../../store/utils/index'
 
 // export default class Tooltip extends React.Component {
 //   render() {

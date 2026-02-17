@@ -1,6 +1,5 @@
 import React from "react";
-import Navigation from './components/navigation/navigation';
-import Layout from './components/layout';
+import { Navigation, Layout } from './components/app-shell';
 import { useAppSelector } from "./store/hooks";
 
 const App = () => {

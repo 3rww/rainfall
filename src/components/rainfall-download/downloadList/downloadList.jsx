@@ -2,10 +2,10 @@ import React, { useCallback } from 'react';
 import { Row, Col, ListGroup, Spinner, CloseButton } from 'react-bootstrap';
 import { includes } from 'lodash-es';
 
-import DownloadItem from './downloadItem';
-import { pickDownload, deleteDownload } from '../../store/features/downloadThunks';
-import { selectFetchHistory } from '../../store/selectors';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import DownloadItem from '../downloadItem';
+import { pickDownload, deleteDownload } from '../../../store/features/downloadThunks';
+import { selectFetchHistory } from '../../../store/selectors';
+import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 
 import './downloadList.css';
 

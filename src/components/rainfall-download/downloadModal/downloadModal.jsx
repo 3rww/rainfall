@@ -10,10 +10,10 @@ import {
   CHART_TIMESTAMP_RULE,
   CHART_SERIES_MODE
 } from './downloadTableUtils';
-import { formatDateTime } from '../../store/utils/dateTime';
+import { formatDateTime } from '../../../store/utils/dateTime';
 import './downloadModal.css';
 
-const DownloadLineChart = lazy(() => import('./downloadLineChart'));
+const DownloadLineChart = lazy(() => import('../downloadLineChart'));
 
 const DownloadModal = ({ show, onHide, fetchHistoryItem }) => {
   const [showAverageOnly, setShowAverageOnly] = useState(true);

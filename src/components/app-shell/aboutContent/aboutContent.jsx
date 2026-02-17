@@ -3,7 +3,7 @@ import { Tabs, Tab, Row, Col, Image, Card } from "react-bootstrap";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import { API_URL_ROOT, ROOT } from "../../store/config";
+import { API_URL_ROOT, ROOT } from "../../../store/config";
 
 import "./aboutContent.css";
 
