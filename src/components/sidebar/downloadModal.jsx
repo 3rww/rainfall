@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState, lazy, Suspense } from 'react';
+import React, { useCallback, useMemo, lazy, Suspense } from 'react';
 import { Modal, Button, Row, Col, Form } from 'react-bootstrap';
 import { unparse } from 'papaparse';
 import { saveAs } from 'file-saver';
@@ -15,14 +15,13 @@ import './downloadModal.css';
 
 const DownloadLineChart = lazy(() => import('./downloadLineChart'));
 
-const DownloadModal = ({ show, onHide, fetchHistoryItem }) => {
-  const [showAverageOnly, setShowAverageOnly] = useState(true);
-
-  useEffect(() => {
-    if (show && !showAverageOnly) {
-      setShowAverageOnly(true);
-    }
-  }, [show, showAverageOnly]);
+const DownloadModal = ({
+  show,
+  onHide,
+  fetchHistoryItem,
+  seriesMode = CHART_SERIES_MODE.averageByType,
+  onSeriesModeChange
+}) => {
 
   const resultsTableData = fetchHistoryItem?.results || {};
   const rollup = fetchHistoryItem?.fetchKwargs?.rollup;
@@ -84,8 +83,11 @@ const DownloadModal = ({ show, onHide, fetchHistoryItem }) => {
   }, [hasAnyResultsData, swmmInp]);
 
   const handleAverageOnlyToggle = useCallback((event) => {
-    setShowAverageOnly(event.currentTarget.checked);
-  }, []);
+    event.stopPropagation();
+    onSeriesModeChange?.(
+      event.target.checked ? CHART_SERIES_MODE.averageByType : CHART_SERIES_MODE.perSensor
+    );
+  }, [onSeriesModeChange]);
 
   const fetchKwargs = fetchHistoryItem.fetchKwargs;
   const sensorLocations = fetchKwargs.sensorLocations;
@@ -93,6 +95,7 @@ const DownloadModal = ({ show, onHide, fetchHistoryItem }) => {
   const pixels = sensorLocations.pixel;
   const totalSensors = gauges.length + pixels.length;
 
+  const showAverageOnly = seriesMode === CHART_SERIES_MODE.averageByType;
   const chartData = showAverageOnly ? averageChartData : perSensorChartData;
   const chartMetaLabel = `${rowCount} total records across ${totalSensors} sensors`;
 
@@ -104,6 +107,7 @@ const DownloadModal = ({ show, onHide, fetchHistoryItem }) => {
       dialogClassName="min-vw-95"
       animation={false}
       fullscreen={'xl-down'}
+      onClick={(event) => event.stopPropagation()}
     >
       <Modal.Header closeButton>
         <Modal.Title className="w-100">

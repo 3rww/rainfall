@@ -5,6 +5,7 @@ import { includes } from 'lodash-es';
 import { pickDownload } from '../../store/features/downloadThunks';
 import { useAppDispatch } from '../../store/hooks';
 import { formatDateTime } from '../../store/utils/dateTime';
+import { CHART_SERIES_MODE } from './downloadTableUtils';
 
 import './downloadItem.css';
 
@@ -13,13 +14,16 @@ const DownloadModal = lazy(() => import('./downloadModal'));
 const DownloadsItem = ({ fetchHistoryItem, contextType }) => {
   const dispatch = useAppDispatch();
   const [show, setShow] = useState(false);
+  const [seriesMode, setSeriesMode] = useState(CHART_SERIES_MODE.averageByType);
 
   const handleClose = useCallback(() => {
     setShow(false);
   }, []);
 
   const handleShow = useCallback((event) => {
+    event.stopPropagation();
     setShow(true);
+    setSeriesMode(CHART_SERIES_MODE.averageByType);
 
     if (!fetchHistoryItem.isActive) {
       console.log(event);
@@ -120,6 +124,8 @@ const DownloadsItem = ({ fetchHistoryItem, contextType }) => {
             show={show}
             onHide={handleClose}
             fetchHistoryItem={fetchHistoryItem}
+            seriesMode={seriesMode}
+            onSeriesModeChange={setSeriesMode}
           />
         </Suspense>
       ) : null}

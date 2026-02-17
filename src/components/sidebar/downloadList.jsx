@@ -14,7 +14,15 @@ const DownloadsList = ({ contextType, rainfallDataType, rainfallSensorType }) =>
 
   const fetchHistory = useAppSelector((state) => selectFetchHistory(state, contextType));
 
-  const handleListClick = useCallback((fetchHistoryItem) => {
+  const handleListClick = useCallback((event, fetchHistoryItem) => {
+    if (event.defaultPrevented) {
+      return;
+    }
+
+    if (event.target instanceof Element && event.target.closest('.modal')) {
+      return;
+    }
+
     dispatch(pickDownload({ ...fetchHistoryItem, contextType }));
   }, [contextType, dispatch]);
 
@@ -44,7 +52,7 @@ const DownloadsList = ({ contextType, rainfallDataType, rainfallSensorType }) =>
             as="div"
             className="mx-0 download-list-item"
             action
-            onClick={() => handleListClick(item)}
+            onClick={(event) => handleListClick(event, item)}
             variant={listColor}
           >
             <CloseButton

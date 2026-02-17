@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Modal,
   Button,
-  ButtonGroup,
+  Tab,
+  Nav,
   InputGroup,
   FormControl,
   Row,
@@ -42,9 +43,9 @@ import './datetimePicker.css';
 
 const DATE_FORMAT = 'MM/DD/YYYY hh:mm A';
 const NOTE_DATE_FORMAT = 'MM/DD/YYYY';
-const EVENT_MODAL_VIEWS = {
-  heatmap: 'heatmap',
-  list: 'list'
+const EVENT_MODAL_TABS = {
+  list: 'list',
+  heatmap: 'heatmap'
 };
 
 const CONTEXT_AVAILABILITY_LABELS = {
@@ -135,7 +136,7 @@ const buildPickerModel = ({ contextType, rainfallDataType, currentKwargs, latest
 const DateTimePicker = ({ rainfallDataType, contextType }) => {
   const dispatch = useAppDispatch();
   const [showEventModal, setShowEventModal] = useState(false);
-  const [eventModalView, setEventModalView] = useState(EVENT_MODAL_VIEWS.heatmap);
+  const [activeEventModalTab, setActiveEventModalTab] = useState(EVENT_MODAL_TABS.list);
   const [showRangeModal, setShowRangeModal] = useState(false);
   const [pendingStart, setPendingStart] = useState(null);
   const [pendingEnd, setPendingEnd] = useState(null);
@@ -283,12 +284,12 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
 
   const closeEventModal = useCallback(() => {
     setShowEventModal(false);
-    setEventModalView(EVENT_MODAL_VIEWS.heatmap);
+    setActiveEventModalTab(EVENT_MODAL_TABS.list);
   }, []);
 
   const handleEventModalShow = useCallback(() => {
     setShowEventModal(true);
-    setEventModalView(EVENT_MODAL_VIEWS.heatmap);
+    setActiveEventModalTab(EVENT_MODAL_TABS.list);
   }, []);
 
   return (
@@ -390,53 +391,59 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
         onHide={closeEventModal}
         size="xl"
         fullscreen={'lg-down'}
-        contentClassName="datetimepicker-event-modal-content"
+        scrollable
         animation={false}
       >
-        <Modal.Header closeButton>
-          <Modal.Title>
-            Select A Rainfall Event
-            <br></br>
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="datetimepicker-event-modal-header">
-            <ButtonGroup aria-label="Event modal view selector" className="datetimepicker-event-modal-toggle">
-              <Button
-                id="dtp-eventview-heatmap"
-                onClick={() => setEventModalView(EVENT_MODAL_VIEWS.heatmap)}
-                variant={eventModalView === EVENT_MODAL_VIEWS.heatmap ? 'primary' : 'outline-primary'}
-              >
-                Heatmap
-              </Button>
-              <Button
-                id="dtp-eventview-list"
-                onClick={() => setEventModalView(EVENT_MODAL_VIEWS.list)}
-                variant={eventModalView === EVENT_MODAL_VIEWS.list ? 'primary' : 'outline-primary'}
-              >
-                Events List
-              </Button>
-            </ButtonGroup>
-            <p className="small text-muted mb-0">
-              {eventModalView === EVENT_MODAL_VIEWS.heatmap
+        <Tab.Container
+          activeKey={activeEventModalTab}
+          mountOnEnter={false}
+          onSelect={(eventKey) => {
+            if (eventKey) {
+              setActiveEventModalTab(eventKey);
+            }
+          }}
+          unmountOnExit={false}
+        >
+          <Modal.Header closeButton>
+            <div className="w-100">
+              <Modal.Title>Select A Rainfall Event</Modal.Title>
+              <Nav variant="tabs" className="mt-2">
+                <Nav.Item>
+                  <Nav.Link id="dtp-eventview-list" eventKey={EVENT_MODAL_TABS.list}>
+                    Events List
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link id="dtp-eventview-heatmap" eventKey={EVENT_MODAL_TABS.heatmap}>
+                    Events Calendar
+                  </Nav.Link>
+                </Nav.Item>
+              </Nav>
+            <p className="small text-muted pt-2 mb-0">
+              {activeEventModalTab === EVENT_MODAL_TABS.heatmap
                 ? 'Select a day from the calendar below to see rainfall event(s) on that day, and select those to use as date/time range for your rainfall data download.'
                 : 'Select an event from the list below to use as date/time range for your rainfall data download.'}
-            </p>
-          </div>
+            </p>              
+            </div>
+          </Modal.Header>
+          <Modal.Body>
 
-          <div hidden={eventModalView !== EVENT_MODAL_VIEWS.heatmap}>
-            <EventsHeatmap
-              contextType={contextType}
-              onEventSelected={closeEventModal}
-            />
-          </div>
-          <div hidden={eventModalView !== EVENT_MODAL_VIEWS.list}>
-            <EventsList
-              contextType={contextType}
-              onEventSelected={closeEventModal}
-            />
-          </div>
-        </Modal.Body>
+            <Tab.Content>
+              <Tab.Pane eventKey={EVENT_MODAL_TABS.list}>
+                <EventsList
+                  contextType={contextType}
+                  onEventSelected={closeEventModal}
+                />
+              </Tab.Pane>
+              <Tab.Pane eventKey={EVENT_MODAL_TABS.heatmap}>
+                <EventsHeatmap
+                  contextType={contextType}
+                  onEventSelected={closeEventModal}
+                />
+              </Tab.Pane>
+            </Tab.Content>
+          </Modal.Body>
+        </Tab.Container>
         <Modal.Footer>
           <Button variant="secondary" onClick={closeEventModal}>
             Close

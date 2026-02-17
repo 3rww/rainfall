@@ -2,6 +2,7 @@ import { has, isEmpty, keys, forEach, includes, startsWith, get } from 'lodash-e
 import { createSelector } from '@reduxjs/toolkit'
 
 import { LYR_HIGHLIGHT_PREFIX } from './config'
+import { buildYearSections, groupEventsByDay } from '../components/sidebar/eventsHeatmapUtils'
 
 const EMPTY_ARRAY = []
 const EMPTY_OBJECT = {}
@@ -265,6 +266,16 @@ export const selectFilteredRainfallEvents = createSelector(
       maxHours >= 24 ? true : event.hours <= maxHours
     ))
   }
+)
+
+export const selectFilteredRainfallEventsByDay = createSelector(
+  [selectFilteredRainfallEvents],
+  (events) => groupEventsByDay(events)
+)
+
+export const selectFilteredRainfallEventYearSections = createSelector(
+  [selectFilteredRainfallEventsByDay],
+  (eventsByDay) => buildYearSections(eventsByDay)
 )
 
 export const selectEvent = (state, eventid) => (

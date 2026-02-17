@@ -1,17 +1,16 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Badge, Button } from 'react-bootstrap';
 
 import { pickRainfallEvent } from '../../store/features/rainfallThunks';
 import {
-  selectFilteredRainfallEvents,
+  selectFilteredRainfallEventYearSections,
+  selectFilteredRainfallEventsByDay,
   selectSelectedEvent
 } from '../../store/selectors';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { formatDateTime, toDateTime } from '../../store/utils/dateTime';
 import {
-  buildYearSections,
-  getCellIntensity,
-  groupEventsByDay
+  getCellIntensity
 } from './eventsHeatmapUtils';
 
 import './eventsHeatmap.css';
@@ -35,13 +34,12 @@ const EventsHeatmap = ({ contextType, onEventSelected }) => {
   const dispatch = useAppDispatch();
   const [activeDayKey, setActiveDayKey] = useState(null);
 
-  const events = useAppSelector(selectFilteredRainfallEvents);
+  const eventsByDay = useAppSelector(selectFilteredRainfallEventsByDay);
+  const yearSections = useAppSelector(selectFilteredRainfallEventYearSections);
   const selectedEvent = useAppSelector(selectSelectedEvent);
 
   const selectedEventId = selectedEvent?.eventid || null;
 
-  const eventsByDay = useMemo(() => groupEventsByDay(events), [events]);
-  const yearSections = useMemo(() => buildYearSections(eventsByDay), [eventsByDay]);
   const activeDayEvents = activeDayKey ? (eventsByDay[activeDayKey] || []) : [];
   const activeDayYear = activeDayKey ? Number(activeDayKey.slice(0, 4)) : null;
 
