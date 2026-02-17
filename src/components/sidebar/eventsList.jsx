@@ -8,13 +8,24 @@ import { toDateTime } from '../../store/utils/dateTime';
 
 import './eventsList.css';
 
-const EventsList = ({ contextType }) => {
+const EventsList = ({ contextType, onEventSelected }) => {
   const dispatch = useAppDispatch();
   const events = useAppSelector(selectFilteredRainfallEvents);
 
   const handleListClick = useCallback((eventid) => {
     dispatch(pickRainfallEvent({ eventid, contextType }));
-  }, [contextType, dispatch]);
+    if (typeof onEventSelected === 'function') {
+      onEventSelected();
+    }
+  }, [contextType, dispatch, onEventSelected]);
+
+  if (!events.length) {
+    return (
+      <p className="small mb-0">
+        <em>No rainfall events are available.</em>
+      </p>
+    );
+  }
 
   return (
     <Row>
@@ -61,4 +72,4 @@ const EventsList = ({ contextType }) => {
   );
 };
 
-export default EventsList;
+export default React.memo(EventsList);

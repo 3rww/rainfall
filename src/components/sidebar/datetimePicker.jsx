@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Modal,
   Button,
+  ButtonGroup,
   InputGroup,
   FormControl,
   Row,
@@ -14,6 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faList } from '@fortawesome/free-solid-svg-icons';
 
 import EventsHeatmap from './eventsHeatmap';
+import EventsList from './eventsList';
 import { pickRainfallDateTimeRange } from '../../store/features/fetchKwargsSlice';
 import {
   selectFetchKwargs,
@@ -40,6 +42,10 @@ import './datetimePicker.css';
 
 const DATE_FORMAT = 'MM/DD/YYYY hh:mm A';
 const NOTE_DATE_FORMAT = 'MM/DD/YYYY';
+const EVENT_MODAL_VIEWS = {
+  heatmap: 'heatmap',
+  list: 'list'
+};
 
 const CONTEXT_AVAILABILITY_LABELS = {
   [CONTEXT_TYPES.legacyRealtime]: 'real-time rainfall',
@@ -129,6 +135,7 @@ const buildPickerModel = ({ contextType, rainfallDataType, currentKwargs, latest
 const DateTimePicker = ({ rainfallDataType, contextType }) => {
   const dispatch = useAppDispatch();
   const [showEventModal, setShowEventModal] = useState(false);
+  const [eventModalView, setEventModalView] = useState(EVENT_MODAL_VIEWS.heatmap);
   const [showRangeModal, setShowRangeModal] = useState(false);
   const [pendingStart, setPendingStart] = useState(null);
   const [pendingEnd, setPendingEnd] = useState(null);
@@ -274,6 +281,16 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
     return `${intervalLabel} ${contextLabel} data is currently available between ${minDateText} and ${maxDateText}`;
   }, [contextType, pickerModel.maxDate, pickerModel.minDate, pickerModel.rollup]);
 
+  const closeEventModal = useCallback(() => {
+    setShowEventModal(false);
+    setEventModalView(EVENT_MODAL_VIEWS.heatmap);
+  }, []);
+
+  const handleEventModalShow = useCallback(() => {
+    setShowEventModal(true);
+    setEventModalView(EVENT_MODAL_VIEWS.heatmap);
+  }, []);
+
   return (
     <div>
       <Modal
@@ -370,7 +387,7 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
 
       <Modal
         show={showEventModal}
-        onHide={() => setShowEventModal(false)}
+        onHide={closeEventModal}
         size="xl"
         fullscreen={'lg-down'}
         contentClassName="datetimepicker-event-modal-content"
@@ -383,16 +400,45 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p className="small text-muted">
-            Select a day from the calendar below to see rainfall event(s) on that day, and select those to use as date/time range for your rainfall data download.
-          </p>
-          <EventsHeatmap
-            contextType={contextType}
-            onEventSelected={() => setShowEventModal(false)}
-          />
+          <div className="datetimepicker-event-modal-header">
+            <ButtonGroup aria-label="Event modal view selector" className="datetimepicker-event-modal-toggle">
+              <Button
+                id="dtp-eventview-heatmap"
+                onClick={() => setEventModalView(EVENT_MODAL_VIEWS.heatmap)}
+                variant={eventModalView === EVENT_MODAL_VIEWS.heatmap ? 'primary' : 'outline-primary'}
+              >
+                Heatmap
+              </Button>
+              <Button
+                id="dtp-eventview-list"
+                onClick={() => setEventModalView(EVENT_MODAL_VIEWS.list)}
+                variant={eventModalView === EVENT_MODAL_VIEWS.list ? 'primary' : 'outline-primary'}
+              >
+                Events List
+              </Button>
+            </ButtonGroup>
+            <p className="small text-muted mb-0">
+              {eventModalView === EVENT_MODAL_VIEWS.heatmap
+                ? 'Select a day from the calendar below to see rainfall event(s) on that day, and select those to use as date/time range for your rainfall data download.'
+                : 'Select an event from the list below to use as date/time range for your rainfall data download.'}
+            </p>
+          </div>
+
+          <div hidden={eventModalView !== EVENT_MODAL_VIEWS.heatmap}>
+            <EventsHeatmap
+              contextType={contextType}
+              onEventSelected={closeEventModal}
+            />
+          </div>
+          <div hidden={eventModalView !== EVENT_MODAL_VIEWS.list}>
+            <EventsList
+              contextType={contextType}
+              onEventSelected={closeEventModal}
+            />
+          </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowEventModal(false)}>
+          <Button variant="secondary" onClick={closeEventModal}>
             Close
           </Button>
         </Modal.Footer>
@@ -426,7 +472,7 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
                 <Button
                   id="dtp-show-eventlistmodal"
                   variant="light"
-                  onClick={() => setShowEventModal(true)}
+                  onClick={handleEventModalShow}
                   className="datetimepicker-control"
                 >
                   <FontAwesomeIcon icon={faList} />

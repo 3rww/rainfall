@@ -22,3 +22,16 @@ button.datetimepicker-control {
 .datetimepicker-event-modal-content .modal-body {
   overflow-y: auto;
 }
+
+.datetimepicker-event-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #fff;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.datetimepicker-event-modal-toggle {
+  margin-bottom: 0.5rem;
+}

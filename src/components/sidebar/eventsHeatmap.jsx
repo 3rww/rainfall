@@ -166,4 +166,4 @@ const EventsHeatmap = ({ contextType, onEventSelected }) => {
   );
 };
 
-export default EventsHeatmap;
+export default React.memo(EventsHeatmap);
