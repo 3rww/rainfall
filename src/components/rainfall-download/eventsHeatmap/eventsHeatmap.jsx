@@ -1,13 +1,13 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { Badge, Button } from 'react-bootstrap';
 
-import { pickRainfallEvent } from '../../../store/features/rainfallThunks';
+import { pickRainfallEvent } from '../../store/features/rainfallThunks';
 import {
   selectFilteredRainfallEvents,
   selectSelectedEvent
-} from '../../../store/selectors';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { formatDateTime, toDateTime } from '../../../store/utils/dateTime';
+} from '../../store/selectors';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { formatDateTime, toDateTime } from '../../store/utils/dateTime';
 import {
   buildYearSections,
   getCellIntensity,

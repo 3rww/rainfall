@@ -5,17 +5,17 @@ import {
 } from 'react-bootstrap';
 import { isEmpty } from 'lodash-es';
 
-import DateTimePicker from '../datetimePicker';
-import GeodataPicker from '../geomPicker';
-import IntervalPicker from '../intervalPicker';
-import DownloadsList from '../downloadList';
+import DateTimePicker from './datetimePicker';
+import GeodataPicker from './geomPicker';
+import IntervalPicker from './intervalPicker';
+import DownloadsList from './downloadList';
 
-import { fetchRainfallDataFromApiV2 } from '../../../store/features/rainfallThunks';
+import { fetchRainfallDataFromApiV2 } from '../../store/features/rainfallThunks';
 import {
   makeSelectSelectedSensors,
   selectFetchHistory
-} from '../../../store/selectors';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+} from '../../store/selectors';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
 import './downloader.css';
 

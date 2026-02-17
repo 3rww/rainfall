@@ -7,7 +7,7 @@ import {
   OverlayTrigger
 } from 'react-bootstrap';
 
-import '../../app-shell/layout/layout.css';
+import '../../layout.css';
 
 const popover = (
   <Popover id="popover-basic">

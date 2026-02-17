@@ -8,22 +8,22 @@ import { isEmpty, has, forEach } from 'lodash-es';
 
 import {
   setStyle
-} from '../../../store/features/mapStyleSlice';
+} from '../../store/features/mapStyleSlice';
 import {
   mapLoaded,
   setInitialStyleLoaded,
   startThinking,
   stopThinking
-} from '../../../store/features/progressSlice';
-import { initDataFetch } from '../../../store/features/appInitThunks';
-import { pickSensorMiddleware } from '../../../store/features/selectionThunks';
-import { ENABLE_DEBUG_LOGS, LAYERS_W_MOUSEOVER, getInteractiveMapLayersForContext } from '../../../store/config';
-import diffStyles from '../../../utilities/styleSpecDiff';
-import { transformFeatureToOption } from '../../../store/utils/transformers';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+} from '../../store/features/progressSlice';
+import { initDataFetch } from '../../store/features/appInitThunks';
+import { pickSensorMiddleware } from '../../store/features/selectionThunks';
+import { ENABLE_DEBUG_LOGS, LAYERS_W_MOUSEOVER, getInteractiveMapLayersForContext } from '../../store/config';
+import diffStyles from '../../utilities/styleSpecDiff';
+import { transformFeatureToOption } from '../../store/utils/transformers';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
-import { Tooltip } from '../tooltip';
-import MapLegend from '../legend';
+import { Tooltip } from './tooltip';
+import MapLegend from './legend';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
@@ -272,7 +272,7 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     if (!Immutable.is(oldStyle, newStyle)) {
       const changes = diffStyles(oldStyle.toJS(), newStyle.toJS());
       if (DEBUG) {
-        console.debug(`updating mapStyle (${changes.map((change) => change.command)})`);
+        console.log(`updating mapStyle (${changes.map((change) => change.command)})`);
       }
       changes.forEach((change) => executeMapChange(map, change));
     }

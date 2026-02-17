@@ -14,16 +14,16 @@ import {
   selectGeographyLookupsAsGroupedOptions,
   selectPickedSensors,
   selectContext
-} from '../../../store/selectors';
+} from '../../store/selectors';
 import {
   pickSensorMiddleware,
   pickSensorByGeographyMiddleware
-} from '../../../store/features/selectionThunks';
+} from '../../store/features/selectionThunks';
 import {
   pluralize
-} from '../../../store/utils/index';
-import { CONTEXT_TYPES } from '../../../store/config';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+} from '../../store/utils/index';
+import { CONTEXT_TYPES } from '../../store/config';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
 const isValidOptionValue = (value) => (
   value !== undefined

@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
 
-import { pickInterval } from '../../../store/features/fetchKwargsSlice';
-import { getIntervalOptionsForContext } from '../../../store/config';
-import { useAppDispatch } from '../../../store/hooks';
+import { pickInterval } from '../../store/features/fetchKwargsSlice';
+import { getIntervalOptionsForContext } from '../../store/config';
+import { useAppDispatch } from '../../store/hooks';
 
 const IntervalPicker = ({ contextType, rainfallDataType }) => {
   const dispatch = useAppDispatch();

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Table } from 'react-bootstrap';
-import { HEADER_LABELS } from '../../../store/config'
+import { HEADER_LABELS } from '../../store/config'
 
 /**
 * Table for Displaying Rainfall API results

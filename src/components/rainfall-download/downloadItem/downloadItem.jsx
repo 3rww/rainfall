@@ -2,13 +2,13 @@ import React, { useCallback, useState, lazy, Suspense } from 'react';
 import { Row, Col, Button, Card, Alert } from 'react-bootstrap';
 import { includes } from 'lodash-es';
 
-import { pickDownload } from '../../../store/features/downloadThunks';
-import { useAppDispatch } from '../../../store/hooks';
-import { formatDateTime } from '../../../store/utils/dateTime';
+import { pickDownload } from '../../store/features/downloadThunks';
+import { useAppDispatch } from '../../store/hooks';
+import { formatDateTime } from '../../store/utils/dateTime';
 
 import './downloadItem.css';
 
-const DownloadModal = lazy(() => import('../downloadModal'));
+const DownloadModal = lazy(() => import('./downloadModal'));
 
 const DownloadsItem = ({ fetchHistoryItem, contextType }) => {
   const dispatch = useAppDispatch();

@@ -4,10 +4,10 @@ import { get } from 'lodash-es';
 import chroma from 'chroma-js';
 import { createSelector } from '@reduxjs/toolkit';
 
-import { LEGEND_BREAKS } from '../../../store/config';
-import { applyColorStretch } from '../../../store/features/mapStyleSlice';
-import { buildRainfallColorStyleExp } from '../../../store/utils/mb';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+import { LEGEND_BREAKS } from '../../store/config';
+import { applyColorStretch } from '../../store/features/mapStyleSlice';
+import { buildRainfallColorStyleExp } from '../../store/utils/mb';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
 import './legend.css';
 

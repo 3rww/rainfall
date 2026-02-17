@@ -1,8 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { debounce } from 'lodash-es';
 
-import { filterEventByHours } from '../../../store/features/rainfallEventsSlice';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+import { filterEventByHours } from '../../store/features/rainfallEventsSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
 const EventFilter = () => {
   const dispatch = useAppDispatch();

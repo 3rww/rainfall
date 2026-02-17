@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
 import { Row, Col, ListGroup, ProgressBar } from 'react-bootstrap';
 
-import { pickRainfallEvent } from '../../../store/features/rainfallThunks';
-import { selectFilteredRainfallEvents } from '../../../store/selectors';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { toDateTime } from '../../../store/utils/dateTime';
+import { pickRainfallEvent } from '../../store/features/rainfallThunks';
+import { selectFilteredRainfallEvents } from '../../store/selectors';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { toDateTime } from '../../store/utils/dateTime';
 
 import './eventsList.css';
 
