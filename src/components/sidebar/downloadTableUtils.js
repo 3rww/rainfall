@@ -4,7 +4,7 @@ import {
   toDateTime
 } from "../../store/utils/dateTime";
 
-export const EXCEL_DATETIME_FORMAT = "MM/DD/YYYY HH:mm:ss";
+export const EXCEL_TIME_ZONE = "America/New_York";
 export const SWMM_DATETIME_FORMAT = "MM/DD/YYYY HH:mm";
 export const CHART_TIMESTAMP_RULE = {
   start: "start",
@@ -25,6 +25,35 @@ const SWMM_ROLLUP_TO_INTERVAL = {
   hourly: "1:00",
   daily: "24:00",
   total: "0:00"
+};
+const EXCEL_DATETIME_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  timeZone: EXCEL_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+  timeZoneName: "short"
+});
+
+const formatExcelDateTimeInEastern = (value) => {
+  // formatToParts keeps the output stable while still letting Intl supply EDT/EST.
+  const parts = EXCEL_DATETIME_FORMATTER.formatToParts(value)
+    .reduce((accumulator, part) => {
+      if (part.type !== "literal") {
+        accumulator[part.type] = part.value;
+      }
+      return accumulator;
+    }, {});
+
+  const requiredParts = ["month", "day", "year", "hour", "minute", "second", "timeZoneName"];
+  if (requiredParts.some((partName) => typeof parts[partName] !== "string" || parts[partName].length === 0)) {
+    return null;
+  }
+
+  return `${parts.month}/${parts.day}/${parts.year} ${parts.hour}:${parts.minute}:${parts.second} ${parts.timeZoneName}`;
 };
 
 const sanitizeSwmmIdentifier = (rawValue, fallback = "SENSOR") => {
@@ -188,7 +217,7 @@ export const formatIsoForExcel = (rawValue) => {
     return null;
   }
 
-  return parsed.format(EXCEL_DATETIME_FORMAT);
+  return formatExcelDateTimeInEastern(new Date(parsed.valueOf()));
 };
 
 export const normalizeDownloadRow = (row) => {

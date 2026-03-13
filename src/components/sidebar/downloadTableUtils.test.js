@@ -14,12 +14,16 @@ import {
 } from "./downloadTableUtils";
 
 describe("download table datetime normalization", () => {
-  it("formats single ISO timestamps with offsets for Excel", () => {
-    expect(formatIsoForExcel("2025-10-01T00:00:00-04:00")).toBe("10/01/2025 00:00:00");
+  it("formats Eastern daylight timestamps with an EDT suffix", () => {
+    expect(formatIsoForExcel("2025-10-01T00:00:00-04:00")).toBe("10/01/2025 00:00:00 EDT");
   });
 
-  it("preserves UTC wall time when parsing Z timestamps", () => {
-    expect(formatIsoForExcel("2025-10-01T00:00:00Z")).toBe("10/01/2025 00:00:00");
+  it("formats Eastern standard timestamps with an EST suffix", () => {
+    expect(formatIsoForExcel("2025-01-01T00:00:00-05:00")).toBe("01/01/2025 00:00:00 EST");
+  });
+
+  it("converts UTC timestamps into Eastern time before formatting", () => {
+    expect(formatIsoForExcel("2025-10-01T00:00:00Z")).toBe("09/30/2025 20:00:00 EDT");
   });
 
   it("returns null for invalid ISO timestamps", () => {
@@ -34,8 +38,8 @@ describe("download table datetime normalization", () => {
     };
 
     expect(normalizeDownloadRow(row)).toEqual({
-      start_ts: "10/01/2025 00:00:00",
-      end_ts: "10/01/2025 01:00:00",
+      start_ts: "10/01/2025 00:00:00 EDT",
+      end_ts: "10/01/2025 01:00:00 EDT",
       val: 0.75,
       src: "G"
     });
@@ -87,7 +91,7 @@ describe("download table datetime normalization", () => {
     expect(fields).toEqual(["start_ts", "end_ts", "ts", "val", "src", "id", "type", "quality"]);
 
     expect(rows[0]).toEqual({
-      ts: "10/01/2025 00:00:00",
+      ts: "10/01/2025 00:00:00 EDT",
       val: 0.5,
       src: "G",
       quality: "ok",
@@ -95,8 +99,8 @@ describe("download table datetime normalization", () => {
       type: "gauge"
     });
     expect(rows[1]).toEqual({
-      start_ts: "10/01/2025 00:00:00",
-      end_ts: "10/01/2025 01:00:00",
+      start_ts: "10/01/2025 00:00:00 EDT",
+      end_ts: "10/01/2025 01:00:00 EDT",
       val: 0.75,
       src: "G",
       id: "8",
