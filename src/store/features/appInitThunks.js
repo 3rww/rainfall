@@ -221,6 +221,8 @@ const applyDefaultDateRanges = ({ dispatch, getState }) => {
       now
     });
 
+    if (!bounds.available) return;
+
     const clamped = clampDateTimeRange({
       start: bounds.max.clone().subtract(lookbackAmount, lookbackUnit),
       end: bounds.max,

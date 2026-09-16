@@ -18,7 +18,7 @@ export const Tooltip = ({ features }) => {
       <ListGroup.Item key={i}>
         <h6 className="tooltip-header">{p.label}</h6>
         
-        {(p.total !== "") ? (
+        {p.total === null ? <p className="tooltip-body">No rainfall observations available.</p> : (typeof p.total === "number") ? (
           <p className="tooltip-body">Total rainfall: <strong>{paddedRound(p.total, 2)}</strong> inches</p>
         ) : (
           null

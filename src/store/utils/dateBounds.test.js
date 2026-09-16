@@ -48,12 +48,14 @@ describe("resolveAvailableBounds", () => {
     expect(bounds.min.toISOString()).toBe(toDateTime(now).subtract(1, "year").startOf("month").toISOString());
   });
 
-  it("uses env min and calibrated max for legacyGauge non-5-minute", () => {
+  it("uses parquet bounds and respects configured min for historic 15-minute", () => {
     const bounds = resolveAvailableBounds({
       contextType: CONTEXT_TYPES.legacyGauge,
       rollup: "15-minute",
       latest: {
-        "calibrated-gauge": "2026-01-31T00:00:00Z"
+        "calibrated-gauge": "2027-01-31T00:00:00Z",
+        "earliest-15min-calibrated-gauge": "1999-01-01T00:00:00Z",
+        "latest-15min-calibrated-gauge": "2026-01-31T00:00:00Z"
       },
       rainfallMinDate,
       now
@@ -63,7 +65,7 @@ describe("resolveAvailableBounds", () => {
     expect(bounds.max.toISOString()).toBe(toDateTime("2026-01-31T00:00:00Z").toISOString());
   });
 
-  it("falls back to now minus 60 days endOf month for legacyGauge non-5-minute max", () => {
+  it("marks missing parquet bounds unavailable without a PostgreSQL fallback", () => {
     const bounds = resolveAvailableBounds({
       contextType: CONTEXT_TYPES.legacyGauge,
       rollup: "15-minute",
@@ -72,10 +74,10 @@ describe("resolveAvailableBounds", () => {
       now
     });
 
-    expect(bounds.max.toISOString()).toBe(toDateTime(now).subtract(60, "days").endOf("month").toISOString());
+    expect(bounds).toEqual({ min: null, max: null, available: false });
   });
 
-  it("uses 5-minute min/max keys for legacyGauge and falls back for missing max", () => {
+  it("marks five-minute coverage unavailable when max is missing", () => {
     const bounds = resolveAvailableBounds({
       contextType: CONTEXT_TYPES.legacyGauge,
       rollup: FIVE_MINUTE_ROLLUP,
@@ -87,8 +89,7 @@ describe("resolveAvailableBounds", () => {
       now
     });
 
-    expect(bounds.min.toISOString()).toBe(toDateTime("2024-01-01T00:00:00Z").toISOString());
-    expect(bounds.max.toISOString()).toBe(toDateTime("2026-01-31T00:00:00Z").toISOString());
+    expect(bounds).toEqual({ min: null, max: null, available: false });
   });
 
   it("prioritizes latest 5-minute key over calibrated max for legacyGauge 5-minute", () => {
@@ -135,7 +136,7 @@ describe("resolveAvailableBounds", () => {
       now
     });
 
-    expect(bounds.min.toISOString()).toBe(bounds.max.toISOString());
+    expect(bounds).toEqual({ min: null, max: null, available: false });
   });
 });
 
@@ -177,5 +178,29 @@ describe("date bound helpers", () => {
       min,
       max
     })).toBe(false);
+  });
+});
+
+describe('parquet availability', () => {
+  for (const [contextType, suffix] of [['legacyGauge', 'gauge'], ['legacyGarr', 'radar']]) {
+    for (const rollup of ['5-minute', '15-minute', 'Hourly', 'Daily', 'Total']) {
+      it(`${contextType} ${rollup} uses the corrected dataset range`, () => {
+        const interval = rollup === "5-minute" ? "5min" : "15min";
+        const bounds = resolveAvailableBounds({ contextType, rollup, latest: {
+          [`earliest-${interval}-calibrated-${suffix}`]: '2020-01-01T00:00:00Z',
+          [`latest-${interval}-calibrated-${suffix}`]: '2026-01-01T00:00:00Z',
+          [`calibrated-${suffix}`]: '2027-01-01T00:00:00Z'
+        } });
+        expect(bounds.available).toBe(true);
+        expect(bounds.min.toISOString()).toBe('2020-01-01T00:00:00.000Z');
+        expect(bounds.max.toISOString()).toBe('2026-01-01T00:00:00.000Z');
+      });
+    }
+  }
+  it('does not invent a range when a bound is invalid or configured minimum exceeds coverage', () => {
+    const latest = { 'earliest-15min-calibrated-gauge': '2026-01-01', 'latest-15min-calibrated-gauge': '2025-01-01' };
+    expect(resolveAvailableBounds({ contextType: 'legacyGauge', latest }).available).toBe(false);
+    latest['latest-15min-calibrated-gauge'] = 'invalid';
+    expect(resolveAvailableBounds({ contextType: 'legacyGauge', latest }).available).toBe(false);
   });
 });

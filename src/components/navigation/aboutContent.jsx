@@ -57,10 +57,14 @@ Querying the rainfall data requires selecting the "when" and the "where".
   * clicking on the map;
   * under "Where" in the "By Sensor" tab: selecting or typing (If you know the name or ID of the sensor) in the dropdown menus.
   * under "Where" in the "By Geography" tab: selecting an ALCOSAN Planning Basin, Municipality, or Watershed, which will in turn select all coincident pixels for you
-* Then, optionally select the time interval to aggregate the results on: 15-minute (default), hourly, daily, or sum total. Rainfall data is collected and stored in 15-minute increments, which allows for 15-minute, hourly, and daily aggregations to be calculated. Note that if a daily interval is selected, the start and end selections will begin at midnight and the start and end hour will be ignored.
+* Then, optionally select the interval: 15-minute (default), hourly, daily, or sum total. The historic tabs also offer 5-minute observations from their separate archive. Hourly, daily, and total results aggregate the 15-minute archive. Note that if a daily interval is selected, the start and end selections will begin at midnight and the start and end hour will be ignored.
 * Finally, Press "Get Rainfall Data" button to get the data.
 
 Query results will be listed in a panel below on each page and shown on the map. The tabular data output may be viewed and downloaded on the page by selecting the 'View and Download Results' Button. Download formats currently include a CSV tabular format, for use in spreadsheet software. Spatial formats will be included in the future.
+
+Historic 5-minute, 15-minute, hourly, daily, and total results use the corrected archive. Missing observations remain unavailable (N/D), distinct from measured zero. Aggregates sum available observations; an entirely missing period remains N/D. A mixed source including N/D indicates a partial total.
+
+Times are shown in Eastern time. Spring-forward clock placeholders are omitted; the archive has one row per repeated fall-back clock label, represented by its first occurrence. The archive does not reconstruct a second occurrence. SWMM exports omit unavailable measurements; review gaps before using them in a model.
 
 The output table for each query result contains:
 
@@ -82,7 +86,7 @@ The following table describes the source code.
 | RTRR | Real-time radar rainfall. Data shown are provisional.|
 | RTRG | Real-time rain gauge data. Data shown are provisional. |
 
-> Note that the source code only appears for the 15-minute increments. Hourly or daily increment may include different source codes, depending on calibration method.
+> Native observations include source codes. Aggregates include all contributing source codes and N/D when observations are missing.
 `;
 
 const how2 = `

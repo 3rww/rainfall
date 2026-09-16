@@ -3,10 +3,13 @@ import { Form, Row, Col } from 'react-bootstrap';
 
 import { pickInterval } from '../../store/features/fetchKwargsSlice';
 import { getIntervalOptionsForContext } from '../../store/config';
-import { useAppDispatch } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+
+import { selectFetchKwargs } from '../../store/selectors';
 
 const IntervalPicker = ({ contextType, rainfallDataType }) => {
   const dispatch = useAppDispatch();
+  const rollup = useAppSelector((state) => selectFetchKwargs(state, contextType).rollup);
 
   const handleSelectInterval = useCallback((event) => {
     dispatch(pickInterval({
@@ -26,14 +29,14 @@ const IntervalPicker = ({ contextType, rainfallDataType }) => {
         <Form>
           {intervalOptions.map((option, index) => (
             <Form.Check
-              defaultChecked={option === '15-minute'}
+              checked={option === rollup}
               inline
               key={`interval-${option}-${index}-${rainfallDataType}`}
               label={option}
               value={option}
               type="radio"
-              id={`interval-${option}-${rainfallDataType}`}
-              name="intervalRadios"
+              id={`interval-${contextType}-${option}-${rainfallDataType}`}
+              name={`intervalRadios-${contextType}`}
               onChange={handleSelectInterval}
             />
           ))}

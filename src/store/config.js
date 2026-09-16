@@ -121,21 +121,12 @@ export const getRainfallDataTypePath = ({ contextType, rainfallDataType, rollup 
   if (
     supportsFiveMinuteIntervalContext(contextType)
     && rainfallDataType === RAINFALL_TYPES.historic
-    && rollup === FIVE_MINUTE_ROLLUP
   ) {
-    return "historic5";
+    return rollup === FIVE_MINUTE_ROLLUP ? "historic5" : "historic15";
   }
 
   return rainfallDataType;
 };
-
-export const shouldIncludeRollupParam = ({ contextType, rainfallDataType, rollup }) => (
-  getRainfallDataTypePath({
-    contextType: contextType,
-    rainfallDataType: rainfallDataType,
-    rollup: rollup
-  }) !== "historic5"
-);
 
 export const HEADER_LABELS = {
   start_ts: "start timestamp",
@@ -212,7 +203,7 @@ export const MAP_LAYERS = [
     'paint': {
       'fill-color': [
         "match",
-        ["get", "total"],
+        ["coalesce", ["get", "total"], ""],
         "",
         "#fff",
         [
@@ -227,7 +218,7 @@ export const MAP_LAYERS = [
       ],
       'fill-opacity': [
         "match",
-        ["get", "total"],
+        ["coalesce", ["get", "total"], ""],
         "",
         0,
         0.8
@@ -367,7 +358,7 @@ export const MAP_LAYERS = [
       "circle-stroke-width": 2,
       'circle-color': [
         "match",
-        ["get", "total"],
+        ["coalesce", ["get", "total"], ""],
         "",
         "#fff",
         [
@@ -382,14 +373,14 @@ export const MAP_LAYERS = [
       ],
       'circle-opacity': [
         "match",
-        ["get", "total"],
+        ["coalesce", ["get", "total"], ""],
         "",
         0,
         1
       ],
       'circle-stroke-opacity': [
         "match",
-        ["get", "total"],
+        ["coalesce", ["get", "total"], ""],
         "",
         0,
         1

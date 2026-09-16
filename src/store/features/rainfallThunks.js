@@ -6,8 +6,8 @@ import {
   API_POLL_MAX_MS,
   API_URL_ROOT,
   REQUEST_TIME_INTERVAL,
-  getRainfallDataTypePath,
-  shouldIncludeRollupParam
+  RAINFALL_MIN_DATE,
+  getRainfallDataTypePath
 } from '../config';
 import {
   selectEvent,
@@ -22,6 +22,7 @@ import {
 } from './fetchKwargsSlice';
 import { pickRainfallEvent as pickRainfallEventAction } from './rainfallEventsSlice';
 import { applyActiveResultToMap } from './downloadThunks';
+import { resolveAvailableBounds, clampDateTimeRange } from '../utils/dateBounds';
 import { buildRequestKey } from '../utils/requestKey';
 import { transformRainfallResults } from '../utils/transformers';
 
@@ -240,14 +241,15 @@ export const fetchRainfallDataFromApiV2 = (payload) => (dispatch, getState) => {
   const { contextType, rainfallDataType } = payload;
   const state = getState();
   const kwargs = selectFetchKwargs(state, contextType);
+  const bounds = resolveAvailableBounds({
+    contextType,
+    rollup: kwargs.rollup,
+    latest: state.stats?.latest,
+    rainfallMinDate: RAINFALL_MIN_DATE
+  });
+  if (!bounds.available) return;
 
   const rainfallDataTypePath = getRainfallDataTypePath({
-    contextType,
-    rainfallDataType,
-    rollup: kwargs.rollup
-  });
-
-  const includeRollupParam = shouldIncludeRollupParam({
     contextType,
     rainfallDataType,
     rollup: kwargs.rollup
@@ -275,12 +277,9 @@ export const fetchRainfallDataFromApiV2 = (payload) => (dispatch, getState) => {
     const requestParams = {
       start_dt: kwargs.startDt,
       end_dt: kwargs.endDt,
-      f: kwargs.f
+      f: kwargs.f,
+      rollup: kwargs.rollup
     };
-
-    if (includeRollupParam) {
-      requestParams.rollup = kwargs.rollup;
-    }
 
     requestParams[sensor[1]] = kwargs.sensorLocations[sensor[0]].map((option) => option.value).join(',');
 
@@ -326,9 +325,19 @@ export const pickRainfallEvent = ({ eventid, contextType }) => (dispatch, getSta
     return;
   }
 
+  const state = getState();
+  const kwargs = selectFetchKwargs(state, contextType);
+  const bounds = resolveAvailableBounds({
+    contextType,
+    rollup: kwargs.rollup,
+    latest: state.stats?.latest,
+    rainfallMinDate: RAINFALL_MIN_DATE
+  });
+  if (!bounds.available) return;
+  const range = clampDateTimeRange({ start: rainfallEvent.startDt, end: rainfallEvent.endDt, ...bounds });
   dispatch(pickRainfallDateTimeRange({
     contextType,
-    startDt: rainfallEvent.startDt,
-    endDt: rainfallEvent.endDt
+    startDt: range.start.toISOString(),
+    endDt: range.end.toISOString()
   }));
 };

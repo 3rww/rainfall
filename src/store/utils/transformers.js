@@ -239,7 +239,7 @@ const resolveHistoric5Source = (contextType, point) => {
 
 const normalizeHistoric5PointRow = (point, fallbackSensorId, options = {}) => {
   const sensorId = point?.id ?? fallbackSensorId
-  const value = point?.rainfall ?? point?.val
+  const value = hasRainfallProperty(point) ? point.rainfall : point?.val
 
   if (sensorId === null || sensorId === undefined || sensorId === "") {
     return []
@@ -302,34 +302,14 @@ export const transformRainfallResults = (r, options = {}) => {
 
     if (!Array.isArray(s?.data)) {
       s.data = []
-      s.total = 0
+      s.total = null
       return
     }
 
-    // The API results don't come with rainfall total per sensor, 
-    // so we tabulate rainfall values from one for all observation 
-    // intervals for each sensor.we exclude erroneous negative numbers
-    let initialValue = 0;
-    let seriesLength = s.data.length
-
-    if (seriesLength === 0) {
-      s.total = 0
-      return
-    }
-
-    let total = (
-      seriesLength > 1
-    ) ? (
-        s.data
-          .filter(i => i.val >= 0) // for the total, we exclude erroneous negative numbers
-          .map(i => i.val)
-          .reduce((totalValue, currentValue) => totalValue + currentValue, initialValue)
-      ) : (
-        s.data[0].val
-      )
-    // we assign negative totals as null, so they don't later on skew the symbology.
-    // s.total = (total >= 0) ? total : null
-    s.total = total
+    const values = s.data
+      .map((point) => point.val)
+      .filter((value) => typeof value === 'number' && Number.isFinite(value) && value >= 0);
+    s.total = values.length ? values.reduce((total, value) => total + value, 0) : null;
 
   })
 

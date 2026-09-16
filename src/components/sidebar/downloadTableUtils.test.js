@@ -449,3 +449,33 @@ describe("SWMM INP export helpers", () => {
     expect(snippet).not.toContain("TS_GAUGE_8");
   });
 });
+
+describe('null rainfall presentation', () => {
+  const results = { gauge: [{ id: '8', data: [
+    { ts: '2026-01-01T00:00:00-05:00', val: 0, src: 'G' },
+    { ts: '2026-01-01T00:15:00-05:00', val: null, src: 'N/D' },
+    { ts: '2026-01-01T00:30:00-05:00', val: 1, src: 'G' }
+  ] }] };
+  it('preserves chart gaps in per-sensor and average charts', () => {
+    expect(buildDownloadChartData(results).rows.map((row) => row['gauge:8'])).toEqual([0, null, 1]);
+    expect(buildDownloadChartData(results, { seriesMode: CHART_SERIES_MODE.averageByType }).rows.map((row) => row['avg:gauge'])).toEqual([0, null, 1]);
+  });
+  it('preserves null CSV cells and excludes missing SWMM measurements', () => {
+    const { rows } = buildDownloadRowsAndFields(results);
+    expect(rows[1].val).toBeNull();
+    expect(rows[1].src).toBe('N/D');
+    const swmm = buildSwmmInpSnippet(results, { rollup: '15-minute' });
+    expect(swmm).toContain('00:00 0');
+    expect(swmm).not.toContain('00:15');
+    expect(swmm).toContain('00:30 1');
+  });
+});
+
+
+describe('daily calendar labels', () => {
+  it('exports and charts Eastern midnight independently of browser timezone', () => {
+    expect(formatIsoForExcel('2026-01-01')).toBe('01/01/2026 00:00:00 EST');
+    expect(formatIsoForExcel('2026-07-01')).toBe('07/01/2026 00:00:00 EDT');
+    expect(extractChartTimestamp('2026-01-01')).toBe(Date.parse('2026-01-01T00:00:00-05:00'));
+  });
+});

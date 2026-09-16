@@ -13,7 +13,8 @@ import DownloadsList from './downloadList';
 import { fetchRainfallDataFromApiV2 } from '../../store/features/rainfallThunks';
 import {
   makeSelectSelectedSensors,
-  selectFetchHistory
+  selectFetchHistory,
+  selectRainfallBoundsAvailable
 } from '../../store/selectors';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
@@ -27,6 +28,8 @@ const RainfallDownloader = ({ rainfallDataType, contextType }) => {
     const selectedSensors = selectSelectedSensorsByContext(state, contextType);
     return !isEmpty(selectedSensors);
   });
+
+  const boundsAvailable = useAppSelector((state) => selectRainfallBoundsAvailable(state, contextType));
 
   const hasDownloads = useAppSelector((state) => {
     const downloadHistory = selectFetchHistory(state, contextType);
@@ -61,7 +64,7 @@ const RainfallDownloader = ({ rainfallDataType, contextType }) => {
           <hr></hr>
           <Button
             onClick={handleDownloadClick}
-            disabled={!hasKwargs}
+            disabled={!hasKwargs || !boundsAvailable}
             className="w-100"
           >
             Get Rainfall Data

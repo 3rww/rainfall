@@ -88,7 +88,7 @@ export const buildRainfallColorStyleExp = (attr, breaks, chromaScaleObj, colors,
     })
   
     return {
-      colorExp: colorExp,
+      colorExp: ["case", ["==", ["get", attr], null], "rgba(0,0,0,0)", colorExp],
       legendContent: legendContent
     }
   

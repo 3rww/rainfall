@@ -20,7 +20,8 @@ import EventsList from './eventsList';
 import { pickRainfallDateTimeRange } from '../../store/features/fetchKwargsSlice';
 import {
   selectFetchKwargs,
-  selectLatestTimestamps
+  selectLatestTimestamps,
+  selectRainfallBoundsAvailable
 } from '../../store/selectors';
 import {
   CONTEXT_TYPES,
@@ -85,8 +86,14 @@ const buildPickerModel = ({ contextType, rainfallDataType, currentKwargs, latest
     startDt = clampedActiveRange.start;
     endDt = clampedActiveRange.end;
   } else {
-    startDt = false;
-    endDt = false;
+    const defaults = clampDateTimeRange({
+      start: maxDate.clone().subtract(1, 'month'),
+      end: maxDate,
+      min: minDate,
+      max: maxDate
+    });
+    startDt = defaults.start;
+    endDt = defaults.end;
   }
 
   let ranges = {};
@@ -134,7 +141,7 @@ const buildPickerModel = ({ contextType, rainfallDataType, currentKwargs, latest
   };
 };
 
-const DateTimePicker = ({ rainfallDataType, contextType }) => {
+const AvailableDateTimePicker = ({ rainfallDataType, contextType }) => {
   const dispatch = useAppDispatch();
   const [showEventModal, setShowEventModal] = useState(false);
   const [activeEventModalTab, setActiveEventModalTab] = useState(EVENT_MODAL_TABS.list);
@@ -167,6 +174,10 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
 
   useEffect(() => {
     if (!pickerModel.rawStartDt.isValid() || !pickerModel.rawEndDt.isValid()) {
+      dispatchPickRainfallDateTimeRange({
+        startDt: pickerModel.startDt.toISOString(),
+        endDt: pickerModel.endDt.toISOString()
+      });
       return;
     }
 
@@ -486,6 +497,14 @@ const DateTimePicker = ({ rainfallDataType, contextType }) => {
       </Row>
     </div>
   );
+};
+
+const DateTimePicker = (props) => {
+  const available = useAppSelector((state) => selectRainfallBoundsAvailable(state, props.contextType));
+  if (!available) {
+    return <p role="alert">Rainfall availability is unavailable for this interval. Reload the page to try again.</p>;
+  }
+  return <AvailableDateTimePicker {...props} />;
 };
 
 export default DateTimePicker;

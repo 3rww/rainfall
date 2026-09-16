@@ -1,7 +1,8 @@
 import { has, isEmpty, keys, forEach, includes, startsWith, get } from 'lodash-es'
 import { createSelector } from '@reduxjs/toolkit'
 
-import { LYR_HIGHLIGHT_PREFIX } from './config'
+import { LYR_HIGHLIGHT_PREFIX, RAINFALL_MIN_DATE } from './config'
+import { resolveAvailableBounds } from './utils/dateBounds'
 import { buildYearSections, groupEventsByDay } from '../components/sidebar/eventsHeatmapUtils'
 
 const EMPTY_ARRAY = []
@@ -330,3 +331,10 @@ export const selectEarliestlegacyGarr5MinTS = (state) => (
 export const selectLatestlegacyGarr5MinTS = (state) => (
   selectLatestTimestamps(state)['latest-5min-calibrated-radar']
 )
+
+export const selectRainfallBoundsAvailable = (state, contextType) => resolveAvailableBounds({
+  contextType,
+  rollup: selectFetchKwargs(state, contextType).rollup,
+  latest: selectLatestTimestamps(state),
+  rainfallMinDate: RAINFALL_MIN_DATE
+}).available;

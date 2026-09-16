@@ -125,7 +125,7 @@ describe("transformRainfallResults", () => {
     expect(result.data).toHaveLength(2);
     expect(result.data[0].total).toBeCloseTo(0.5);
     expect(result.data[1].data).toEqual([]);
-    expect(result.data[1].total).toBe(0);
+    expect(result.data[1].total).toBeNull();
   });
 
   it("groups mixed historic5 rows by point id, falls back to outer id, and drops rows with no id", () => {
@@ -251,5 +251,22 @@ describe("transformDataApiEventsJSON", () => {
     const result = transformDataApiEventsJSON(clone(payload));
 
     expect(result).toEqual([]);
+  });
+});
+
+describe("missing rainfall", () => {
+  it("keeps null observations and distinguishes empty totals from measured zero", () => {
+    const result = transformRainfallResults({ data: [
+      { id: "missing", data: [{ ts: "2026-01-01", val: null, src: "N/D" }] },
+      { id: "zero", data: [{ ts: "2026-01-01", val: 0 }, { ts: "2026-01-02", val: null }] },
+      { id: "partial", data: [{ ts: "2026-01-01", val: 1 }, { ts: "2026-01-02", val: null }] }
+    ] });
+    expect(result.data.map((row) => row.total)).toEqual([null, 0, 1]);
+    expect(result.data[0].data[0].val).toBeNull();
+  });
+  it("retains a null rainfall field in the existing five-minute adapter", () => {
+    const result = transformRainfallResults({ data: [{ id: "8", ts: "2026-01-01", rainfall: null }] }, { contextType: "legacyGauge" });
+    expect(result.data[0].data[0].val).toBeNull();
+    expect(result.data[0].total).toBeNull();
   });
 });

@@ -124,8 +124,18 @@ export const resolveAvailableBounds = ({
   const nowMoment = toValidMoment(now) || nowDateTime();
   const envMin = toValidMoment(rainfallMinDate) || toValidDateTime("2000-04-01");
 
-  const gaugeFallbackMax = nowMoment.clone().subtract(60, "days").endOf("month");
-  const garrFallbackMax = nowMoment.clone().subtract(60, "days").endOf("month");
+  const isHistoricContext = contextType === CONTEXT_TYPES.legacyGauge || contextType === CONTEXT_TYPES.legacyGarr;
+  if (isHistoricContext) {
+    const dataset = contextType === CONTEXT_TYPES.legacyGauge ? "gauge" : "radar";
+    const interval = rollup === FIVE_MINUTE_ROLLUP ? "5min" : "15min";
+    const earliest = toValidMoment(latestValues[`earliest-${interval}-calibrated-${dataset}`]);
+    const max = toValidMoment(latestValues[`latest-${interval}-calibrated-${dataset}`]);
+    const min = earliest && latestMoment(earliest, envMin);
+    if (!min || !max || min.isAfter(max)) {
+      return { min: null, max: null, available: false };
+    }
+    return { min, max, available: true };
+  }
 
   let min = envMin.clone();
   let max = nowMoment.clone();
@@ -136,36 +146,6 @@ export const resolveAvailableBounds = ({
       latestValues["realtime-gauge"]
     ) || nowMoment.clone();
     min = max.clone().subtract(1, "year").startOf("month");
-  } else if (contextType === CONTEXT_TYPES.legacyGauge) {
-    const calibratedMax = toValidMoment(latestValues["calibrated-gauge"]);
-    const isFiveMinute = rollup === FIVE_MINUTE_ROLLUP;
-
-    if (isFiveMinute) {
-      min = toValidMoment(latestValues["earliest-5min-calibrated-gauge"]) || envMin.clone();
-      max = (
-        toValidMoment(latestValues["latest-5min-calibrated-gauge"])
-        || calibratedMax
-        || nowMoment.clone()
-      );
-    } else {
-      min = envMin.clone();
-      max = calibratedMax || gaugeFallbackMax;
-    }
-  } else if (contextType === CONTEXT_TYPES.legacyGarr) {
-    const calibratedMax = toValidMoment(latestValues["calibrated-radar"]);
-    const isFiveMinute = rollup === FIVE_MINUTE_ROLLUP;
-
-    if (isFiveMinute) {
-      min = toValidMoment(latestValues["earliest-5min-calibrated-radar"]) || envMin.clone();
-      max = (
-        toValidMoment(latestValues["latest-5min-calibrated-radar"])
-        || calibratedMax
-        || nowMoment.clone()
-      );
-    } else {
-      min = envMin.clone();
-      max = calibratedMax || garrFallbackMax;
-    }
   }
 
   if (min.isAfter(max)) {
@@ -174,6 +154,7 @@ export const resolveAvailableBounds = ({
 
   return {
     min,
-    max
+    max,
+    available: true
   };
 };

@@ -15,7 +15,7 @@ export const ResultsTable = ({ rows, header }) => {
   let rs = rows.map((r, ir) => (
     <tr key={`r${ir}`}>
     {header.map((h, ih) => (
-      <td key={`d${ir}${ih}`}><small>{r[h]}</small></td>)
+      <td key={`d${ir}${ih}`}><small>{h === "val" && r[h] === null ? "N/D" : r[h]}</small></td>)
     )}
     </tr>
   ))

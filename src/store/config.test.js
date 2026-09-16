@@ -152,7 +152,7 @@ describe("config interval and path helpers", () => {
       contextType: CONTEXT_TYPES.legacyGauge,
       rainfallDataType: RAINFALL_TYPES.historic,
       rollup: "15-minute"
-    })).toBe(RAINFALL_TYPES.historic);
+    })).toBe("historic15");
 
     expect(getRainfallDataTypePath({
       contextType: CONTEXT_TYPES.legacyRealtime,
@@ -165,45 +165,6 @@ describe("config interval and path helpers", () => {
       rainfallDataType: RAINFALL_TYPES.realtime,
       rollup: FIVE_MINUTE_ROLLUP
     })).toBe(RAINFALL_TYPES.realtime);
-  });
-
-  it("omits rollup only when request path resolves to historic5", async () => {
-    const {
-      CONTEXT_TYPES,
-      RAINFALL_TYPES,
-      FIVE_MINUTE_ROLLUP,
-      shouldIncludeRollupParam
-    } = await import("./config");
-
-    expect(shouldIncludeRollupParam({
-      contextType: CONTEXT_TYPES.legacyGauge,
-      rainfallDataType: RAINFALL_TYPES.historic,
-      rollup: FIVE_MINUTE_ROLLUP
-    })).toBe(false);
-
-    expect(shouldIncludeRollupParam({
-      contextType: CONTEXT_TYPES.legacyGarr,
-      rainfallDataType: RAINFALL_TYPES.historic,
-      rollup: FIVE_MINUTE_ROLLUP
-    })).toBe(false);
-
-    expect(shouldIncludeRollupParam({
-      contextType: CONTEXT_TYPES.legacyGauge,
-      rainfallDataType: RAINFALL_TYPES.historic,
-      rollup: "15-minute"
-    })).toBe(true);
-
-    expect(shouldIncludeRollupParam({
-      contextType: CONTEXT_TYPES.legacyRealtime,
-      rainfallDataType: RAINFALL_TYPES.historic,
-      rollup: FIVE_MINUTE_ROLLUP
-    })).toBe(true);
-
-    expect(shouldIncludeRollupParam({
-      contextType: CONTEXT_TYPES.legacyRealtime,
-      rainfallDataType: RAINFALL_TYPES.realtime,
-      rollup: "15-minute"
-    })).toBe(true);
   });
 
   it("returns interactive map layers by context", async () => {

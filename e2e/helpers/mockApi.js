@@ -47,6 +47,10 @@ const MOCK_TIMESTAMPS = {
   "realtime-gauge": "2025-10-01T03:00:00-04:00",
   "calibrated-gauge": "2025-10-01T03:00:00-04:00",
   "calibrated-radar": "2025-10-01T03:00:00-04:00",
+  "earliest-15min-calibrated-gauge": "2000-04-01T00:00:00-05:00",
+  "latest-15min-calibrated-gauge": "2026-01-31T00:00:00Z",
+  "earliest-15min-calibrated-radar": "2000-04-01T00:00:00-05:00",
+  "latest-15min-calibrated-radar": "2026-01-31T00:00:00Z",
   "earliest-5min-calibrated-gauge": "2025-01-01T00:00:00-05:00",
   "latest-5min-calibrated-gauge": "2025-10-01T03:00:00-04:00",
   "earliest-5min-calibrated-radar": "2025-01-01T00:00:00-05:00",
@@ -195,7 +199,7 @@ export const registerMockApiRoutes = async (page, options = {}) => {
     }
 
     if (path === "/v2/latest-observations/") {
-      return jsonResponse(route, MOCK_TIMESTAMPS);
+      return jsonResponse(route, options.timestamps || MOCK_TIMESTAMPS);
     }
 
     if (path === "/gauges/") {
@@ -210,13 +214,13 @@ export const registerMockApiRoutes = async (page, options = {}) => {
       return jsonResponse(route, MOCK_GEOGRAPHY_LOOKUP);
     }
 
-    const requestMatch = path.match(/^\/v2\/(gauge|pixel)\/(realtime|historic|historic5)\/$/);
+    const requestMatch = path.match(/^\/v2\/(gauge|pixel)\/(realtime|historic15|historic5)\/$/);
     if (requestMatch) {
       const sensor = requestMatch[1];
       const payload = request.postDataJSON() || {};
 
-      rainfallRequests.push({ sensor, payload });
-      lastRequestBySensor.set(sensor, payload);
+      rainfallRequests.push({ sensor, path, payload });
+      lastRequestBySensor.set(sensor, { ...payload, endpoint: requestMatch[2] });
 
       return jsonResponse(route, {
         status: "queued",
@@ -263,25 +267,19 @@ export const registerMockApiRoutes = async (page, options = {}) => {
       const sensorId = sensor === "gauge" ? "8" : "100";
       const sourceCode = sensor === "gauge" ? "G" : "R";
 
+      const points = [
+        { ts: requestPayload.start_dt || MOCK_EVENT.start_dt, val: 0.25, src: sourceCode },
+        { ts: requestPayload.end_dt || MOCK_EVENT.end_dt, val: null, src: "N/D" }
+      ];
+      const isTotal = requestPayload.rollup?.toLowerCase() === "total";
+      const data = [{ id: sensorId, data: isTotal
+            ? [{ ts: `${points[0].ts}/${points[1].ts}`, val: 0.25, src: `${sourceCode}, N/D` }]
+            : points }];
       return jsonResponse(route, {
         status: "finished",
         args: requestPayload,
         messages: [],
-        data: [{
-          id: sensorId,
-          data: [
-            {
-              ts: requestPayload.start_dt || MOCK_EVENT.start_dt,
-              val: 0.25,
-              src: sourceCode
-            },
-            {
-              ts: requestPayload.end_dt || MOCK_EVENT.end_dt,
-              val: 0.5,
-              src: sourceCode
-            }
-          ]
-        }]
+        data
       });
     }
 

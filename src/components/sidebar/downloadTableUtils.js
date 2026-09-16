@@ -71,6 +71,15 @@ const sanitizeSwmmIdentifier = (rawValue, fallback = "SENSOR") => {
 const formatSwmmValue = (value) => `${Number(value.toFixed(6))}`;
 const roundChartAverageValue = (value) => Number(value.toFixed(CHART_AVERAGE_DECIMAL_PLACES));
 
+// Daily rollups are calendar dates in Eastern time, not browser-local instants.
+const parseDownloadTimestamp = (value) => {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const date = toDateTime(value).tz(EXCEL_TIME_ZONE, true);
+    return date.isValid() ? date : null;
+  }
+  return parseZonedDateTime(value, true);
+};
+
 const parseSwmmTimestamp = (rawTimestamp, rule = CHART_TIMESTAMP_RULE.start) => {
   if (typeof rawTimestamp !== "string") {
     return null;
@@ -78,8 +87,8 @@ const parseSwmmTimestamp = (rawTimestamp, rule = CHART_TIMESTAMP_RULE.start) => 
 
   const rangeParts = rawTimestamp.split("/");
   if (rangeParts.length === 2) {
-    const start = parseZonedDateTime(rangeParts[0].trim(), true);
-    const end = parseZonedDateTime(rangeParts[1].trim(), true);
+    const start = parseDownloadTimestamp(rangeParts[0].trim());
+    const end = parseDownloadTimestamp(rangeParts[1].trim());
 
     if (!start || !end) {
       return null;
@@ -99,7 +108,7 @@ const parseSwmmTimestamp = (rawTimestamp, rule = CHART_TIMESTAMP_RULE.start) => 
     return start;
   }
 
-  return parseZonedDateTime(rawTimestamp, true);
+  return parseDownloadTimestamp(rawTimestamp);
 };
 
 export const getSwmmIntervalFromRollup = (rollup) => {
@@ -146,7 +155,7 @@ export const buildSwmmInpSnippet = (resultsTableData, options = {}) => {
       const sensorDataRows = Array.isArray(sensorRow?.data) ? sensorRow.data : [];
       sensorDataRows.forEach((sensorDataRow) => {
         const timestamp = parseSwmmTimestamp(sensorDataRow?.ts, timestampRule);
-        const value = Number(sensorDataRow?.val);
+        const value = sensorDataRow?.val == null || sensorDataRow.val === "" ? null : Number(sensorDataRow.val);
 
         if (timestamp === null || !Number.isFinite(value)) {
           return;
@@ -212,7 +221,7 @@ export const formatIsoForExcel = (rawValue) => {
     return null;
   }
 
-  const parsed = parseZonedDateTime(rawValue, true);
+  const parsed = parseDownloadTimestamp(rawValue);
   if (!parsed) {
     return null;
   }
@@ -321,8 +330,8 @@ export const extractChartTimestamp = (rawTimestamp, rule = CHART_TIMESTAMP_RULE.
 
   const rangeParts = rawTimestamp.split("/");
   if (rangeParts.length === 2) {
-    const start = parseZonedDateTime(rangeParts[0].trim(), true);
-    const end = parseZonedDateTime(rangeParts[1].trim(), true);
+    const start = parseDownloadTimestamp(rangeParts[0].trim());
+    const end = parseDownloadTimestamp(rangeParts[1].trim());
 
     if (!start || !end) {
       return null;
@@ -339,7 +348,7 @@ export const extractChartTimestamp = (rawTimestamp, rule = CHART_TIMESTAMP_RULE.
     return start.valueOf();
   }
 
-  const parsed = parseZonedDateTime(rawTimestamp, true);
+  const parsed = parseDownloadTimestamp(rawTimestamp);
   if (!parsed) {
     return null;
   }
@@ -370,9 +379,10 @@ export const buildDownloadChartData = (resultsTableData, options = {}) => {
 
       sensorDataRows.forEach((sensorDataRow) => {
         const timestampMs = extractChartTimestamp(sensorDataRow?.ts, timestampRule);
-        const value = Number(sensorDataRow?.val);
+        const value = sensorDataRow?.val == null || sensorDataRow.val === "" ? null : Number(sensorDataRow.val);
+        if (value !== null && !Number.isFinite(value)) return;
 
-        if (timestampMs === null || !Number.isFinite(value)) {
+        if (timestampMs === null) {
           return;
         }
 
@@ -390,8 +400,10 @@ export const buildDownloadChartData = (resultsTableData, options = {}) => {
 
           const existingRow = rowsByTimestamp.get(timestampMs) || { timestampMs: timestampMs };
           const existingAggregate = existingRow[seriesKey] || { sum: 0, count: 0 };
-          existingAggregate.sum += value;
-          existingAggregate.count += 1;
+          if (value !== null) {
+            existingAggregate.sum += value;
+            existingAggregate.count += 1;
+          }
           existingRow[seriesKey] = existingAggregate;
           rowsByTimestamp.set(timestampMs, existingRow);
           return;
@@ -427,6 +439,8 @@ export const buildDownloadChartData = (resultsTableData, options = {}) => {
         const aggregate = row[seriesItem.key];
         if (aggregate && aggregate.count > 0) {
           averagedRow[seriesItem.key] = roundChartAverageValue(aggregate.sum / aggregate.count);
+        } else if (aggregate) {
+          averagedRow[seriesItem.key] = null;
         }
       });
       return averagedRow;
