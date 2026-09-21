@@ -25,8 +25,8 @@
     "react-markdown": "^10.0.0",
     "react-redux": "^9.0.0",
     "react-select": "^5.0.0",
-    "recharts": "^2.15.1",
-    "remark-gfm": "^4.0.0"
+    "remark-gfm": "^4.0.0",
+    "uplot": "^1.6.32"
   },
   "scripts": {
     "start": "vite --host --port 3000",

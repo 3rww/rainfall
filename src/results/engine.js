@@ -103,8 +103,8 @@ export function createResultsEngine() {
   function* preview({ handles, mode, selected, range, rollup }) {
     const all = entries(handles);
     const native = rollup.toLowerCase();
-    const start = range?.start ? toDateTime(range.start).tz(ZONE, true).startOf('day').valueOf() : -Infinity;
-    const end = range?.end ? toDateTime(range.end).tz(ZONE, true).endOf('day').valueOf() : Infinity;
+    const start = Number.isFinite(range?.startMs) ? range.startMs : range?.start ? toDateTime(range.start).tz(ZONE, true).startOf('day').valueOf() : -Infinity;
+    const end = Number.isFinite(range?.endMs) ? range.endMs : range?.end ? toDateTime(range.end).tz(ZONE, true).endOf('day').valueOf() : Infinity;
     const grid = new Map();
     let processed = 0;
     for (const dataset of all) for (const raw of dataset.observationTimes) {
@@ -132,7 +132,7 @@ export function createResultsEngine() {
     const rows = new Map();
     for (const time of new Set(bucketByTime.values())) rows.set(time, { timestampMs: time, coverage: {} });
     const series = [];
-    const selectedSet = new Set(selected.slice(0, 10));
+    const selectedSet = new Set(selected);
     for (const dataset of all) {
       const targets = mode === 'averageByType' ? [{ key: `avg:${dataset.type}`, label: `${label(dataset.type)} Average`, sensors: dataset.series }]
         : dataset.series.filter(s => selectedSet.has(`${dataset.type}:${s.id}`)).map(s => ({ key: `${dataset.type}:${s.id}`, label: `${label(dataset.type)} ${s.id}`, sensors: [s] }));
@@ -172,7 +172,7 @@ export function createResultsEngine() {
     }
     const result = [...rows.values()].sort((a, b) => a.timestampMs - b.timestampMs);
     for (const row of result) for (const s of series) if (row[s.key] != null) row[s.key] = Number(row[s.key].toFixed(3));
-    return { rows: result, series, interval, native };
+    return { rows: result, series, interval, native, range: range || {} };
   }
   function* exportData({ handles, format, rollup }) {
     const all = entries(handles);

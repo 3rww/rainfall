@@ -43,9 +43,17 @@ release adapter references. FileSaver/browser download lifetime is separate.
 
 ## Preview semantics
 
-Average by Type uses every returned sensor of each type. Individual mode allows ten
-sensors total, initially the first ten ordered by type and natural ID. The picker is
-searchable. Date controls apply to the chart only, in Eastern calendar time.
+Average by Type uses every returned sensor of each type. Individual mode initially
+selects the first ten sensors ordered by type and natural ID. The searchable, responsive
+checkbox grid below the chart supports selecting or deselecting all returned sensors;
+uPlot replaces Recharts and the previous ten-series limit is removed. The average
+switch sits directly above this grid.
+
+Drag horizontally to zoom into the uPlot chart; double-click or use Reset chart zoom
+to restore the full range. Exact zoom instants are stored in Redux and request a new,
+possibly finer preview. Axis labels and cursor readouts use Eastern time, including
+explicit DST offsets in the readout. Zoom does not change the query or downloads.
+CSV and SWMM each show a full-width Bootstrap progress bar while generating.
 
 The worker chooses the finest interval with at most 1,000 returned-grid buckets,
 starting at the requested interval and progressing through 15-minute, hourly, daily,
@@ -84,7 +92,7 @@ exceptions). The fixture is generated in the test runner, not in browser state.
 The JSON benchmark report is attached to the Playwright test. No production data is
 modified or fetched.
 
-On this machine, September 21, 2026, the production Chromium run measured:
+Before the uPlot UI update, on this machine, September 21, 2026, the production Chromium run measured:
 
 | Measurement | Result |
 | --- | ---: |
@@ -115,3 +123,14 @@ no immediate browser heap reduction or total-memory target is claimed.
 
 No backend changes, feature flag or persistent migration are required. Rollback is
 reverting the frontend release.
+
+The uPlot update was also tested with the same production fixture, selecting all 165
+individual series and exercising drag zoom, double-click reset, cached selection
+changes and background exports. The shell appeared in 12 ms and the initial average
+preview in 1,478 ms after ingestion. All worker resources were released after deletion.
+The chart JavaScript chunk fell from approximately 393 KB to 55 KB (uncompressed).
+Selecting/rendering all 165 series still produced main-thread pauses of roughly
+1.7–1.8 seconds in headless Chromium; the default average view did not. Redundant
+resize and stale-preview redraws are suppressed, but unlimited series selection is
+inherently heavier than the initial ten-sensor selection. These browser measurements
+are not a guarantee for other hardware or rendering configurations.

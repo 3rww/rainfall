@@ -60,11 +60,11 @@ describe('bounded rainfall previews', () => {
     expect(preview.rows[0].coverage['avg:gauge']).toEqual({ contributing: 3, expected: 6, timestamps: 3 });
     expect(preview.rows.at(-1)['avg:gauge']).toBeNull();
   });
-  it('bounds individual series, keeps both offset-bearing fall-back instants and all-null totals', () => {
+  it('includes every selected sensor, keeps both offset-bearing fall-back instants and all-null totals', () => {
     const data = Array.from({ length: 12 }, (_, id) => ({ id, data: [point('2025-11-02T01:15:00-04:00', 0), point('2025-11-02T01:15:00-05:00', null)] }));
     const { engine, handles } = load({ pixel: data });
     const preview = finish(engine.preview({ handles, mode: 'perSensor', selected: data.map(s => `pixel:${s.id}`), rollup: '15-minute' }));
-    expect(preview.series).toHaveLength(10);
+    expect(preview.series).toHaveLength(12);
     expect(preview.rows).toHaveLength(2);
     expect(preview.rows[1].timestampMs - preview.rows[0].timestampMs).toBe(3600000);
     expect(preview.rows[1]['pixel:0']).toBeNull();
@@ -106,4 +106,13 @@ it('calendar daily observations aggregate to months without moving into the prec
 it('keeps canonical sensor identity when an observation has an extra id field', () => {
   const { summaries } = load({ gauge: [{ id: '8', data: [point('2026-06-01T00:00:00Z', 1, 'G', { id: 'observation-id' })] }] });
   expect(summaries.gauge[0].id).toBe('8');
+});
+it('uses exact zoom instants rather than expanding them to Eastern calendar days', () => {
+  const data = [point('2025-11-02T01:15:00-04:00', 1), point('2025-11-02T01:15:00-05:00', 2)];
+  const { engine, handles } = load({ gauge: [{ id: 1, data }] });
+  const preview = finish(engine.preview({ handles, mode: 'averageByType', selected: [], rollup: '15-minute', range: {
+    startMs: Date.parse('2025-11-02T01:00:00-05:00'), endMs: Date.parse('2025-11-02T01:30:00-05:00')
+  } }));
+  expect(preview.rows).toHaveLength(1);
+  expect(preview.rows[0]['avg:gauge']).toBe(2);
 });

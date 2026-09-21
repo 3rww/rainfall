@@ -46,7 +46,7 @@ const slice = createSlice({
     preferencesChanged(state, { payload }) {
       const item = ensure(state, payload);
       if (payload.mode) item.mode = payload.mode;
-      if (payload.selected) { item.selected = [...new Set(payload.selected)].slice(0, 10).sort(); item.selectionCustomized = true; }
+      if (payload.selected) { item.selected = [...new Set(payload.selected)].sort(); item.selectionCustomized = true; }
       if (payload.range) item.range = payload.range;
     },
     resultUpdated(state, { payload }) {
@@ -60,6 +60,8 @@ const slice = createSlice({
     previewActivated(state, { payload }) {
       const item = ensure(state, payload);
       item.previewKey = payload.key;
+      // A cached preview replaces any aborted in-flight operation immediately.
+      item.operations.preview = { ...item.operations.preview, operationId: null, status: 'succeeded', key: payload.key, error: null, progress: { done: true } };
       state.lru = state.lru.filter(k => k !== payload.key);
       state.lru.push(payload.key);
     },

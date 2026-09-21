@@ -1,5 +1,5 @@
-import React, { useMemo, useState, lazy, Suspense } from 'react';
-import { Modal, Button, Form, Alert } from 'react-bootstrap';
+import React, { useCallback, useMemo, useState, lazy, Suspense } from 'react';
+import { Modal, Button, Form, Alert, ProgressBar } from 'react-bootstrap';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   makeSelectResultPresentation, makeSelectSensorSummaries, preferencesChanged,
@@ -19,6 +19,7 @@ const DownloadModal = ({ show, onHide, fetchHistoryItem, contextType }) => {
   const [search, setSearch] = useState('');
   const kwargs = fetchHistoryItem.fetchKwargs;
   const change = values => dispatch(preferencesChanged({ ...arg, ...values }));
+  const changeRange = useCallback(range => dispatch(preferencesChanged({ ...arg, range })), [dispatch, arg]);
   const selected = ui.selected || [];
   const records = sensors.reduce((n, s) => n + s.recordCount, 0);
   const available = fetchHistoryItem.detailsAvailable;
@@ -32,34 +33,59 @@ const DownloadModal = ({ show, onHide, fetchHistoryItem, contextType }) => {
     </Modal.Title></Modal.Header>
     <Modal.Body>
       {!available && <Alert variant="danger">Detailed results are unavailable. Please rerun this query.</Alert>}
-      <div className="download-modal-download-row d-flex gap-3 align-items-start">
-        <p>Download as:</p>
+      <div className="download-modal-download-row">
+        <div className="d-flex flex-wrap gap-3 align-items-start">
+        <p className="mb-0">Download as:</p>
         {['csv', 'swmm'].map(format => {
           const op = ui.operations?.[format];
           return <div key={format}>
             <Button size="sm" variant="outline-primary" disabled={!available || !records || op?.status === 'pending'} onClick={() => dispatch(exportRequested({ ...arg, format }))}>{format === 'csv' ? 'CSV' : 'SWMM (.inp)'}</Button>
-            {op?.status === 'pending' && <div role="status"><small>{format.toUpperCase()}: {op.progress?.total ? `${Math.min(100, Math.round(100 * op.progress.processed / op.progress.total))}%` : 'Preparing…'}</small> <Button size="sm" variant="link" onClick={() => dispatch(operationCanceled({ ...arg, format }))}>Cancel {format.toUpperCase()}</Button></div>}
             {op?.status === 'ready' && <Button size="sm" onClick={() => dispatch(saveRequested({ ...arg, format }))}>Ready to save {format.toUpperCase()}</Button>}
             {op?.status === 'failed' && <p role="alert">{op.error}</p>}
+          </div>;
+        })}
+        </div>
+        {['csv', 'swmm'].map(format => {
+          const op = ui.operations?.[format];
+          if (op?.status !== 'pending') return null;
+          const percent = op.progress?.done ? 100 : op.progress?.total ? Math.min(100, Math.round(100 * op.progress.processed / op.progress.total)) : null;
+          return <div key={format} className="download-modal-export-progress mt-3">
+            <div className="d-flex align-items-center justify-content-between mb-1">
+              <small>{format.toUpperCase()}</small>
+              <Button size="sm" variant="link" className="p-0" onClick={() => dispatch(operationCanceled({ ...arg, format }))}>Cancel {format.toUpperCase()}</Button>
+            </div>
+            <ProgressBar><ProgressBar animated striped now={percent ?? 100} label={percent === null ? 'Preparing…' : `${percent}%`} aria-label={`${format.toUpperCase()} export progress`} /></ProgressBar>
           </div>;
         })}
       </div>
       <p className="small download-modal-chart-meta"><em>{records} total records across {sensors.length} sensors</em></p>
       <div className="border-top mt-3 py-3">
-        <Form.Check checked={ui.mode !== 'perSensor'} id="download-average-only-toggle" label="Average by Type" type="switch" onChange={e => change({ mode: e.target.checked ? 'averageByType' : 'perSensor' })} />
-        {ui.mode === 'perSensor' && <fieldset className="my-2"><legend className="fs-6">Individual sensors ({selected.length}/10)</legend>
-          <Form.Control aria-label="Search sensors" placeholder="Search sensors" value={search} onChange={e => setSearch(e.target.value)} />
-          <div style={{ maxHeight: 140, overflowY: 'auto' }}>{sensors.filter(s => `${s.type} ${s.id}`.toLowerCase().includes(search.toLowerCase())).map(s => <Form.Check key={s.key} id={`sensor-${s.key}`} label={`${s.type} ${s.id}`} checked={selected.includes(s.key)} disabled={!selected.includes(s.key) && selected.length >= 10} onChange={e => change({ selected: e.target.checked ? [...selected, s.key] : selected.filter(k => k !== s.key) })} />)}</div>
-        </fieldset>}
-        <div className="d-flex flex-wrap gap-2 my-3 align-items-end">
-          <Form.Label>Chart start date (Eastern)<Form.Control aria-label="Chart start date" type="date" value={ui.range?.start || ''} max={ui.range?.end || undefined} onChange={e => change({ range: { ...ui.range, start: e.target.value } })} /></Form.Label>
-          <Form.Label>Chart end date (Eastern)<Form.Control aria-label="Chart end date" type="date" value={ui.range?.end || ''} min={ui.range?.start || undefined} onChange={e => change({ range: { ...ui.range, end: e.target.value } })} /></Form.Label>
-          <Button variant="link" onClick={() => change({ range: {} })}>Reset chart range</Button>
-        </div>
         <p className="small">{ui.preview ? `${ui.preview.interval[0].toUpperCase()}${ui.preview.interval.slice(1)} preview; downloads contain ${kwargs.rollup.toLowerCase()} observations.` : 'Downloads contain the original observations.'}</p>
         {previewPending && <p role="status">Preparing chart…</p>}
         {ui.operations?.preview?.status === 'failed' && <Alert variant="danger">{ui.operations.preview.error}</Alert>}
-        {!previewPending && ui.preview && <Suspense fallback={<p>Loading chart…</p>}><DownloadLineChart rows={ui.preview.rows} series={ui.preview.series} /></Suspense>}
+        {ui.preview && <Suspense fallback={<p>Loading chart…</p>}><DownloadLineChart rows={ui.preview.rows} series={ui.preview.series} range={ui.preview.range} onRangeChange={changeRange} /></Suspense>}
+        <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+          <p class="small text-muted">Drag horizontally to zoom. Double-click to reset. Times are Eastern.</p>
+          <Button variant="link" size="sm" onClick={() => changeRange({})}>Reset chart zoom</Button>
+        </div>
+        <div className="download-modal-chart-controls border-top mt-3 pt-3">
+          <Form.Check checked={ui.mode !== 'perSensor'} id="download-average-only-toggle" label="Average by Type" type="switch" onChange={e => change({ mode: e.target.checked ? 'averageByType' : 'perSensor' })} />
+          {ui.mode === 'perSensor' && <fieldset className="mt-3" aria-label="Individual sensor selection">
+            <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+              <p className="fs-6 mb-0">Individual sensors ({selected.length}/{sensors.length})</p>
+              <div className="btn-group btn-group-sm" role="group" aria-label="Sensor selection controls">
+                <Button variant="outline-primary" disabled={selected.length === sensors.length} onClick={() => change({ selected: sensors.map(s => s.key) })}>Select all</Button>
+                <Button variant="outline-primary" disabled={!selected.length} onClick={() => change({ selected: [] })}>Deselect all</Button>
+              </div>
+            </div>
+            <Form.Control className="mb-3" aria-label="Search sensors" placeholder="Search sensors" value={search} onChange={e => setSearch(e.target.value)} />
+            <div className="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-2 download-modal-sensor-grid">
+              {sensors.filter(s => `${s.type} ${s.id}`.toLowerCase().includes(search.toLowerCase())).map(s => <div className="col" key={s.key}>
+                <Form.Check id={`sensor-${s.key}`} label={<code>{s.type} {s.id}</code>} checked={selected.includes(s.key)} onChange={e => change({ selected: e.target.checked ? [...selected, s.key] : selected.filter(k => k !== s.key) })} />
+              </div>)}
+            </div>
+          </fieldset>}
+        </div>
       </div>
     </Modal.Body>
     <Modal.Footer><Button variant="outline-primary" onClick={onHide}>Close</Button></Modal.Footer>

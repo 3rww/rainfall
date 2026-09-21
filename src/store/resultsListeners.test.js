@@ -161,3 +161,19 @@ it('partial sensor completion updates defaults in natural order and preserves ex
   await ingest(store, results, arg, 'replacement');
   expect(getUi(store).selected).toEqual([]);
 });
+it('returning to a cached preview clears pending status and ignores its late cancellation', async () => {
+  const results = controlledClient();
+  const { store } = setup(results);
+  await ingest(store, results);
+  store.dispatch(modalOpened(arg));
+  results.pending[0].resolve({ rows: [], series: [], interval: '15-minute', native: '15-minute' });
+  await vi.waitFor(() => expect(getUi(store).operations.preview.status).toBe('succeeded'));
+  const cachedKey = getUi(store).previewKey;
+  store.dispatch(preferencesChanged({ ...arg, range: { startMs: 1, endMs: 2 } }));
+  expect(getUi(store).operations.preview.status).toBe('pending');
+  store.dispatch(preferencesChanged({ ...arg, range: {} }));
+  expect(results.pending[1].options.signal.aborted).toBe(true);
+  await Promise.resolve(); await Promise.resolve();
+  expect(getUi(store).previewKey).toBe(cachedKey);
+  expect(getUi(store).operations.preview.status).toBe('succeeded');
+});
