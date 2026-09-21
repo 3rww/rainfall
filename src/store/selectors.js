@@ -312,9 +312,9 @@ export const selectLatestlegacyRealtimeGaugeTS = (state) => selectLatestTimestam
 
 export const selectLatestlegacyRealtimeRadarTS = (state) => selectLatestTimestamps(state)['realtime-radar']
 
-export const selectLatestlegacyGaugeTS = (state) => selectLatestTimestamps(state)['calibrated-gauge']
+export const selectLatestlegacyGaugeTS = (state) => selectLatestTimestamps(state)['latest-15min-calibrated-gauge']
 
-export const selectLatestlegacyGarrTS = (state) => selectLatestTimestamps(state)['calibrated-radar']
+export const selectLatestlegacyGarrTS = (state) => selectLatestTimestamps(state)['latest-15min-calibrated-radar']
 
 export const selectEarliestlegacyGauge5MinTS = (state) => (
   selectLatestTimestamps(state)['earliest-5min-calibrated-gauge']

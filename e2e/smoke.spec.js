@@ -254,3 +254,61 @@ test('historic15 polling failures reach the download error state', async ({ page
   await page.getByRole('button', { name: 'Get Rainfall Data' }).click();
   await expect(page.getByText(/Rainfall request failed|polling failure/i)).toBeVisible();
 });
+
+test.describe('historic availability from dataset timestamps', () => {
+  test.use({ timezoneId: 'America/New_York' });
+
+  const timestamps = {
+    'calibrated-radar': '2026-08-01T00:00:00-04:00',
+    'calibrated-gauge': '2026-07-31T23:45:00-04:00',
+    'realtime-radar': '2026-09-21T10:00:00-04:00',
+    'realtime-gauge': '2026-09-21T10:15:00-04:00',
+    'rainfall-events': '2026-07-28T02:00:00-04:00',
+    'earliest-5min-calibrated-gauge': '2022-07-01T00:00:00-04:00',
+    'latest-5min-calibrated-gauge': '2026-07-31T23:55:00-04:00',
+    'earliest-5min-calibrated-radar': '2019-02-28T20:05:00-05:00',
+    'latest-5min-calibrated-radar': '2026-07-01T00:00:00-04:00',
+    'earliest-15min-calibrated-gauge': '2000-04-01T00:00:00-05:00',
+    'latest-15min-calibrated-gauge': '2026-07-31T23:45:00-04:00',
+    'earliest-15min-calibrated-radar': '2000-04-01T00:00:00-05:00',
+    'latest-15min-calibrated-radar': '2026-06-30T23:45:00-04:00'
+  };
+
+  for (const [context, sensor] of [['legacyGauge', 'gauge'], ['legacyGarr', 'radar']]) {
+    test(`${sensor} picker uses exact parquet bounds across intervals`, async ({ page }) => {
+      await registerMockApiRoutes(page, { timestamps });
+      await page.goto('/');
+      await closeAboutModalIfVisible(page);
+      await page.waitForFunction(() => window.__APP_STORE__?.getState().stats.latest?.['latest-15min-calibrated-radar']);
+      await setContext(page, context);
+
+      for (const rollup of ['5-minute', '15-minute', 'Hourly', 'Daily', 'Total']) {
+        const interval = rollup === '5-minute' ? '5min' : '15min';
+        const earliest = timestamps[`earliest-${interval}-calibrated-${sensor}`];
+        const latest = timestamps[`latest-${interval}-calibrated-${sensor}`];
+        await page.getByRole('radio', { name: rollup, exact: true }).check();
+        await page.evaluate((contextType) => window.__APP_STORE__.dispatch({
+          type: 'fetchKwargs/pickRainfallDateTimeRange',
+          payload: { contextType, startDt: '1990-01-01T00:00:00Z', endDt: '2030-01-01T00:00:00Z' }
+        }), context);
+
+        await expect.poll(() => page.evaluate((contextType) => {
+          const { startDt, endDt } = window.__APP_STORE__.getState().fetchKwargs[contextType].active;
+          return { startDt, endDt };
+        }, context)).toEqual({ startDt: new Date(earliest).toISOString(), endDt: new Date(latest).toISOString() });
+
+        await page.getByRole('tabpanel', {
+          name: sensor === 'gauge' ? 'Historical Rain Gauge' : 'Calibrated Radar Rainfall'
+        }).locator('#dtp-show-datepicker-historic').click();
+        const dialog = page.getByRole('dialog');
+        const localDate = (value) => new Date(value).toLocaleDateString('en-US', {
+          timeZone: 'America/New_York', month: '2-digit', day: '2-digit', year: 'numeric'
+        });
+        await expect(dialog.locator('.datetimepicker-range-note')).toContainText(
+          `available between ${localDate(earliest)} and ${localDate(latest)}`
+        );
+        await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+      }
+    });
+  }
+});

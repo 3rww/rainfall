@@ -128,9 +128,8 @@ export const resolveAvailableBounds = ({
   if (isHistoricContext) {
     const dataset = contextType === CONTEXT_TYPES.legacyGauge ? "gauge" : "radar";
     const interval = rollup === FIVE_MINUTE_ROLLUP ? "5min" : "15min";
-    const earliest = toValidMoment(latestValues[`earliest-${interval}-calibrated-${dataset}`]);
+    const min = toValidMoment(latestValues[`earliest-${interval}-calibrated-${dataset}`]);
     const max = toValidMoment(latestValues[`latest-${interval}-calibrated-${dataset}`]);
-    const min = earliest && latestMoment(earliest, envMin);
     if (!min || !max || min.isAfter(max)) {
       return { min: null, max: null, available: false };
     }

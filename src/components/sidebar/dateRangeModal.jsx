@@ -63,6 +63,9 @@ const DateRangeModal = ({
                   minDate={minDate.toDate()}
                   maxDate={maxDate.toDate()}
                   className="form-control"
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
                 />
               </Col>
               <Col md={6}>
@@ -76,6 +79,9 @@ const DateRangeModal = ({
                   minDate={pendingStart || minDate.toDate()}
                   maxDate={maxDate.toDate()}
                   className="form-control"
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
                 />
               </Col>
             </Row>

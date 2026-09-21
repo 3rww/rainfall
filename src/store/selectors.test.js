@@ -28,18 +28,20 @@ describe("latest timestamp selectors", () => {
     expect(selectLatestlegacyRealtimeRadarTS(state)).toBe("2026-02-11T00:00:00Z");
   });
 
-  it("maps legacy default latest timestamp keys", () => {
+  it("maps historic default latest timestamps to 15-minute parquet keys", () => {
     const state = {
       stats: {
         latest: {
           "calibrated-gauge": "2026-01-30T00:00:00Z",
-          "calibrated-radar": "2026-01-31T00:00:00Z"
+          "calibrated-radar": "2026-01-31T00:00:00Z",
+          "latest-15min-calibrated-gauge": "2026-01-28T00:00:00Z",
+          "latest-15min-calibrated-radar": "2026-01-29T00:00:00Z"
         }
       }
     };
 
-    expect(selectLatestlegacyGaugeTS(state)).toBe("2026-01-30T00:00:00Z");
-    expect(selectLatestlegacyGarrTS(state)).toBe("2026-01-31T00:00:00Z");
+    expect(selectLatestlegacyGaugeTS(state)).toBe("2026-01-28T00:00:00Z");
+    expect(selectLatestlegacyGarrTS(state)).toBe("2026-01-29T00:00:00Z");
   });
 
   it("maps legacy 5-minute earliest/latest timestamp keys", () => {
