@@ -548,9 +548,9 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     <div className="map-and-legend-container">
       <div className="map" id={MAPID} ref={mapContainerRef}></div>
       <PlaybackToolbar />
-      <div className="legend-container container-fluid">
+      {/* <div className="legend-container container-fluid">
         <MapLegend />
-      </div>
+      </div> */}
     </div>
   );
 };

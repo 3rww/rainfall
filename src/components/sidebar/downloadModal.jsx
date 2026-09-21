@@ -65,7 +65,7 @@ const DownloadModal = ({ show, onHide, fetchHistoryItem, contextType }) => {
         {ui.operations?.preview?.status === 'failed' && <Alert variant="danger">{ui.operations.preview.error}</Alert>}
         {ui.preview && <Suspense fallback={<p>Loading chart…</p>}><DownloadLineChart rows={ui.preview.rows} series={ui.preview.series} range={ui.preview.range} onRangeChange={changeRange} /></Suspense>}
         <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-          <p class="small text-muted">Drag horizontally to zoom. Double-click to reset. Times are Eastern.</p>
+          <p className="small text-muted">Drag horizontally to zoom. Double-click to reset. Times are Eastern.</p>
           <Button variant="link" size="sm" onClick={() => changeRange({})}>Reset chart zoom</Button>
         </div>
         <div className="download-modal-chart-controls border-top mt-3 pt-3">

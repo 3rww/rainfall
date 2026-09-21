@@ -2,13 +2,20 @@
 
 The toolbar appears only for an active result; transport controls and the slider
 appear only in Interval and Cumulative modes. Icon buttons have tooltips, and the
-compact Eastern timestamp sits at the end of the slider (the full interval is
-available in its tooltip). The toolbar switches the active rainfall query between
+compact Eastern timestamp and controls have dedicated columns beside the slider.
+On narrow screens the slider wraps to its own full-width row. The full interval
+is available in the timestamp tooltip. The toolbar switches the active rainfall query between
 Query total, Interval, and Cumulative views. Interval and Cumulative use the query's returned
 resolution; Total-only queries must be rerun with a timestep interval.
 
-Playback starts paused, requests a new frame every 100 ms (up to ten frames per
-second), and stops at the end.
+Playback starts paused and stops at the end. Short results use 100 ms per
+transition; longer results divide a ten-second playback schedule by the number
+of transitions. An elapsed-time clock accounts for rendering time and skips
+overdue frames on large results. Every timestep remains available when scrubbing,
+and cumulative frames still include all preceding observations. The final frame
+is scheduled within ten seconds; worker and browser rendering stalls can delay
+its actual appearance. The slider follows the selected timestep immediately,
+while the timestamp describes the frame actually displayed on the map.
 Play at the end restarts it. Scrubbing, stepping, changing modes, and hiding the
 browser tab pause playback. A different result, context, or result revision
 restores Query total. Each mode remembers its own 0.5-, 5-, or 10-inch legend
@@ -86,3 +93,13 @@ With all 165 pixels rendered, preparation took 423 ms and seeking took
 92 ms. Subsequent frame applications were 114–186 ms apart with the
 100 ms delay; rendering adds some overhead. The frame cache remained bounded to
 three frames and cleanup left no sessions or cached frames.
+
+### Adaptive playback and manual scrubbing
+
+All 163 unit tests and five playback browser tests passed, along with the
+production build and the 165-pixel, 8,929-timestep production benchmark. Browser
+checks used installed Microsoft Edge through a temporary Playwright config.
+Mouse drags in both directions at desktop and mobile widths keep the slider's
+position and width stable. The benchmark checks completion against a ten-second
+schedule with 500 ms tolerance for frame application; it measures the final
+frame's application timestamp, excluding test-driver serialization and polling.

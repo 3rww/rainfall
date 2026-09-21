@@ -7,12 +7,13 @@ import {
 export function registerPlaybackController(store, results) {
   let disposed = false, queued = false, identity = '', operation = '', sequence = 0;
   let session = null, prepared = null, abort = null, timer = null, clockKey = '';
+  let clock = null;
   let cacheMode = '', cacheGeneration = -1, maxCachedFrames = 0;
   const cache = new Map();
   const release = id => { if (id) results.run('releasePlayback', { session: id }).catch(() => {}); };
   function cleanup() {
     abort?.abort(); abort = null; clearTimeout(timer); timer = null;
-    cache.clear(); release(session); session = null; prepared = null; clockKey = '';
+    cache.clear(); release(session); session = null; prepared = null; clockKey = ''; clock = null;
   }
   function waitForApplication(frame, signal) {
     return new Promise(resolve => {
@@ -40,10 +41,24 @@ export function registerPlaybackController(store, results) {
       return;
     }
     const p = state.playback;
-    const nextClockKey = JSON.stringify([p.key, p.mode, p.playing, p.frame?.index, p.target, p.generation]);
+    const runKey = JSON.stringify([p.key, p.mode, p.generation]);
+    if (!p.playing) clock = null;
+    else if (!clock || clock.key !== runKey) {
+      clock = { key: runKey, started: performance.now(), index: p.target,
+        interval: Math.min(100, 10000 / Math.max(1, p.timeline.length - 1)) };
+    }
+    const nextClockKey = JSON.stringify([runKey, p.playing, p.frame?.index, p.target]);
     if (clockKey !== nextClockKey) {
       clearTimeout(timer); timer = null; clockKey = nextClockKey;
-      if (p.playing && p.frame?.index === p.target && !p.pending) timer = setTimeout(() => store.dispatch(advancePlayback()), 100);
+      if (clock && p.frame?.index === p.target && !p.pending) {
+        const due = clock.started + (p.target + 1 - clock.index) * clock.interval;
+        // Account for rendering time and skip overdue frames instead of accumulating delay.
+        // Keep at most one unapplied frame in flight, even when rendering is slow.
+        timer = setTimeout(() => {
+          const index = clock.index + Math.floor((performance.now() - clock.started) / clock.interval);
+          store.dispatch(advancePlayback(index));
+        }, Math.max(0, due - performance.now()));
+      }
     }
     const nextOperation = JSON.stringify([p.key, p.mode, p.target, p.generation]);
     if (nextOperation === operation) return;

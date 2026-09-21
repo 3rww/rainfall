@@ -25,9 +25,9 @@ const slice = createSlice({
       if (state.playing && state.frame?.index === state.timeline.length - 1) { state.target = 0; state.generation++; }
     },
     pausePlayback(state) { state.playing = false; },
-    advancePlayback(state) {
+    advancePlayback(state, { payload }) {
       if (!state.playing || !state.frame || state.pending) return;
-      state.target = Math.min(state.frame.index + 1, state.timeline.length - 1);
+      state.target = Math.min(Math.max(state.frame.index + 1, payload ?? 0), state.timeline.length - 1);
       state.status = 'loading';
     },
     playbackPrepared(state, { payload }) { if (payload.key === state.key) state.timeline = payload.timeline; },

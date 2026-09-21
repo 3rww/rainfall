@@ -4,14 +4,14 @@ import playback, { changePlaybackMode, seekPlayback, playbackFrameApplied, toggl
 import { registerPlaybackController } from './playbackController';
 
 const flush = async () => { for (let i = 0; i < 15; i++) await Promise.resolve(); };
-function setup() {
+function setup(frameCount = 4) {
   const item = { requestId: 'a', isActive: true, revision: 1, detailsAvailable: true, isFetching: 0, fetchKwargs: { rollup: '5-minute' }, resultHandles: { pixel: 'x' } };
   const store = configureStore({ reducer: {
     playback,
     progress: (s = { tab: 'test' }) => s,
     fetchKwargs: (s = { test: { history: [item] } }, a) => a.type === 'replace' ? { test: { history: a.payload } } : s
   } });
-  const timeline = [0, 1, 2, 3].map(i => ({ label: String(i) }));
+  const timeline = Array.from({ length: frameCount }, (_, i) => ({ label: String(i) }));
   const results = { run: vi.fn(async (type, args) => type === 'preparePlayback' ? { session: args.session, timeline } : type === 'playbackFrame' ? { index: args.index, values: [], interval: timeline[args.index] } : null) };
   const stop = registerPlaybackController(store, results);
   const apply = () => store.dispatch(playbackFrameApplied(store.getState().playback.pending.token));
@@ -80,11 +80,34 @@ describe('playback availability and failures', () => {
       await vi.advanceTimersByTimeAsync(2000); await flush();
       expect(store.getState().playback.target).toBe(1);
       apply(); await flush(); await vi.advanceTimersByTimeAsync(100); await flush();
-      expect(store.getState().playback.target).toBe(2);
+      expect(store.getState().playback.target).toBe(3);
       store.dispatch(seekPlayback(3)); await flush(); apply(); await flush();
       expect(store.getState().playback.playing).toBe(false);
       store.dispatch(togglePlayback()); await flush();
       expect(store.getState().playback.target).toBe(0);
+    } finally { stop(); vi.useRealTimers(); }
+  });
+});
+
+// A slow map must not add its render cost to every frame's playback delay.
+describe('adaptive playback timing', () => {
+  it.each([4, 101, 1201, 8929])('finishes %i timesteps on a ten-second schedule', async count => {
+    vi.useFakeTimers();
+    const { store, stop, apply } = setup(count);
+    try {
+      await flush(); store.dispatch(changePlaybackMode('interval')); await flush(); apply(); await flush();
+      const started = performance.now();
+      store.dispatch(togglePlayback()); await flush();
+      let rendered = 0;
+      while (store.getState().playback.playing && performance.now() - started < 11000) {
+        await vi.advanceTimersByTimeAsync(20); await flush();
+        if (store.getState().playback.pending) { apply(); rendered++; await flush(); }
+      }
+      expect(store.getState().playback.frame.index).toBe(count - 1);
+      expect(store.getState().playback.playing).toBe(false);
+      // Allow one simulated render tick beyond the scheduled final frame.
+      expect(performance.now() - started).toBeLessThanOrEqual(10020);
+      if (count > 1000) expect(rendered).toBeLessThan(count - 1);
     } finally { stop(); vi.useRealTimers(); }
   });
 });

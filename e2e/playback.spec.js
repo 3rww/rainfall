@@ -45,8 +45,13 @@ test('interval and cumulative playback controls, legends, state rendering, and c
     return { mode: bounds('.playback-mode'), controls: bounds('.btn-group'), slider: bounds('.playback-slider'), timestamp: bounds('.playback-label') };
   });
   expect(layout.controls.left).toBeGreaterThan(layout.mode.right);
-  expect(layout.slider.left).toBeGreaterThan(layout.controls.right);
-  expect(layout.timestamp.left).toBeGreaterThan(layout.slider.right);
+  expect(layout.slider.right - layout.slider.left).toBeGreaterThan(170);
+  if (Math.abs(layout.slider.centerY - layout.controls.centerY) < 2) {
+    expect(layout.slider.left).toBeGreaterThan(layout.controls.right);
+    expect(layout.timestamp.left).toBeGreaterThan(layout.slider.right);
+  } else {
+    expect(layout.slider.centerY).toBeGreaterThan(layout.controls.centerY);
+  }
   expect(Math.abs(layout.mode.centerY - layout.timestamp.centerY)).toBeLessThan(2);
   await page.screenshot({ path: info.outputPath('playback-desktop.png') });
   await page.getByRole('button', { name: 'Next timestep' }).click(); await ready(page);
@@ -88,7 +93,9 @@ test('interval and cumulative playback controls, legends, state rendering, and c
   await page.getByRole('button', { name: 'Pause playback' }).click();
   await mode.selectOption('total');
   await expect.poll(() => page.evaluate(() => window.__RAINFALL_MAP__.getFeatureState({ source: 'pixel', id: '100' }).rainfall)).toBeUndefined();
+  await mode.selectOption('interval'); await ready(page);
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect(slider).toBeVisible();
   await expect(mode).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath('playback-mobile.png') });
@@ -142,9 +149,17 @@ test('large playback keeps native frames, maintains cadence, seeks and releases 
   const p = await state(page);
   expect(p.frame.index).toBe(data[0].data.length - 1);
   expect(p.frame.values).toHaveLength(data.length);
+  const playbackStarted = await page.evaluate(() => {
+    window.playbackMetrics.seekMs = window.playbackMetrics.frames.at(-1).at - window.playbackMetrics.seekStarted;
+    window.__APP_STORE__.dispatch({ type: 'playback/togglePlayback' });
+    return performance.now();
+  });
+  await page.waitForFunction(() => !window.__APP_STORE__.getState().playback.playing, null, { timeout: 12000 });
+  expect((await state(page)).frame.index).toBe(data[0].data.length - 1);
+  const playbackDuration = await page.evaluate(started => window.playbackMetrics.frames.at(-1).at - started, playbackStarted);
+  expect(playbackDuration).toBeLessThan(10500);
   const metrics = await page.evaluate(() => {
     const metrics = window.playbackMetrics;
-    metrics.seekMs = metrics.frames.at(-1).at - metrics.seekStarted;
     metrics.prepareMs = metrics.frames[0].at - metrics.started;
     metrics.cadenceMs = metrics.frames.slice(1, 6).map((frame, i) => frame.at - metrics.frames[i].at);
     const store = window.__APP_STORE__;
@@ -155,6 +170,7 @@ test('large playback keeps native frames, maintains cadence, seeks and releases 
   });
   await expect.poll(async () => (await state(page)).frame).toBeNull();
   await expect(page.getByRole('combobox', { name: 'Rainfall map view' })).toHaveCount(0);
+  metrics.playbackDurationMs = playbackDuration;
   metrics.cleanup = await page.evaluate(() => window.__APP_STORE__.inspectResults());
   metrics.playback = { beforeCleanup, afterCleanup: await page.evaluate(() => window.__APP_STORE__.inspectPlayback()) };
   expect(metrics.playback.afterCleanup.sessions).toBe(0);
@@ -194,4 +210,28 @@ test('open tooltips update with frames and hiding the tab pauses playback', asyn
     document.dispatchEvent(new Event('visibilitychange'));
   });
   expect((await state(page)).playing).toBe(false);
+});
+
+test('scrubbing follows the pointer in both directions without shifting the slider', async ({ page }) => {
+  await openResult(page, largeRainfall(12, 1201));
+  await page.getByRole('combobox', { name: 'Rainfall map view' }).selectOption('interval'); await ready(page);
+  const slider = page.getByRole('slider', { name: 'Rainfall timestep' });
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await slider.scrollIntoViewIfNeeded();
+    const box = await slider.boundingBox();
+    expect(box.width).toBeGreaterThan(width === 390 ? 250 : 170);
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + 8, y); await page.mouse.down();
+    for (const fraction of [0.2, 0.8, 0.4, 0.9, 0.1]) {
+      await page.mouse.move(box.x + 8 + (box.width - 16) * fraction, y, { steps: 3 });
+      const selected = Number(await slider.inputValue());
+      expect(Math.abs(selected - fraction * 1200)).toBeLessThan(35);
+      expect((await state(page)).target).toBe(selected);
+      const current = await slider.boundingBox();
+      expect(current.x).toBe(box.x); expect(current.width).toBe(box.width); expect(current.y).toBe(box.y);
+    }
+    await page.mouse.up(); await ready(page);
+    expect((await state(page)).frame.index).toBe(Number(await slider.inputValue()));
+  }
 });

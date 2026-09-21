@@ -6,6 +6,7 @@ import ReactMap from './map/map';
 import RainfallDownloader from './sidebar/downloader'
 import LegacyRealtimeRainfallPage from './sidebar/legacy/legacyRealtime'
 import ThinkingOverlay from './thinking/thinkingOverlay'
+import MapLegendVertical from './map/legend-vert';
 
 import { RAINFALL_TYPES, CONTEXT_TYPES, SENSOR_TYPES } from '../store/config'
 
@@ -29,15 +30,22 @@ const Layout = () => {
       </Row>
 
       <Row className="layout-main-row g-0">
-        <Col sm={7} className="map-column">
-          <ReactMap
-            activeTab={tab}
-            token={initMap.token}
-            styleUrl={initMap.styleId}
-            latitude={initMap.latitude}
-            longitude={initMap.longitude}
-            zoom={initMap.zoom}
-          />
+        <Col sm={7} className="map-column h-100">
+          <Row className="g-0 h-100">
+            <Col xs={1} className="h-100 pe-1">
+              <MapLegendVertical />
+            </Col>
+            <Col xs={11} className="h-100">
+              <ReactMap
+                activeTab={tab}
+                token={initMap.token}
+                styleUrl={initMap.styleId}
+                latitude={initMap.latitude}
+                longitude={initMap.longitude}
+                zoom={initMap.zoom}
+              />
+            </Col>
+          </Row>
         </Col>
 
         <Col sm={5} className="sidebar-column">
