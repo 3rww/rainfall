@@ -1,3 +1,4 @@
+import playback from './features/playbackSlice';
 import resultsPresentation from './features/resultsPresentationSlice';
 import { combineReducers } from '@reduxjs/toolkit';
 
@@ -13,6 +14,7 @@ import mapLegendReducer from './features/mapLegendSlice';
 
 export const rootReducer = combineReducers({
   resultsPresentation,
+  playback,
   progress: progressReducer,
   globalConfig: globalConfigReducer,
   fetchKwargs: fetchKwargsReducer,

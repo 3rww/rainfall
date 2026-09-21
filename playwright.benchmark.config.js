@@ -1,7 +1,7 @@
 import config from './playwright.config';
 export default {
   ...config,
-  testMatch: '**/results.spec.js',
+  testMatch: ['**/results.spec.js', '**/playback.spec.js'],
   fullyParallel: false,
   workers: 1,
   timeout: 180000,

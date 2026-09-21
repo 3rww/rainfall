@@ -22,6 +22,9 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
 import { Tooltip } from './tooltip';
 import MapLegend from './legend';
+import PlaybackToolbar from './playbackToolbar';
+import { applyPlaybackFrame, clearPlaybackFrame, applyPlaybackStyle } from './playbackMap';
+import { playbackFrameApplied } from '../../store/features/playbackSlice';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
@@ -36,6 +39,10 @@ const ReactMap = ({ activeTab, token, zoom }) => {
   const store = useStore();
   const mapStyle = useAppSelector((state) => state.mapStyle);
   const initMap = useAppSelector((state) => state.initMap);
+  const playback = useAppSelector(state => state.playback);
+  const mapReady = useAppSelector(state => state.progress.mapLoaded);
+  const appliedFrameRef = useRef(null);
+  const tooltipFeaturesRef = useRef([]);
 
   const webmapRef = useRef(null);
   const mapContainerRef = useRef(null);
@@ -49,17 +56,18 @@ const ReactMap = ({ activeTab, token, zoom }) => {
   }, [activeTab]);
 
   const setTooltip = useCallback((features) => {
+    tooltipFeaturesRef.current = features;
     if (!tooltipRootRef.current) {
       return;
     }
 
     if (features.length > 0) {
-      tooltipRootRef.current.render(<Tooltip features={features} />);
+      tooltipRootRef.current.render(<Tooltip features={features} playback={store.getState().playback} />);
       return;
     }
 
     tooltipRootRef.current.render(null);
-  }, []);
+  }, [store]);
 
   const makeTooltipOnHover = useCallback((event, tooltip) => {
     const map = webmapRef.current;
@@ -291,6 +299,7 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     mapboxgl.accessToken = token;
     const webmap = new mapboxgl.Map(mapConfig);
     webmapRef.current = webmap;
+    if (E2E_TEST_MODE) window.__RAINFALL_MAP__ = webmap;
     let didInitializeApp = false;
 
     const initializeApp = (loaded = true, message = 'Map loaded') => {
@@ -459,6 +468,7 @@ const ReactMap = ({ activeTab, token, zoom }) => {
         }, 0);
       }
       if (webmapRef.current) {
+        if (E2E_TEST_MODE) delete window.__RAINFALL_MAP__;
         webmapRef.current.remove();
         webmapRef.current = null;
       }
@@ -475,9 +485,69 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     }
   }, [mapStyle, updateMapStyle]);
 
+  useEffect(() => {
+    const map = webmapRef.current;
+    if (!mapReady || !map) return;
+    const style = () => applyPlaybackStyle(map, store.getState().playback);
+    if (map.isStyleLoaded()) style();
+    else map.once('idle', style);
+    return () => map.off('idle', style);
+  }, [mapReady, mapStyle, playback.mode, playback.scales, store]);
+
+  useEffect(() => {
+    const map = webmapRef.current;
+    if (!map || !mapReady) return;
+    const apply = () => {
+      const current = store.getState().playback;
+      if (current.mode === 'total') {
+        clearPlaybackFrame(map, appliedFrameRef.current);
+        appliedFrameRef.current = null;
+        return;
+      }
+      const frame = current.pending?.frame || current.frame;
+      if (!frame) {
+        clearPlaybackFrame(map, appliedFrameRef.current);
+        appliedFrameRef.current = null;
+        return;
+      }
+      applyPlaybackFrame(map, frame);
+      appliedFrameRef.current = frame;
+      if (current.pending) dispatch(playbackFrameApplied(current.pending.token));
+    };
+    let animation;
+    const schedule = () => { animation = requestAnimationFrame(apply); };
+    if (map.isStyleLoaded()) schedule();
+    else map.once('idle', schedule);
+    return () => { cancelAnimationFrame(animation); map.off('idle', schedule); };
+  }, [mapReady, mapStyle, playback.pending, playback.mode, playback.key, dispatch, store]);
+
+  useEffect(() => { setTooltip(tooltipFeaturesRef.current); }, [playback.frame, playback.mode, setTooltip]);
+
+  useEffect(() => {
+    const map = webmapRef.current;
+    if (!map) return;
+    let animation;
+    const restore = () => {
+      cancelAnimationFrame(animation);
+      animation = requestAnimationFrame(() => {
+        const current = store.getState().playback;
+        applyPlaybackStyle(map, current);
+        const frame = current.pending?.frame || current.frame;
+        if (current.mode !== 'total' && frame) {
+          applyPlaybackFrame(map, frame);
+          appliedFrameRef.current = frame;
+          if (current.pending) dispatch(playbackFrameApplied(current.pending.token));
+        }
+      });
+    };
+    map.on('style.load', restore);
+    return () => { cancelAnimationFrame(animation); map.off('style.load', restore); };
+  }, [store, dispatch]);
+
   return (
     <div className="map-and-legend-container">
       <div className="map" id={MAPID} ref={mapContainerRef}></div>
+      <PlaybackToolbar />
       <div className="legend-container container-fluid">
         <MapLegend />
       </div>

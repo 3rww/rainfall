@@ -1,5 +1,6 @@
 // Worker-owned observations. Generators yield bounded batches to the scheduler.
 import { unparse } from 'papaparse';
+import { createPlaybackEngine } from './playback';
 import { toDateTime } from '../store/utils/dateTime';
 import {
   normalizeDownloadRow, parseDownloadTimestamp, formatExcelDateTimeInEastern, sanitizeSwmmIdentifier,
@@ -228,9 +229,12 @@ export function createResultsEngine() {
     parts.push(lines.join(''));
     return { blob: new Blob(parts, { type: 'text/plain;charset=utf-8' }), filename: 'rainfall_swmm.inp' };
   }
+  const playback = createPlaybackEngine(entries);
   return {
     ingest, preview, export: exportData,
-    dispose(handles) { for (const handle of handles) datasets.delete(handle); },
+    *inspectPlayback() { return { sessions: playback.size() }; },
+    preparePlayback: playback.preparePlayback, playbackFrame: playback.playbackFrame, releasePlayback: playback.releasePlayback,
+    dispose(handles) { playback.dispose(handles); for (const handle of handles) datasets.delete(handle); },
     inspect() { return { datasets: datasets.size, timestamps: [...datasets.values()].reduce((n, d) => n + d.timestamps.size, 0) }; }
   };
 }

@@ -1,3 +1,4 @@
+import { registerPlaybackController } from './playbackController';
 import { configureStore } from '@reduxjs/toolkit';
 import { rootReducer } from './rootReducer';
 import { createRainfallListeners } from './listenerMiddleware';
@@ -14,10 +15,13 @@ export function createAppStore({ results = createResultsClient(), preloadedState
     middleware: getDefault => getDefault({ thunk: { extraArgument: extra } }).prepend(listeners.middleware).concat(middleware),
     devTools: true
   });
+  const disposePlayback = registerPlaybackController(store, results);
   results.onFailure(message => store.dispatch(workerFailed(message)));
+  store.inspectPlayback = async () => ({ ...await results.run('inspectPlayback', {}), ...disposePlayback.inspect() });
   store.inspectResults = () => results.inspect();
   store.teardown = () => {
     for (const job of extra.pollingJobs.values()) { job.controller.abort('canceled'); clearTimeout(job.timer); }
+    disposePlayback();
     extra.pollingJobs.clear(); disposeListeners(); listeners.clearListeners(); results.teardown();
   };
   return store;

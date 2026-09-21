@@ -68,7 +68,8 @@ export const buildRainfallColorStyleExp = (attr, breaks, chromaScaleObj, colors,
       method = 'linear'
     }
     
-    const numericAttrExpression = ["to-number", ["get", attr], 0]
+    const valueExpression = Array.isArray(attr) ? attr : ["get", attr]
+    const numericAttrExpression = ["to-number", valueExpression, 0]
 
     let colorExp = [
       "interpolate",
@@ -88,7 +89,7 @@ export const buildRainfallColorStyleExp = (attr, breaks, chromaScaleObj, colors,
     })
   
     return {
-      colorExp: ["case", ["==", ["get", attr], null], "rgba(0,0,0,0)", colorExp],
+      colorExp: ["case", ["==", valueExpression, null], "rgba(0,0,0,0)", colorExp],
       legendContent: legendContent
     }
   

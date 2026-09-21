@@ -38,3 +38,14 @@
     background: rgba(255, 255, 255, 0.8);
 }
 
+
+.playback-toolbar { flex: 0 0 auto; }
+.playback-toolbar .playback-mode { flex: 0 0 130px; width: 130px; }
+.playback-timeline { flex: 1 1 320px; min-width: 0; }
+.playback-toolbar .playback-slider { flex: 1 1 100px; width: auto; min-width: 60px; margin: 0; }
+.playback-label { flex: 0 1 auto; font-size: 0.75rem; }
+.playback-button { display: inline-flex; }
+.playback-button .btn { border-radius: 0; padding: 0.25rem 0.5rem; }
+.playback-button:first-child .btn { border-top-left-radius: 0.2rem; border-bottom-left-radius: 0.2rem; }
+.playback-button:last-child .btn { border-top-right-radius: 0.2rem; border-bottom-right-radius: 0.2rem; }
+.playback-button + .playback-button { margin-left: -1px; }

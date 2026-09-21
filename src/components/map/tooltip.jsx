@@ -1,51 +1,23 @@
 import React from 'react';
 import { ListGroup, Card } from 'react-bootstrap';
-import { paddedRound } from '../../store/utils/index'
-
-// export default class Tooltip extends React.Component {
-//   render() {
+import { paddedRound } from '../../store/utils/index';
 import './tooltip.css';
 
-export const Tooltip = ({ features }) => {
-
-  const c = features.filter(f => f.id !== undefined).length
-
-  const renderFeature = (feature, i) => {
-    let p = feature.properties
-    // let d = JSON.parse(p.data)
-
-    return (
-      <ListGroup.Item key={i}>
-        <h6 className="tooltip-header">{p.label}</h6>
-        
-        {p.total === null ? <p className="tooltip-body">No rainfall observations available.</p> : (typeof p.total === "number") ? (
-          <p className="tooltip-body">Total rainfall: <strong>{paddedRound(p.total, 2)}</strong> inches</p>
-        ) : (
-          null
-        )}
-
-        {/* {(d.length > 0) ? (
-          d.map(r => (
-            <p className="small">{r.ts} | {r.val} | {r.src}</p>
-          ))
-        ) : (
-          null
-        )} */}
-      </ListGroup.Item>
-    )
-  };
-
-  if (c > 0) {
-    return (
-      // <Card style={{ width: '250px' }}>
-      <Card>
-        <ListGroup variant="flush">
-          {features.filter(f => f.id !== undefined).map(renderFeature)}
-        </ListGroup>
-      </Card>
-    )
-  } else {
-    return null
-  }
-}
-// }
+export const Tooltip = ({ features, playback }) => {
+  const visible = features.filter(feature => feature.id !== undefined);
+  if (!visible.length) return null;
+  const active = Boolean(playback && playback.mode !== 'total');
+  const caption = active ? (playback.mode === 'cumulative' ? 'Cumulative rainfall' : 'Interval rainfall') : 'Total rainfall';
+  return <Card><ListGroup variant="flush">
+    {visible.map((feature, index) => {
+      const reading = active ? playback.frame?.values.find(value => value.source === feature.source && value.id === String(feature.id)) : null;
+      const value = active ? reading?.value ?? null : feature.properties.total;
+      return <ListGroup.Item key={index}>
+        <h6 className="tooltip-header">{feature.properties.label}</h6>
+        {active && playback.frame && <p className="tooltip-body">{playback.frame.interval.label}</p>}
+        {value === null ? <p className="tooltip-body">No rainfall observations available.</p> : typeof value === 'number' ?
+          <p className="tooltip-body">{caption}: <strong>{active ? value.toFixed(3) : paddedRound(value, 2)}</strong> inches</p> : null}
+      </ListGroup.Item>;
+    })}
+  </ListGroup></Card>;
+};

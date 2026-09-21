@@ -15,6 +15,7 @@ const MOCK_EVENT_2 = {
 const MOCK_STYLE = {
   version: 8,
   name: "mock-style",
+  glyphs: "http://mock.api/fonts/{fontstack}/{range}.pbf",
   sources: {
     gauge: {
       type: "geojson",
@@ -207,7 +208,7 @@ export const registerMockApiRoutes = async (page, options = {}) => {
     }
 
     if (path === "/pixels/") {
-      return jsonResponse(route, MOCK_PIXELS);
+      return jsonResponse(route, options.pixels || MOCK_PIXELS);
     }
 
     if (path === "/static/data/geography-lookup.json") {
