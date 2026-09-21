@@ -1,0 +1,45 @@
+import { it, expect, vi } from 'vitest';
+import { createResultsClient } from './client';
+it('starts lazily, transfers buffers, throttles progress, and always delivers terminal progress', async () => {
+  const worker = { postMessage: vi.fn(), terminate: vi.fn() };
+  const factory = vi.fn(() => worker);
+  const client = createResultsClient(factory);
+  expect(factory).not.toHaveBeenCalled();
+  const buffer = new ArrayBuffer(10);
+  const progress = vi.fn();
+  const promise = client.run('ingest', { buffer }, { onProgress: progress });
+  expect(worker.postMessage.mock.calls[0][1]).toEqual([buffer]);
+  const id = worker.postMessage.mock.calls[0][0].id;
+  for (let i = 0; i < 10; i++) worker.onmessage({ data: { id, progress: { processed: i } } });
+  worker.onmessage({ data: { id, result: { status: 'finished' } } });
+  await promise;
+  expect(progress).toHaveBeenCalledTimes(2);
+  expect(progress).toHaveBeenLastCalledWith({ done: true });
+  client.teardown();
+  expect(worker.terminate).toHaveBeenCalledOnce();
+});
+it('bridges abort, ignores late replies, rejects pending work on worker failure', async () => {
+  const worker = { postMessage: vi.fn(), terminate: vi.fn() };
+  const client = createResultsClient(() => worker);
+  const failure = vi.fn(); client.onFailure(failure);
+  const controller = new AbortController();
+  const first = client.run('preview', {}, { signal: controller.signal });
+  const second = client.run('export', {});
+  controller.abort();
+  await expect(first).rejects.toMatchObject({ name: 'AbortError' });
+  worker.onmessage({ data: { id: '1', result: { rows: [] } } });
+  worker.onerror({ message: 'Crashed' });
+  await expect(second).rejects.toThrow('Crashed');
+  expect(failure).toHaveBeenCalledWith('Crashed');
+});
+it('releases an artifact even when an abort races with its completion', async () => {
+  const worker = { postMessage: vi.fn(), terminate: vi.fn() };
+  const client = createResultsClient(() => worker);
+  const controller = new AbortController();
+  const promise = client.run('export', { handles: { gauge: 'one' } }, { signal: controller.signal });
+  worker.onmessage({ data: { id: '1', result: { blob: new Blob(['rainfall']), filename: 'rainfall.csv' } } });
+  controller.abort();
+  const result = await promise;
+  expect(client.artifact(result.artifact)).toBeUndefined();
+  client.teardown();
+});

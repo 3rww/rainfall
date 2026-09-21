@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { formatDateTime } from "../../store/utils/dateTime";
+import { toDateTime } from "../../store/utils/dateTime";
 
 const CHART_COLORS = [
   "#0077b6",
@@ -22,8 +22,8 @@ const CHART_COLORS = [
   "#8f2d56"
 ];
 
-const formatAxisTimestamp = (timestampMs) => formatDateTime(timestampMs, "MM/DD HH:mm");
-const formatTooltipTimestamp = (timestampMs) => formatDateTime(timestampMs, "MM/DD/YYYY h:mm a");
+const formatAxisTimestamp = (timestampMs) => toDateTime(timestampMs).tz("America/New_York").format("MM/DD HH:mm");
+const formatTooltipTimestamp = (timestampMs) => toDateTime(timestampMs).tz("America/New_York").format("MM/DD/YYYY h:mm a Z");
 
 const DownloadLineChart = ({ rows, series, showLegend = true }) => {
   const hasChartData = Array.isArray(rows) && rows.length > 0 && Array.isArray(series) && series.length > 0;
@@ -50,7 +50,10 @@ const DownloadLineChart = ({ rows, series, showLegend = true }) => {
           />
           <YAxis />
           <Tooltip
-            formatter={(value, _name, item) => [value, item?.name]}
+            formatter={(value, _name, item) => {
+              const coverage = item?.payload?.coverage?.[item.dataKey];
+              return [value, `${item?.name}${coverage ? ` (${coverage.contributing}/${coverage.expected} readings; ${coverage.timestamps} timestamps)` : ''}`];
+            }}
             labelFormatter={formatTooltipTimestamp}
           />
           {showLegend ? <Legend /> : null}
@@ -73,4 +76,4 @@ const DownloadLineChart = ({ rows, series, showLegend = true }) => {
   );
 };
 
-export default DownloadLineChart;
+export default React.memo(DownloadLineChart);

@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { workerFailed } from './resultsPresentationSlice';
 import { initialState } from '../initialState';
 
 const normalizeMessage = (messages) => {
@@ -124,7 +125,7 @@ const fetchKwargsSlice = createSlice({
         return;
       }
 
-      currentItem.isFetching += 1;
+      if (!currentItem.pendingSensors?.includes(sensor)) currentItem.isFetching += 1;
       if (sensor) {
         currentItem.pendingSensors = uniquePush(currentItem.pendingSensors, sensor);
       }
@@ -134,8 +135,12 @@ const fetchKwargsSlice = createSlice({
       const { contextType, requestId, results, processedKwargs, status, messages } = action.payload;
 
       findHistoryItemsByRequestId(state, requestId, contextType).forEach((fetchItem) => {
-        fetchItem.isFetching -= 1;
-        fetchItem.results = { ...results, ...fetchItem.results };
+        fetchItem.isFetching = Math.max(0, fetchItem.isFetching - 1);
+        // Retain historic sensor-type ordering while allowing replacement values to win.
+        fetchItem.results = { ...results, ...fetchItem.results, ...results };
+        fetchItem.resultHandles = { ...action.payload.resultHandles, ...fetchItem.resultHandles, ...action.payload.resultHandles };
+        fetchItem.revision = (fetchItem.revision || 0) + 1;
+        fetchItem.detailsAvailable = Object.keys(fetchItem.results).every(sensor => Boolean(fetchItem.resultHandles[sensor]));
         fetchItem.processedKwargs = processedKwargs;
         fetchItem.status = status;
         fetchItem.messages = messages;
@@ -158,7 +163,7 @@ const fetchKwargsSlice = createSlice({
         return;
       }
 
-      fetchItem.isFetching -= 1;
+      fetchItem.isFetching = Math.max(0, fetchItem.isFetching - 1);
       fetchItem.status = status;
       fetchItem.messages = messages;
 
@@ -196,7 +201,13 @@ const fetchKwargsSlice = createSlice({
 
       context.history = context.history.filter((item) => item.requestId !== requestId);
     }
-  }
+  },
+  extraReducers: builder => builder.addCase(workerFailed, state => {
+    for (const context of Object.values(state)) for (const item of context.history || []) {
+      item.detailsAvailable = false;
+      item.resultHandles = {};
+    }
+  })
 });
 
 export const {

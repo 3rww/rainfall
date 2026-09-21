@@ -1,5 +1,5 @@
-import { createListenerMiddleware } from '@reduxjs/toolkit';
-import { cloneDeep, get, keys } from 'lodash-es';
+import { createListenerMiddleware, createSelector } from '@reduxjs/toolkit';
+import { get, keys } from 'lodash-es';
 
 import { SENSOR_TYPES } from './config';
 import {
@@ -20,19 +20,22 @@ import {
 import { joinTabletoGeojson } from './utils/transformers';
 import { cancelRainfallPolling } from './features/rainfallThunks';
 
-const buildSourceDataByName = (state, resultsBySensor = {}) => {
+const EMPTY_RESULTS = {};
+const buildSourceDataByName = createSelector(
+  [state => state.refData, (_state, results = EMPTY_RESULTS) => results],
+  (refData, resultsBySensor) => {
   const sourceDataByName = {};
 
   keys(SENSOR_TYPES).forEach((sensorType) => {
-    const referenceGeojson = cloneDeep(get(state, ['refData', sensorType, 'data']));
+    const referenceGeojson = get(refData, [sensorType, 'data']);
     if (!referenceGeojson) {
       return;
     }
 
     if (resultsBySensor && resultsBySensor[sensorType]) {
       sourceDataByName[sensorType] = joinTabletoGeojson(
-        cloneDeep(referenceGeojson),
-        resultsBySensor[sensorType],
+        referenceGeojson,
+        resultsBySensor[sensorType].map(({ id, total, recordCount, validCount, missingCount }) => ({ id, total, ...(recordCount !== undefined ? { recordCount, validCount, missingCount } : {}) })),
         'properties.id',
         'id',
         false
@@ -44,7 +47,7 @@ const buildSourceDataByName = (state, resultsBySensor = {}) => {
   });
 
   return sourceDataByName;
-};
+});
 
 const reapplySelectedHighlights = ({ dispatch, state, contextType }) => {
   const activeKwargs = selectFetchKwargs(state, contextType);
@@ -60,7 +63,8 @@ const reapplySelectedHighlights = ({ dispatch, state, contextType }) => {
   });
 };
 
-const listenerMiddleware = createListenerMiddleware();
+export function createRainfallListeners(extra) {
+const listenerMiddleware = createListenerMiddleware({ extra });
 
 listenerMiddleware.startListening({
   actionCreator: switchTab,
@@ -128,7 +132,7 @@ listenerMiddleware.startListening({
     ]);
 
     sensorsToCancel.forEach((sensor) => {
-      cancelRainfallPolling({ requestId, contextType, sensor });
+      listenerApi.dispatch(cancelRainfallPolling({ requestId, contextType, sensor }));
     });
 
     if (removedItem.isActive !== true) {
@@ -160,4 +164,6 @@ listenerMiddleware.startListening({
   }
 });
 
-export default listenerMiddleware;
+return listenerMiddleware;
+}
+export default createRainfallListeners();

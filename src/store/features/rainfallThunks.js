@@ -24,220 +24,48 @@ import { pickRainfallEvent as pickRainfallEventAction } from './rainfallEventsSl
 import { applyActiveResultToMap } from './downloadThunks';
 import { resolveAvailableBounds, clampDateTimeRange } from '../utils/dateBounds';
 import { buildRequestKey } from '../utils/requestKey';
-import { transformRainfallResults } from '../utils/transformers';
+import { nanoid } from '@reduxjs/toolkit';
 
-const pollingJobs = new Map();
-
-const getPollingKey = ({ requestId, contextType, sensor }) => (
-  `${contextType}:${requestId}:${sensor}`
-);
-
-const clearPollingJob = (pollKey) => {
-  pollingJobs.delete(pollKey);
+const getPollingKey = ({ requestId, contextType, sensor }) => JSON.stringify([contextType, requestId, sensor]);
+const abortPollingJob = (jobs, key, reason = 'canceled') => {
+  const job = jobs?.get(key);
+  if (!job) return;
+  job.controller.abort(reason); clearTimeout(job.timer); jobs.delete(key);
 };
-
-const abortPollingJob = (pollKey, reason = 'canceled') => {
-  const pollingJob = pollingJobs.get(pollKey);
-  if (!pollingJob) {
-    return;
-  }
-
-  pollingJob.controller.abort(reason);
-  pollingJobs.delete(pollKey);
-};
-
-const dispatchRequestFail = ({ dispatch, requestId, contextType, sensor, status, messages }) => {
-  dispatch(requestRainfallDataFail({
-    requestId,
-    contextType,
-    results: { [sensor]: false },
-    status,
-    messages
-  }));
-};
-
-const pollRainfallApiV2 = async ({
-  dispatch,
-  requestId,
-  sensor,
-  contextType,
-  url,
-  params,
-  pollKey,
-  attempt = 1
-}) => {
-  const pollingJob = pollingJobs.get(pollKey);
-  if (!pollingJob) {
-    return;
-  }
-
-  const elapsedMs = Date.now() - pollingJob.startedAt;
-  if (attempt > API_POLL_MAX_ATTEMPTS || elapsedMs > API_POLL_MAX_MS) {
-    dispatchRequestFail({
-      dispatch,
-      requestId,
-      contextType,
-      sensor,
-      status: 'timed_out',
-      messages: [`Rainfall request timed out after ${Math.round(elapsedMs / 1000)} seconds.`]
-    });
-    abortPollingJob(pollKey, 'timed_out');
-    return;
-  }
-
-  const requestOptions = {
-    url,
-    method: 'POST',
-    signal: pollingJob.controller.signal
+const pollRainfallApiV2 = async ({ dispatch, getState, extra, requestId, sensor, contextType, url, params, pollKey, job, attempt = 1 }) => {
+  const jobs = extra.pollingJobs;
+  const current = () => jobs.get(pollKey) === job && Boolean(selectFetchHistoryItemById(getState(), requestId, contextType));
+  if (!current()) return;
+  const fail = (status, messages) => {
+    if (current()) dispatch(requestRainfallDataFail({ requestId, contextType, results: { [sensor]: false }, status, messages }));
   };
-
-  if (params !== false) {
-    requestOptions.data = params;
-  }
-
   try {
-    const response = await axios(requestOptions);
-    let apiResponse = response.data;
-
+    if (attempt > API_POLL_MAX_ATTEMPTS || Date.now() - job.startedAt > API_POLL_MAX_MS) {
+      fail('timed_out', ['Rainfall request timed out.']); abortPollingJob(jobs, pollKey, 'timed_out'); return;
+    }
+    const response = await axios({ url, method: 'POST', signal: job.controller.signal, responseType: 'arraybuffer', ...(params !== false ? { data: params } : {}) });
+    if (!current()) return;
+    const apiResponse = await extra.results.run('ingest', { buffer: response.data, handle: job.handle, sensor, contextType }, { signal: job.controller.signal });
+    if (!current()) { extra.results.dispose([job.handle]); return; }
     if (includes(['queued', 'started'], apiResponse.status)) {
-      const nextUrl = apiResponse?.meta?.jobUrl;
-      if (!nextUrl) {
-        dispatchRequestFail({
-          dispatch,
-          requestId,
-          contextType,
-          sensor,
-          status: 'error',
-          messages: ['Rainfall request returned queued/started without a follow-up job URL.']
-        });
-        clearPollingJob(pollKey);
-        return;
-      }
-
-      setTimeout(() => {
-        pollRainfallApiV2({
-          dispatch,
-          requestId,
-          sensor,
-          contextType,
-          url: nextUrl,
-          params: false,
-          pollKey,
-          attempt: attempt + 1
-        });
-      }, REQUEST_TIME_INTERVAL);
+      const nextUrl = apiResponse.meta?.jobUrl;
+      if (!nextUrl) { fail('error', ['Rainfall request returned queued/started without a follow-up job URL.']); jobs.delete(pollKey); return; }
+      job.timer = setTimeout(() => pollRainfallApiV2({ dispatch, getState, extra, requestId, sensor, contextType, url: nextUrl, params: false, pollKey, job, attempt: attempt + 1 }), REQUEST_TIME_INTERVAL);
       return;
     }
-
-    if (includes(['deferred', 'failed'], apiResponse.status)) {
-      dispatchRequestFail({
-        dispatch,
-        requestId,
-        contextType,
-        sensor,
-        status: apiResponse.status,
-        messages: apiResponse.messages
-      });
-      clearPollingJob(pollKey);
-      return;
-    }
-
-    if (apiResponse.status === 'finished') {
-      try {
-        if (apiResponse.data === null) {
-          dispatchRequestFail({
-            dispatch,
-            requestId,
-            contextType,
-            sensor,
-            status: 'error',
-            messages: apiResponse.messages
-          });
-          clearPollingJob(pollKey);
-          return;
-        }
-
-        apiResponse = transformRainfallResults(apiResponse, { contextType, sensor });
-
-        dispatch(requestRainfallDataSuccess({
-          requestId,
-          contextType,
-          results: { [sensor]: apiResponse.data },
-          processedKwargs: apiResponse.args,
-          status: apiResponse.status,
-          messages: apiResponse.messages
-        }));
-
-        dispatch(applyActiveResultToMap({ requestId, contextType }));
-      } catch (error) {
-        dispatchRequestFail({
-          dispatch,
-          requestId,
-          contextType,
-          sensor,
-          status: 'error',
-          messages: apiResponse.messages
-        });
-      }
-
-      clearPollingJob(pollKey);
-      return;
-    }
-
-    if (apiResponse.status === 'does not exist') {
-      dispatchRequestFail({
-        dispatch,
-        requestId,
-        contextType,
-        sensor,
-        status: apiResponse.status,
-        messages: apiResponse.messages
-      });
-      clearPollingJob(pollKey);
-      return;
-    }
-
-    dispatchRequestFail({
-      dispatch,
-      requestId,
-      contextType,
-      sensor,
-      status: 'error',
-      messages: [`Unexpected rainfall status "${apiResponse.status}" returned by API.`]
-    });
-    clearPollingJob(pollKey);
+    if (apiResponse.status === 'finished' && apiResponse.data !== null) {
+      dispatch(requestRainfallDataSuccess({ requestId, contextType, results: { [sensor]: apiResponse.data }, resultHandles: { [sensor]: apiResponse.handle }, processedKwargs: apiResponse.args, status: apiResponse.status, messages: apiResponse.messages }));
+      dispatch(applyActiveResultToMap({ requestId, contextType }));
+    } else fail(apiResponse.status === 'finished' ? 'error' : apiResponse.status, apiResponse.messages);
+    jobs.delete(pollKey);
   } catch (error) {
-    const aborted = pollingJob.controller.signal.aborted;
-
-    if (aborted) {
-      const abortReason = pollingJob.controller.signal.reason;
-      if (abortReason !== 'timed_out') {
-        dispatchRequestFail({
-          dispatch,
-          requestId,
-          contextType,
-          sensor,
-          status: 'canceled',
-          messages: ['Rainfall request was canceled.']
-        });
-      }
-      clearPollingJob(pollKey);
-      return;
-    }
-
-    dispatchRequestFail({
-      dispatch,
-      requestId,
-      contextType,
-      sensor,
-      status: 'error',
-      messages: ['An error occurred when trying to fetch the rainfall data.', `${error}`]
-    });
-    clearPollingJob(pollKey);
+    if (!current()) return;
+    fail(job.controller.signal.aborted ? 'canceled' : 'error', ['An error occurred when trying to fetch the rainfall data.', String(error)]);
+    extra.results.dispose([job.handle]); jobs.delete(pollKey);
   }
 };
 
-export const fetchRainfallDataFromApiV2 = (payload) => (dispatch, getState) => {
+export const fetchRainfallDataFromApiV2 = (payload) => (dispatch, getState, extra) => {
   const { contextType, rainfallDataType } = payload;
   const state = getState();
   const kwargs = selectFetchKwargs(state, contextType);
@@ -293,14 +121,15 @@ export const fetchRainfallDataFromApiV2 = (payload) => (dispatch, getState) => {
     }));
 
     const pollKey = getPollingKey({ requestId, contextType, sensor: sensor[0] });
-    abortPollingJob(pollKey);
-    pollingJobs.set(pollKey, {
+    abortPollingJob(extra.pollingJobs, pollKey);
+    extra.pollingJobs.set(pollKey, {
+      handle: nanoid(),
       controller: new AbortController(),
       startedAt: Date.now()
     });
 
     pollRainfallApiV2({
-      dispatch,
+      dispatch, getState, extra, job: extra.pollingJobs.get(pollKey),
       requestId,
       sensor: sensor[0],
       contextType,
@@ -312,9 +141,9 @@ export const fetchRainfallDataFromApiV2 = (payload) => (dispatch, getState) => {
   });
 };
 
-export const cancelRainfallPolling = ({ requestId, contextType, sensor }) => {
+export const cancelRainfallPolling = ({ requestId, contextType, sensor }) => (_dispatch, _getState, extra) => {
   const pollKey = getPollingKey({ requestId, contextType, sensor });
-  abortPollingJob(pollKey, 'canceled');
+  abortPollingJob(extra?.pollingJobs, pollKey, 'canceled');
 };
 
 export const pickRainfallEvent = ({ eventid, contextType }) => (dispatch, getState) => {

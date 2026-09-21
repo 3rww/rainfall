@@ -1,33 +1,29 @@
-import React, { useCallback, useState, lazy, Suspense } from 'react';
+import React, { useCallback } from 'react';
 import { Row, Col, Button, Card, Alert } from 'react-bootstrap';
 import { includes } from 'lodash-es';
 
 import { pickDownload } from '../../store/features/downloadThunks';
-import { useAppDispatch } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { formatDateTime } from '../../store/utils/dateTime';
-import { CHART_SERIES_MODE } from './downloadTableUtils';
+import { modalOpened, modalClosed, resultKey } from '../../store/features/resultsPresentationSlice';
+import DownloadModal from './downloadModal';
 
 import './downloadItem.css';
 
-const DownloadModal = lazy(() => import('./downloadModal'));
 
 const DownloadsItem = ({ fetchHistoryItem, contextType }) => {
   const dispatch = useAppDispatch();
-  const [show, setShow] = useState(false);
-  const [seriesMode, setSeriesMode] = useState(CHART_SERIES_MODE.averageByType);
+  const show = useAppSelector(state => state.resultsPresentation.items[resultKey({ contextType, requestId: fetchHistoryItem.requestId })]?.open || false);
 
   const handleClose = useCallback(() => {
-    setShow(false);
-  }, []);
+    dispatch(modalClosed({ contextType, requestId: fetchHistoryItem.requestId }));
+  }, [dispatch, contextType, fetchHistoryItem.requestId]);
 
   const handleShow = useCallback((event) => {
     event.stopPropagation();
-    setShow(true);
-    setSeriesMode(CHART_SERIES_MODE.averageByType);
+    dispatch(modalOpened({ contextType, requestId: fetchHistoryItem.requestId }));
 
     if (!fetchHistoryItem.isActive) {
-      console.log(event);
-      console.log('Loading data from', fetchHistoryItem.requestId, 'to the map');
       dispatch(pickDownload({ ...fetchHistoryItem, contextType }));
     }
   }, [contextType, dispatch, fetchHistoryItem]);
@@ -119,15 +115,14 @@ const DownloadsItem = ({ fetchHistoryItem, contextType }) => {
       ) : null}
 
       {show ? (
-        <Suspense fallback={<p className="small mb-0"><em>Loading results…</em></p>}>
+
           <DownloadModal
             show={show}
             onHide={handleClose}
             fetchHistoryItem={fetchHistoryItem}
-            seriesMode={seriesMode}
-            onSeriesModeChange={setSeriesMode}
+            contextType={contextType}
           />
-        </Suspense>
+
       ) : null}
     </div>
   );

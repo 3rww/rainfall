@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { configureStore } from '@reduxjs/toolkit';
+import { createAppStore } from '../index';
+import { createFakeResultsClient } from '../../results/fakeClient';
 import axios from 'axios';
 import { initialState } from '../initialState';
 import { rootReducer } from '../rootReducer';
@@ -24,7 +25,7 @@ const makeStore = (context, sensor, rollup, available = true) => {
   Object.assign(state.fetchKwargs[context].active, { startDt: '2025-02-01T00:00:00Z', endDt: '2025-02-02T00:00:00Z', rollup });
   state.fetchKwargs[context].active.sensorLocations[sensor] = [{ value: '9A', label: '9A' }];
   state.rainfallEvents.list = [{ eventid: 'wide', startDt: '2020-01-01T00:00:00Z', endDt: '2030-01-01T00:00:00Z' }];
-  return configureStore({ reducer: rootReducer, preloadedState: state });
+  return createAppStore({ preloadedState: state, results: createFakeResultsClient() });
 };
 
 describe('historic requests', () => {
@@ -33,7 +34,7 @@ describe('historic requests', () => {
       it(`${context} ${rollup} uses its parquet endpoint and canonical results`, async () => {
         const store = makeStore(context, sensor, rollup);
         const data = [{ id: '9A', data: [{ ts: '2025-02-01T00:00:00Z', val: null, src: 'N/D' }] }];
-        axios.mockResolvedValue({ data: { status: 'finished', data, args: {}, messages: [] } });
+        axios.mockResolvedValue({ data: new TextEncoder().encode(JSON.stringify({ status: 'finished', data, args: {}, messages: [] })).buffer });
         store.dispatch(fetchRainfallDataFromApiV2({ contextType: context, rainfallDataType: 'historic' }));
         await vi.waitFor(() => expect(store.getState().fetchKwargs[context].history[0]?.results?.[sensor]?.[0]?.total).toBeNull());
         const request = axios.mock.calls[0][0];
@@ -55,5 +56,36 @@ describe('historic requests', () => {
     const active = store.getState().fetchKwargs.legacyGauge.active;
     expect(active.startDt).toBe('2025-01-01T00:00:00.000Z');
     expect(active.endDt).toBe('2026-01-01T00:00:00.000Z');
+  });
+});
+
+describe('binary polling envelopes', () => {
+  it.each([
+    [{ status: 'queued', meta: {} }, 'error'],
+    [{ status: 'does not exist', messages: ['Missing job'] }, 'does not exist'],
+    [{ status: 'failed', messages: ['Failed job'] }, 'failed'],
+    [{ status: 'finished', data: null, messages: ['No data'] }, 'error']
+  ])('preserves failure status for %j', async (envelope, expected) => {
+    const store = makeStore('legacyGauge', 'gauge', '15-minute');
+    axios.mockResolvedValue({ data: new TextEncoder().encode(JSON.stringify(envelope)).buffer });
+    store.dispatch(fetchRainfallDataFromApiV2({ contextType: 'legacyGauge', rainfallDataType: 'historic' }));
+    await vi.waitFor(() => expect(store.getState().fetchKwargs.legacyGauge.history[0]?.status).toBe(expected));
+    expect(axios.mock.calls[0][0].responseType).toBe('arraybuffer');
+    store.teardown();
+  });
+  it('ignores a replaced response that arrives after the latest query completed', async () => {
+    const store = makeStore('legacyGauge', 'gauge', '15-minute');
+    let oldResolve;
+    axios.mockImplementationOnce(() => new Promise(resolve => { oldResolve = resolve; }));
+    const response = val => ({ data: new TextEncoder().encode(JSON.stringify({ status: 'finished', data: [{ id: '9A', data: [{ ts: '2026-01-01T00:00:00Z', val, src: 'G' }] }] })).buffer });
+    axios.mockResolvedValue(response(2));
+    const request = { contextType: 'legacyGauge', rainfallDataType: 'historic' };
+    store.dispatch(fetchRainfallDataFromApiV2(request));
+    store.dispatch(fetchRainfallDataFromApiV2(request));
+    await vi.waitFor(() => expect(store.getState().fetchKwargs.legacyGauge.history[0]?.results.gauge[0].total).toBe(2));
+    oldResolve(response(99)); await Promise.resolve(); await Promise.resolve();
+    expect(store.getState().fetchKwargs.legacyGauge.history[0].results.gauge[0].total).toBe(2);
+    expect(store.getState().fetchKwargs.legacyGauge.history[0].isFetching).toBe(0);
+    store.teardown();
   });
 });

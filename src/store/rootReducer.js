@@ -1,3 +1,4 @@
+import resultsPresentation from './features/resultsPresentationSlice';
 import { combineReducers } from '@reduxjs/toolkit';
 
 import progressReducer from './features/progressSlice';
@@ -11,6 +12,7 @@ import initMapReducer from './features/initMapSlice';
 import mapLegendReducer from './features/mapLegendSlice';
 
 export const rootReducer = combineReducers({
+  resultsPresentation,
   progress: progressReducer,
   globalConfig: globalConfigReducer,
   fetchKwargs: fetchKwargsReducer,

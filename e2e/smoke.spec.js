@@ -182,8 +182,8 @@ for (const [context, sensor] of [['legacyGauge', 'gauge'], ['legacyGarr', 'pixel
       await expect(view).toBeVisible();
       await expect.poll(() => page.evaluate(({context, sensor}) => {
         const row = window.__APP_STORE__.getState().fetchKwargs[context].history[0].results[sensor][0];
-        return { total: row.total, missing: row.data[1].val };
-      }, {context, sensor})).toEqual({total: .25, missing: null});
+        return { total: row.total, missing: row.missingCount, details: row.data };
+      }, {context, sensor})).toEqual({total: .25, missing: 1, details: undefined});
       await view.click();
       await expect(page.getByRole('img', { name: 'Rainfall results line chart' })).toBeVisible();
       const downloadPromise = page.waitForEvent('download');

@@ -279,7 +279,7 @@ export const registerMockApiRoutes = async (page, options = {}) => {
         status: "finished",
         args: requestPayload,
         messages: [],
-        data
+        data: options.rainfallData ? options.rainfallData(sensor, requestPayload) : data
       });
     }
 

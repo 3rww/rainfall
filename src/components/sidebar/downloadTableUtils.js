@@ -16,7 +16,7 @@ export const CHART_SERIES_MODE = {
   averageByType: "averageByType"
 };
 
-const PREFERRED_FIELD_ORDER = ["start_ts", "end_ts", "ts", "val", "src", "id", "type"];
+export const PREFERRED_FIELD_ORDER = ["start_ts", "end_ts", "ts", "val", "src", "id", "type"];
 const CHART_AVERAGE_DECIMAL_PLACES = 3;
 const SWMM_DEFAULT_INTERVAL = "0:00";
 const SWMM_ROLLUP_TO_INTERVAL = {
@@ -38,7 +38,7 @@ const EXCEL_DATETIME_FORMATTER = new Intl.DateTimeFormat("en-US", {
   timeZoneName: "short"
 });
 
-const formatExcelDateTimeInEastern = (value) => {
+export const formatExcelDateTimeInEastern = (value) => {
   // formatToParts keeps the output stable while still letting Intl supply EDT/EST.
   const parts = EXCEL_DATETIME_FORMATTER.formatToParts(value)
     .reduce((accumulator, part) => {
@@ -56,7 +56,7 @@ const formatExcelDateTimeInEastern = (value) => {
   return `${parts.month}/${parts.day}/${parts.year} ${parts.hour}:${parts.minute}:${parts.second} ${parts.timeZoneName}`;
 };
 
-const sanitizeSwmmIdentifier = (rawValue, fallback = "SENSOR") => {
+export const sanitizeSwmmIdentifier = (rawValue, fallback = "SENSOR") => {
   const normalized = `${rawValue ?? ""}`
     .trim()
     .toUpperCase()
@@ -72,7 +72,7 @@ const formatSwmmValue = (value) => `${Number(value.toFixed(6))}`;
 const roundChartAverageValue = (value) => Number(value.toFixed(CHART_AVERAGE_DECIMAL_PLACES));
 
 // Daily rollups are calendar dates in Eastern time, not browser-local instants.
-const parseDownloadTimestamp = (value) => {
+export const parseDownloadTimestamp = (value) => {
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     const date = toDateTime(value).tz(EXCEL_TIME_ZONE, true);
     return date.isValid() ? date : null;
@@ -80,7 +80,7 @@ const parseDownloadTimestamp = (value) => {
   return parseZonedDateTime(value, true);
 };
 
-const parseSwmmTimestamp = (rawTimestamp, rule = CHART_TIMESTAMP_RULE.start) => {
+export const parseSwmmTimestamp = (rawTimestamp, rule = CHART_TIMESTAMP_RULE.start) => {
   if (typeof rawTimestamp !== "string") {
     return null;
   }
@@ -229,7 +229,7 @@ export const formatIsoForExcel = (rawValue) => {
   return formatExcelDateTimeInEastern(new Date(parsed.valueOf()));
 };
 
-export const normalizeDownloadRow = (row) => {
+export const normalizeDownloadRow = (row, formatTimestamp = formatIsoForExcel) => {
   const normalized = { ...row };
   const rawTimestamp = normalized.ts;
 
@@ -239,8 +239,8 @@ export const normalizeDownloadRow = (row) => {
 
   const rangeParts = rawTimestamp.split("/");
   if (rangeParts.length === 2) {
-    const startTimestamp = formatIsoForExcel(rangeParts[0].trim());
-    const endTimestamp = formatIsoForExcel(rangeParts[1].trim());
+    const startTimestamp = formatTimestamp(rangeParts[0].trim());
+    const endTimestamp = formatTimestamp(rangeParts[1].trim());
 
     if (startTimestamp !== null && endTimestamp !== null) {
       const { ts, ...withoutTs } = normalized;
@@ -254,7 +254,7 @@ export const normalizeDownloadRow = (row) => {
     return normalized;
   }
 
-  const formattedTimestamp = formatIsoForExcel(rawTimestamp);
+  const formattedTimestamp = formatTimestamp(rawTimestamp);
   if (formattedTimestamp === null) {
     return normalized;
   }

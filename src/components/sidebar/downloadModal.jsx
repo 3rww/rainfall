@@ -1,210 +1,68 @@
-import React, { useCallback, useMemo, lazy, Suspense } from 'react';
-import { Modal, Button, Row, Col, Form } from 'react-bootstrap';
-import { unparse } from 'papaparse';
-import { saveAs } from 'file-saver';
-
+import React, { useMemo, useState, lazy, Suspense } from 'react';
+import { Modal, Button, Form, Alert } from 'react-bootstrap';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
-  buildDownloadRowsAndFields,
-  buildDownloadChartData,
-  buildSwmmInpSnippet,
-  CHART_TIMESTAMP_RULE,
-  CHART_SERIES_MODE
-} from './downloadTableUtils';
+  makeSelectResultPresentation, makeSelectSensorSummaries, preferencesChanged,
+  exportRequested, operationCanceled, saveRequested
+} from '../../store/features/resultsPresentationSlice';
 import { formatDateTime } from '../../store/utils/dateTime';
 import './downloadModal.css';
-
 const DownloadLineChart = lazy(() => import('./downloadLineChart'));
 
-const DownloadModal = ({
-  show,
-  onHide,
-  fetchHistoryItem,
-  seriesMode = CHART_SERIES_MODE.averageByType,
-  onSeriesModeChange
-}) => {
-
-  const resultsTableData = fetchHistoryItem?.results || {};
-  const rollup = fetchHistoryItem?.fetchKwargs?.rollup;
-
-  const rowsAndFields = useMemo(() => buildDownloadRowsAndFields(resultsTableData), [resultsTableData]);
-
-  const rowCount = useMemo(() => Object.values(resultsTableData).reduce((sum, sensorRows) => {
-    if (!Array.isArray(sensorRows)) {
-      return sum;
-    }
-
-    const sensorRowCount = sensorRows.reduce((sensorSum, sensorRow) => (
-      sensorSum + (Array.isArray(sensorRow?.data) ? sensorRow.data.length : 0)
-    ), 0);
-
-    return sum + sensorRowCount;
-  }, 0), [resultsTableData]);
-
-  const averageChartData = useMemo(() => buildDownloadChartData(resultsTableData, {
-    timestampRule: CHART_TIMESTAMP_RULE.start,
-    seriesMode: CHART_SERIES_MODE.averageByType
-  }), [resultsTableData]);
-
-  const perSensorChartData = useMemo(() => buildDownloadChartData(resultsTableData, {
-    timestampRule: CHART_TIMESTAMP_RULE.start
-  }), [resultsTableData]);
-
-  const swmmInp = useMemo(() => buildSwmmInpSnippet(resultsTableData, {
-    rollup,
-    timestampRule: CHART_TIMESTAMP_RULE.start
-  }), [resultsTableData, rollup]);
-
-  const hasAnyResultsData = rowCount > 0;
-
-  const handleDownloadClick = useCallback((event) => {
-    event.preventDefault();
-
-    const csv = rowsAndFields.rows.length > 0
-      ? unparse({ fields: rowsAndFields.fields, data: rowsAndFields.rows })
-      : '';
-
-    if (csv.length === 0) {
-      return;
-    }
-
-    const blob = new Blob([csv], { type: 'application/csv' });
-    saveAs(blob, 'rainfall.csv', { autoBom: true });
-  }, [rowsAndFields.fields, rowsAndFields.rows]);
-
-  const handleDownloadInpClick = useCallback((event) => {
-    event.preventDefault();
-
-    if (!hasAnyResultsData) {
-      return;
-    }
-
-    const blob = new Blob([swmmInp], { type: 'text/plain;charset=utf-8' });
-    saveAs(blob, 'rainfall_swmm.inp', { autoBom: true });
-  }, [hasAnyResultsData, swmmInp]);
-
-  const handleAverageOnlyToggle = useCallback((event) => {
-    event.stopPropagation();
-    onSeriesModeChange?.(
-      event.target.checked ? CHART_SERIES_MODE.averageByType : CHART_SERIES_MODE.perSensor
-    );
-  }, [onSeriesModeChange]);
-
-  const fetchKwargs = fetchHistoryItem.fetchKwargs;
-  const sensorLocations = fetchKwargs.sensorLocations;
-  const gauges = sensorLocations.gauge;
-  const pixels = sensorLocations.pixel;
-  const totalSensors = gauges.length + pixels.length;
-
-  const showAverageOnly = seriesMode === CHART_SERIES_MODE.averageByType;
-  const chartData = showAverageOnly ? averageChartData : perSensorChartData;
-  const chartMetaLabel = `${rowCount} total records across ${totalSensors} sensors`;
-
-  return (
-    <Modal
-      show={show}
-      onHide={onHide}
-      size="xl"
-      dialogClassName="min-vw-95"
-      animation={false}
-      fullscreen={'xl-down'}
-      onClick={(event) => event.stopPropagation()}
-    >
-      <Modal.Header closeButton>
-        <Modal.Title className="w-100">
-          <Row>
-            <Col>
-              <h4>{formatDateTime(fetchKwargs.startDt, 'DD MMM YYYY, h:mm a')} to {formatDateTime(fetchKwargs.endDt, 'DD MMM YYYY, h:mm a')}</h4>
-              <hr></hr>
-            </Col>
-          </Row>
-
-          {gauges.length > 0 ? (
-            <Row>
-              <Col md={3}>
-                <small>Gauges:</small>
-              </Col>
-              <Col md={9}>
-                <small>{gauges.map((gauge) => gauge.label).join(', ')}</small>
-              </Col>
-            </Row>
-          ) : null}
-
-          {pixels.length > 0 ? (
-            <Row>
-              <Col md={3}>
-                <small>Pixels:</small>
-              </Col>
-              <Col md={9}>
-                <small>{pixels.length} pixels queried</small>
-              </Col>
-            </Row>
-          ) : null}
-
-          <Row>
-            <Col md={3}>
-              <small>Interval:</small>
-            </Col>
-            <Col md={9}>
-              <small>{fetchKwargs.rollup}</small>
-            </Col>
-          </Row>
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Row className="download-modal-download-row">
-          <Col sm={3}>
-            <p className="mb-0">Download as:</p>
-          </Col>
-          <Col sm={3}>
-            <Button className="w-100" variant="outline-primary" size={'sm'} onClick={handleDownloadClick}>
-              CSV
-            </Button>
-          </Col>
-          <Col sm={3}>
-            <Button
-              className="w-100"
-              disabled={!hasAnyResultsData}
-              variant="outline-primary"
-              size={'sm'}
-              onClick={handleDownloadInpClick}
-            >
-              SWMM (.inp)
-            </Button>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col>
-            <p className="small download-modal-chart-meta">
-              <em>{chartMetaLabel}</em>
-            </p>
-            <div className="border-top mt-3 py-3">
-              <Form.Check
-                checked={showAverageOnly}
-                className="download-modal-average-toggle"
-                id="download-average-only-toggle"
-                label="Average by Type"
-                onChange={handleAverageOnlyToggle}
-                type="switch"
-              />
-              <Suspense fallback={<p className="small mb-0"><em>Loading chart…</em></p>}>
-                <DownloadLineChart
-                  rows={chartData.rows}
-                  series={chartData.series}
-                  showLegend={showAverageOnly}
-                />
-              </Suspense>
-            </div>
-          </Col>
-        </Row>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="outline-primary" onClick={onHide}>
-          Close
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  );
+const DownloadModal = ({ show, onHide, fetchHistoryItem, contextType }) => {
+  const dispatch = useAppDispatch();
+  const arg = useMemo(() => ({ contextType, requestId: fetchHistoryItem.requestId }), [contextType, fetchHistoryItem.requestId]);
+  const selectPresentation = useMemo(makeSelectResultPresentation, []);
+  const selectSummaries = useMemo(makeSelectSensorSummaries, []);
+  const ui = useAppSelector(state => selectPresentation(state, arg));
+  const sensors = useAppSelector(state => selectSummaries(state, arg));
+  const [search, setSearch] = useState('');
+  const kwargs = fetchHistoryItem.fetchKwargs;
+  const change = values => dispatch(preferencesChanged({ ...arg, ...values }));
+  const selected = ui.selected || [];
+  const records = sensors.reduce((n, s) => n + s.recordCount, 0);
+  const available = fetchHistoryItem.detailsAvailable;
+  const previewPending = ui.operations?.preview?.status === 'pending';
+  return <Modal show={show} onHide={onHide} size="xl" dialogClassName="min-vw-95" animation={false} fullscreen="xl-down" onClick={e => e.stopPropagation()}>
+    <Modal.Header closeButton><Modal.Title>
+      <h4>{formatDateTime(kwargs.startDt, 'DD MMM YYYY, h:mm a')} to {formatDateTime(kwargs.endDt, 'DD MMM YYYY, h:mm a')}</h4>
+      <small>Interval: {kwargs.rollup}</small>
+      {kwargs.sensorLocations.gauge.length > 0 && <p className="small mb-0">Gauges: {kwargs.sensorLocations.gauge.map(g => g.label).join(', ')}</p>}
+      {kwargs.sensorLocations.pixel.length > 0 && <p className="small mb-0">Pixels: {kwargs.sensorLocations.pixel.length} pixels queried</p>}
+    </Modal.Title></Modal.Header>
+    <Modal.Body>
+      {!available && <Alert variant="danger">Detailed results are unavailable. Please rerun this query.</Alert>}
+      <div className="download-modal-download-row d-flex gap-3 align-items-start">
+        <p>Download as:</p>
+        {['csv', 'swmm'].map(format => {
+          const op = ui.operations?.[format];
+          return <div key={format}>
+            <Button size="sm" variant="outline-primary" disabled={!available || !records || op?.status === 'pending'} onClick={() => dispatch(exportRequested({ ...arg, format }))}>{format === 'csv' ? 'CSV' : 'SWMM (.inp)'}</Button>
+            {op?.status === 'pending' && <div role="status"><small>{format.toUpperCase()}: {op.progress?.total ? `${Math.min(100, Math.round(100 * op.progress.processed / op.progress.total))}%` : 'Preparing…'}</small> <Button size="sm" variant="link" onClick={() => dispatch(operationCanceled({ ...arg, format }))}>Cancel {format.toUpperCase()}</Button></div>}
+            {op?.status === 'ready' && <Button size="sm" onClick={() => dispatch(saveRequested({ ...arg, format }))}>Ready to save {format.toUpperCase()}</Button>}
+            {op?.status === 'failed' && <p role="alert">{op.error}</p>}
+          </div>;
+        })}
+      </div>
+      <p className="small download-modal-chart-meta"><em>{records} total records across {sensors.length} sensors</em></p>
+      <div className="border-top mt-3 py-3">
+        <Form.Check checked={ui.mode !== 'perSensor'} id="download-average-only-toggle" label="Average by Type" type="switch" onChange={e => change({ mode: e.target.checked ? 'averageByType' : 'perSensor' })} />
+        {ui.mode === 'perSensor' && <fieldset className="my-2"><legend className="fs-6">Individual sensors ({selected.length}/10)</legend>
+          <Form.Control aria-label="Search sensors" placeholder="Search sensors" value={search} onChange={e => setSearch(e.target.value)} />
+          <div style={{ maxHeight: 140, overflowY: 'auto' }}>{sensors.filter(s => `${s.type} ${s.id}`.toLowerCase().includes(search.toLowerCase())).map(s => <Form.Check key={s.key} id={`sensor-${s.key}`} label={`${s.type} ${s.id}`} checked={selected.includes(s.key)} disabled={!selected.includes(s.key) && selected.length >= 10} onChange={e => change({ selected: e.target.checked ? [...selected, s.key] : selected.filter(k => k !== s.key) })} />)}</div>
+        </fieldset>}
+        <div className="d-flex flex-wrap gap-2 my-3 align-items-end">
+          <Form.Label>Chart start date (Eastern)<Form.Control aria-label="Chart start date" type="date" value={ui.range?.start || ''} max={ui.range?.end || undefined} onChange={e => change({ range: { ...ui.range, start: e.target.value } })} /></Form.Label>
+          <Form.Label>Chart end date (Eastern)<Form.Control aria-label="Chart end date" type="date" value={ui.range?.end || ''} min={ui.range?.start || undefined} onChange={e => change({ range: { ...ui.range, end: e.target.value } })} /></Form.Label>
+          <Button variant="link" onClick={() => change({ range: {} })}>Reset chart range</Button>
+        </div>
+        <p className="small">{ui.preview ? `${ui.preview.interval[0].toUpperCase()}${ui.preview.interval.slice(1)} preview; downloads contain ${kwargs.rollup.toLowerCase()} observations.` : 'Downloads contain the original observations.'}</p>
+        {previewPending && <p role="status">Preparing chart…</p>}
+        {ui.operations?.preview?.status === 'failed' && <Alert variant="danger">{ui.operations.preview.error}</Alert>}
+        {!previewPending && ui.preview && <Suspense fallback={<p>Loading chart…</p>}><DownloadLineChart rows={ui.preview.rows} series={ui.preview.series} /></Suspense>}
+      </div>
+    </Modal.Body>
+    <Modal.Footer><Button variant="outline-primary" onClick={onHide}>Close</Button></Modal.Footer>
+  </Modal>;
 };
-
 export default DownloadModal;
