@@ -61,8 +61,28 @@ export function createPlaybackEngine(entries) {
       }
       delete sensor.readings;
     }
+    // All-sensor average per interval, and its running total, for the toolbar sparkline.
+    const intervalTotal = new Float64Array(timeline.length);
+    const intervalCount = new Int32Array(timeline.length);
+    for (const sensor of sensors) {
+      for (const point of sensor.points) {
+        if (point.value === null) continue;
+        intervalTotal[point.index] += point.value;
+        intervalCount[point.index]++;
+        if (++processed % 4096 === 0) yield { processed };
+      }
+    }
+    const interval = new Array(timeline.length);
+    const cumulative = new Array(timeline.length);
+    let runningSum = null;
+    for (let index = 0; index < timeline.length; index++) {
+      const value = intervalCount[index] > 0 ? intervalTotal[index] / intervalCount[index] : null;
+      interval[index] = value;
+      if (value !== null) runningSum = (runningSum ?? 0) + value;
+      cumulative[index] = runningSum;
+    }
     sessions.set(session, { handles: Object.values(handles), sensors, timeline });
-    return { session, timeline, sensors: sensors.map(({ source, id }) => ({ source, id })) };
+    return { session, timeline, sensors: sensors.map(({ source, id }) => ({ source, id })), summary: { interval, cumulative } };
   }
   function* playbackFrame({ session, index, mode }) {
     const data = sessions.get(session);

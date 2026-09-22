@@ -20,6 +20,7 @@ describe('worker playback', () => {
     expect(frame(0, 'cumulative')).toEqual([null, null, 0.1]);
     expect(frame(2, 'cumulative')[0]).toBe(summary.data[0].total);
     expect(prepared.sensors).toContainEqual({ source: 'gauge', id: '100' });
+    expect(prepared.summary).toEqual({ interval: [0.1, 0, 0.25], cumulative: [0.1, 0.1, 0.35] });
     e.dispose(['pixel']);
     expect(() => frame(0, 'interval')).toThrow(/unavailable/);
   });

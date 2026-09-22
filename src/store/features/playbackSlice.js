@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   key: '', available: false, message: '', mode: 'total', playing: false,
   target: 0, generation: 0, timeline: [], frame: null, pending: null, status: 'idle',
+  summary: { interval: [], cumulative: [] },
   scales: { total: 'breaks_050', interval: 'breaks_005', cumulative: 'breaks_050' }
 };
 const slice = createSlice({
@@ -30,7 +31,7 @@ const slice = createSlice({
       state.target = Math.min(Math.max(state.frame.index + 1, payload ?? 0), state.timeline.length - 1);
       state.status = 'loading';
     },
-    playbackPrepared(state, { payload }) { if (payload.key === state.key) state.timeline = payload.timeline; },
+    playbackPrepared(state, { payload }) { if (payload.key === state.key) { state.timeline = payload.timeline; state.summary = payload.summary; } },
     playbackFrameReady(state, { payload }) {
       if (payload.key === state.key && payload.generation === state.generation && payload.mode === state.mode && payload.frame.index === state.target) state.pending = payload;
     },

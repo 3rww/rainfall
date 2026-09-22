@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { Button, ButtonGroup, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBackwardStep, faForwardStep, faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { activePlaybackResult, changePlaybackMode, seekPlayback, togglePlayback, pausePlayback } from '../../store/features/playbackSlice';
+const PlaybackSparkline = lazy(() => import('./playbackSparkline'));
 
 const timestampFormatter = new Intl.DateTimeFormat('en-US', {
   timeZone: 'America/New_York', month: 'short', day: 'numeric', year: 'numeric',
@@ -77,9 +78,6 @@ export default function PlaybackToolbar() {
             <PlaybackButton id="playback-next" label="Next timestep" icon={faForwardStep} disabled={!enabled || index === playbackMode.timeline.length - 1} onClick={() => dispatch(seekPlayback(index + 1))} />
           </ButtonGroup>
         </div>
-        <div className="col-auto playback-timeline">
-          <Form.Range className="playback-slider" aria-label="Rainfall timestep" aria-valuetext={playbackMode.timeline[index]?.label || 'No timestep selected'} min={0} max={Math.max(0, playbackMode.timeline.length - 1)} step={1} value={index} disabled={!enabled} onPointerDown={() => dispatch(pausePlayback())} onChange={e => dispatch(seekPlayback(Number(e.target.value)))} />
-        </div>        
         <div className="col-auto ">
           <span className="small text-muted text-center" title={interval?.label}>
             {interval ? <><time dateTime={new Date(daily ? interval.startMs : interval.endMs).toISOString()}>{timestamp}</time> · {playbackMode.frame.index + 1}/{playbackMode.timeline.length}</> : 'Preparing playback…'}
@@ -88,5 +86,13 @@ export default function PlaybackToolbar() {
         </div>
       </> : playbackMode.message && <span className="col small">{playbackMode.message}</span>}
     </div>
+    {playbackMode.mode !== 'total' && <div className="row g-2">
+      <div className="col playback-timeline">
+        <Suspense fallback={null}>
+          <PlaybackSparkline values={playbackMode.summary[playbackMode.mode]} mode={playbackMode.mode} />
+        </Suspense>
+        <Form.Range className="playback-slider" aria-label="Rainfall timestep" aria-valuetext={playbackMode.timeline[index]?.label || 'No timestep selected'} min={0} max={Math.max(0, playbackMode.timeline.length - 1)} step={1} value={index} disabled={!enabled} onPointerDown={() => dispatch(pausePlayback())} onChange={e => dispatch(seekPlayback(Number(e.target.value)))} />
+      </div>
+    </div>}
   </div>;
 }

@@ -38,6 +38,8 @@
     background: rgba(255, 255, 255, 0.8);
 }
 
+.playback-timeline { display: flex; flex-direction: column; gap: 0.125rem; }
+.playback-sparkline-wrapper { width: 100%; height: 28px; pointer-events: none; }
 
 /* .playback-toolbar { flex: 0 0 auto; container-type: inline-size; }
 .playback-toolbar .playback-mode { flex: 0 0 130px; width: 130px; }

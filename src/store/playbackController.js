@@ -79,7 +79,7 @@ export function registerPlaybackController(store, results) {
           const response = await results.run('preparePlayback', { session: preparingSession, handles: item.resultHandles, rollup: item.fetchKwargs.rollup }, { signal });
           if (!current()) { release(preparingSession); return; }
           session = preparingSession; prepared = response;
-          store.dispatch(playbackPrepared({ key, timeline: response.timeline }));
+          store.dispatch(playbackPrepared({ key, timeline: response.timeline, summary: response.summary }));
           if (!response.timeline.length) throw new Error('No observation intervals are available for playback.');
         }
         for (let index = p.target; index < Math.min(p.target + 3, prepared.timeline.length); index++) {
