@@ -13,6 +13,21 @@ const numeric = value => value == null || value === '' || !Number.isFinite(Numbe
 const natural = (a, b) => String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
 const label = type => type[0].toUpperCase() + type.slice(1);
 const intervals = ['5-minute', '15-minute', 'hourly', 'daily', 'monthly', 'yearly'];
+// A columnar group's "data" is a dict of parallel arrays (e.g. { ts: [...], val: [...], src: [...] })
+// rather than an array of row objects; convert it back to points here so the rest of
+// ingest() and every downstream consumer only ever sees the row-of-objects shape.
+const isColumnar = value => value != null && !Array.isArray(value) && typeof value === 'object';
+const columnarToPoints = columnar => {
+  const keys = Object.keys(columnar);
+  const length = keys.length ? columnar[keys[0]].length : 0;
+  const points = new Array(length);
+  for (let i = 0; i < length; i++) {
+    const point = {};
+    for (const key of keys) point[key] = columnar[key][i];
+    points[i] = point;
+  }
+  return points;
+};
 const minutes = { '5-minute': 5, '15-minute': 15, hourly: 60 };
 
 export function createResultsEngine() {
@@ -63,7 +78,7 @@ export function createResultsEngine() {
     let processed = 0;
     // Support the legacy historic5 rainfall field without flattening the dataset.
     for (const row of data) {
-      const points = Array.isArray(row.data) ? row.data : [row];
+      const points = Array.isArray(row.data) ? row.data : isColumnar(row.data) ? columnarToPoints(row.data) : [row];
       for (const original of points) {
         const id = Array.isArray(row.data) && !Object.hasOwn(original, 'rainfall') ? row.id : original.id ?? row.id;
         if (id == null) continue;
@@ -85,7 +100,7 @@ export function createResultsEngine() {
         if (++processed % BATCH === 0) yield { processed };
       }
       // Empty canonical sensors still have a summary.
-      if (row.id != null && row.id !== '' && Array.isArray(row.data) && !row.data.length) grouped.set(`${typeof row.id}:${row.id}`, { id: row.id, data: [], total: null, recordCount: 0, validCount: 0 });
+      if (row.id != null && row.id !== '' && !points.length && (Array.isArray(row.data) || isColumnar(row.data))) grouped.set(`${typeof row.id}:${row.id}`, { id: row.id, data: [], total: null, recordCount: 0, validCount: 0 });
     }
     dataset.series = [...grouped.values()];
     const summary = dataset.series.map(({ data: ignored, ...rest }) => ({ ...rest, missingCount: rest.recordCount - rest.validCount }));

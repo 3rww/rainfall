@@ -123,6 +123,20 @@ const jsonResponse = (route, body, status = 200) => route.fulfill({
   headers: corsHeaders
 });
 
+// Mirrors the API's f=*_columnar shape: a list of row dicts becomes a dict of parallel arrays.
+export const toColumnar = rows => {
+  if (!rows.length) return {};
+  const fields = Object.keys(rows[0]);
+  return Object.fromEntries(fields.map(field => [field, rows.map(row => row[field])]));
+};
+
+// Applies toColumnar() to every sensor group in a fixture, only when the request asked for it.
+export const toColumnarFixtureIfRequested = (groups, requestPayload) => (
+  String(requestPayload?.f).endsWith("_columnar")
+    ? groups.map(group => ({ ...group, data: toColumnar(group.data) }))
+    : groups
+);
+
 const emptyResponse = (route, contentType = "text/plain") => route.fulfill({
   status: 200,
   body: "",
@@ -273,9 +287,11 @@ export const registerMockApiRoutes = async (page, options = {}) => {
         { ts: requestPayload.end_dt || MOCK_EVENT.end_dt, val: null, src: "N/D" }
       ];
       const isTotal = requestPayload.rollup?.toLowerCase() === "total";
-      const data = [{ id: sensorId, data: isTotal
+      const rows = isTotal
             ? [{ ts: `${points[0].ts}/${points[1].ts}`, val: 0.25, src: `${sourceCode}, N/D` }]
-            : points }];
+            : points;
+      // Mirror the API's f=*_columnar shape: each group's "data" becomes a dict of parallel arrays.
+      const data = [{ id: sensorId, data: String(requestPayload.f).endsWith("_columnar") ? toColumnar(rows) : rows }];
       return jsonResponse(route, {
         status: "finished",
         args: requestPayload,

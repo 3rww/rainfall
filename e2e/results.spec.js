@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { registerMockApiRoutes } from './helpers/mockApi';
+import { registerMockApiRoutes, toColumnarFixtureIfRequested } from './helpers/mockApi';
 import { largeRainfall } from './helpers/largeRainfall';
 const benchmark = process.env.RAINFALL_BENCHMARK === '1';
 const contextType = 'legacyGarr';
@@ -7,7 +7,7 @@ const contextType = 'legacyGarr';
 test('worker results: immediate shell, bounded previews, deferred background exports and cleanup', async ({ page }, info) => {
   test.setTimeout(180000);
   const fixture = largeRainfall(benchmark ? 165 : 12, benchmark ? 8929 : 1201);
-  const api = await registerMockApiRoutes(page, { rainfallData: () => fixture });
+  const api = await registerMockApiRoutes(page, { rainfallData: (_sensor, requestPayload) => toColumnarFixtureIfRequested(fixture, requestPayload) });
   const failures = [];
   page.on('pageerror', e => failures.push(e.message));
   await page.goto(benchmark ? '/rainfall/' : '/');
@@ -126,7 +126,7 @@ test('worker results: immediate shell, bounded previews, deferred background exp
 
 test('opening another result never shows the first result’s export progress', async ({ page }) => {
   test.skip(benchmark, 'Covered by the regular real-worker suite; benchmark measures one query.');
-  await registerMockApiRoutes(page, { rainfallData: () => largeRainfall(12, 1201) });
+  await registerMockApiRoutes(page, { rainfallData: (_sensor, requestPayload) => toColumnarFixtureIfRequested(largeRainfall(12, 1201), requestPayload) });
   await page.goto('/');
   await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).last().click();
   await page.evaluate(() => {
@@ -150,7 +150,7 @@ test('opening another result never shows the first result’s export progress', 
 
 test('download progress spans the row and chart controls sit below the canvas', async ({ page }, info) => {
   test.skip(benchmark, 'UI layout covered in the normal browser suite.');
-  await registerMockApiRoutes(page, { rainfallData: () => largeRainfall(12, 50) });
+  await registerMockApiRoutes(page, { rainfallData: (_sensor, requestPayload) => toColumnarFixtureIfRequested(largeRainfall(12, 50), requestPayload) });
   await page.goto('/');
   await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).last().click();
   await page.evaluate(() => {

@@ -2,6 +2,7 @@ import {
   MAPBOX_TOKEN,
   MAPBOX_STYLE_BASEMAP,
   RAINFALL_MIN_DATE,
+  RAINFALL_RESPONSE_FORMAT,
   CONTEXT_TYPES
 } from './config'
 
@@ -47,7 +48,7 @@ export const initialState = {
         },
         rollup: "15-minute",
         zerofill: true,
-        f: 'sensor'
+        f: RAINFALL_RESPONSE_FORMAT
       },
       history: []
     },
@@ -62,7 +63,7 @@ export const initialState = {
         },
         rollup: "15-minute",
         zerofill: true,
-        f: 'sensor'
+        f: RAINFALL_RESPONSE_FORMAT
       },
       // history: testFetchHistoryItems
       history: []
@@ -78,7 +79,7 @@ export const initialState = {
         },
         rollup: "15-minute",
         zerofill: true,
-        f: 'sensor'
+        f: RAINFALL_RESPONSE_FORMAT
       },
       history: []
     }       

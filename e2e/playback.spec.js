@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { registerMockApiRoutes } from './helpers/mockApi';
+import { registerMockApiRoutes, toColumnarFixtureIfRequested } from './helpers/mockApi';
 import { largeRainfall, rainfallGeometry } from './helpers/largeRainfall';
 const benchmark = process.env.RAINFALL_BENCHMARK === '1';
 const contextType = 'legacyGarr';
 async function openResult(page, data, rollup = '5-minute') {
-  const api = await registerMockApiRoutes(page, { rainfallData: () => data, pixels: rainfallGeometry(data.length) });
+  const api = await registerMockApiRoutes(page, { rainfallData: (_sensor, requestPayload) => toColumnarFixtureIfRequested(data, requestPayload), pixels: rainfallGeometry(data.length) });
   await page.goto(benchmark ? '/rainfall/' : '/');
   await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).last().click();
   await page.waitForFunction(() => window.__APP_STORE__?.getState().stats.latest?.['latest-15min-calibrated-radar']);

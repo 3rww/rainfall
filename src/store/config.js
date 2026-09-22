@@ -61,6 +61,11 @@ export const REQUEST_TIME_INTERVAL = Number(import.meta.env.VITE_API_REQUEST_INT
 export const API_POLL_MAX_ATTEMPTS = Number(import.meta.env.VITE_API_POLL_MAX_ATTEMPTS || 120);
 export const API_POLL_MAX_MS = Number(import.meta.env.VITE_API_POLL_MAX_MS || 300000);
 
+// v2 API response shape: sensor-grouped, with each sensor's readings as parallel
+// arrays (columnar) rather than an array of {ts, val, src} row objects. Kept as
+// a single constant so reverting to the row-of-dicts 'sensor' shape is one line.
+export const RAINFALL_RESPONSE_FORMAT = "sensor_columnar";
+
 
 // rainfall data constants ----------------------------------
 

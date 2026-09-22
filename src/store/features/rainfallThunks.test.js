@@ -4,6 +4,7 @@ import { createFakeResultsClient } from '../../results/fakeClient';
 import axios from 'axios';
 import { initialState } from '../initialState';
 import { rootReducer } from '../rootReducer';
+import { RAINFALL_RESPONSE_FORMAT } from '../config';
 import { fetchRainfallDataFromApiV2, pickRainfallEvent } from './rainfallThunks';
 
 vi.mock('axios');
@@ -39,7 +40,7 @@ describe('historic requests', () => {
         await vi.waitFor(() => expect(store.getState().fetchKwargs[context].history[0]?.results?.[sensor]?.[0]?.total).toBeNull());
         const request = axios.mock.calls[0][0];
         expect(request.url).toContain(`/v2/${sensor}/${rollup === '5-minute' ? 'historic5' : 'historic15'}/`);
-        expect(request.data.f).toBe('sensor');
+        expect(request.data.f).toBe(RAINFALL_RESPONSE_FORMAT);
         expect(request.data[`${sensor}s`]).toBe('9A');
         expect(request.data.rollup).toBe(rollup);
       });

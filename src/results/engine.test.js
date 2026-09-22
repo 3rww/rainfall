@@ -116,3 +116,22 @@ it('uses exact zoom instants rather than expanding them to Eastern calendar days
   expect(preview.rows).toHaveLength(1);
   expect(preview.rows[0]['avg:gauge']).toBe(2);
 });
+
+describe('columnar response shape (f=*_columnar)', () => {
+  const toColumnar = rows => {
+    if (!rows.length) return {};
+    const fields = Object.keys(rows[0]);
+    return Object.fromEntries(fields.map(field => [field, rows.map(row => row[field])]));
+  };
+  it('produces identical summaries to the row-of-dicts shape', () => {
+    const rows = { pixel: [{ id: '100', data: [point('2025-11-02T01:15:00-05:00', 0), point('2025-11-02T01:30:00-05:00', null, 'N/D')] }] };
+    const columnar = { pixel: rows.pixel.map(({ id, data }) => ({ id, data: toColumnar(data) })) };
+    expect(load(columnar).summaries).toEqual(load(rows).summaries);
+  });
+  it('treats an empty columnar group the same as an empty row-of-dicts group', () => {
+    const rows = { pixel: [{ id: '100', data: [] }] };
+    const columnar = { pixel: [{ id: '100', data: {} }] };
+    expect(load(columnar).summaries).toEqual(load(rows).summaries);
+  });
+});
+
