@@ -329,6 +329,19 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     }
     window.addEventListener('resize', resizeMap);
 
+    // Playback (interval/cumulative) drives per-frame setFeatureState calls across
+    // every plotted feature, which can momentarily invalidate mapbox's hit-test
+    // results while the mouse is stationary. That produces a spurious
+    // mouseleave->mousemove pair on the hover layer, flickering the tooltip.
+    // Debounce the "hide" side of that pair so a same-tick re-entry cancels it.
+    let tooltipHideTimer = null;
+    const cancelTooltipHide = () => {
+      if (tooltipHideTimer) {
+        clearTimeout(tooltipHideTimer);
+        tooltipHideTimer = null;
+      }
+    };
+
     tooltipContainerRef.current = document.createElement('div');
     // Prevent the tooltip from intercepting pointer events, which would trigger
     // spurious mouseleave/mousemove cycles on the underlying layer and cause it to flicker.
@@ -402,6 +415,8 @@ const ReactMap = ({ activeTab, token, zoom }) => {
         hoveredStateId[layerName] = null;
 
         webmap.on('mousemove', layerName, (event) => {
+          cancelTooltipHide();
+
           const interactiveLayers = getInteractiveMapLayersForContext(activeTabRef.current);
           if (!interactiveLayers.includes(layerName)) {
             setTooltip([]);
@@ -436,8 +451,12 @@ const ReactMap = ({ activeTab, token, zoom }) => {
         });
 
         webmap.on('mouseleave', layerName, () => {
-          setTooltip([]);
-          webmap.getCanvas().style.cursor = '';
+          cancelTooltipHide();
+          tooltipHideTimer = setTimeout(() => {
+            tooltipHideTimer = null;
+            setTooltip([]);
+            webmap.getCanvas().style.cursor = '';
+          }, 50);
 
           if (hoveredStateId[layerName]) {
             webmap.setFeatureState(
@@ -457,6 +476,7 @@ const ReactMap = ({ activeTab, token, zoom }) => {
       if (fallbackInitTimer) {
         clearTimeout(fallbackInitTimer);
       }
+      cancelTooltipHide();
       window.removeEventListener('resize', resizeMap);
       if (resizeObserver) {
         resizeObserver.disconnect();
