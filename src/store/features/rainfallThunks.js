@@ -45,13 +45,30 @@ const pollRainfallApiV2 = async ({ dispatch, getState, extra, requestId, sensor,
     }
     const response = await axios({ url, method: 'POST', signal: job.controller.signal, responseType: 'arraybuffer', ...(params !== false ? { data: params } : {}) });
     if (!current()) return;
-    const apiResponse = await extra.results.run('ingest', { buffer: response.data, handle: job.handle, sensor, contextType }, { signal: job.controller.signal });
+    let apiResponse = await extra.results.run('ingest', { buffer: response.data, handle: job.handle, sensor, contextType }, { signal: job.controller.signal });
     if (!current()) { extra.results.dispose([job.handle]); return; }
     if (includes(['queued', 'started'], apiResponse.status)) {
       const nextUrl = apiResponse.meta?.jobUrl;
       if (!nextUrl) { fail('error', ['Rainfall request returned queued/started without a follow-up job URL.']); jobs.delete(pollKey); return; }
       job.timer = setTimeout(() => pollRainfallApiV2({ dispatch, getState, extra, requestId, sensor, contextType, url: nextUrl, params: false, pollKey, job, attempt: attempt + 1 }), REQUEST_TIME_INTERVAL);
       return;
+    }
+    if (apiResponse.status === 'finished' && apiResponse.meta?.artifactUrl) {
+      let artifact;
+      try {
+        artifact = await axios({ url: apiResponse.meta.artifactUrl, method: 'GET', signal: job.controller.signal, responseType: 'arraybuffer' });
+      } catch (error) {
+        if (job.controller.signal.aborted) throw error;
+        const refreshUrl = apiResponse.meta.jobUrl || url;
+        const refreshed = await axios({ url: refreshUrl, method: 'POST', signal: job.controller.signal, responseType: 'arraybuffer' });
+        const refreshedStatus = await extra.results.run('ingest', { buffer: refreshed.data, handle: job.handle, sensor, contextType }, { signal: job.controller.signal });
+        const refreshedUrl = refreshedStatus.meta?.artifactUrl;
+        if (!refreshedUrl) throw error;
+        artifact = await axios({ url: refreshedUrl, method: 'GET', signal: job.controller.signal, responseType: 'arraybuffer' });
+      }
+      if (!current()) return;
+      apiResponse = await extra.results.run('ingest', { buffer: artifact.data, handle: job.handle, sensor, contextType }, { signal: job.controller.signal });
+      if (!current()) { extra.results.dispose([job.handle]); return; }
     }
     if (apiResponse.status === 'finished' && apiResponse.data !== null) {
       dispatch(requestRainfallDataSuccess({ requestId, contextType, results: { [sensor]: apiResponse.data }, resultHandles: { [sensor]: apiResponse.handle }, processedKwargs: apiResponse.args, status: apiResponse.status, messages: apiResponse.messages }));
@@ -106,7 +123,8 @@ export const fetchRainfallDataFromApiV2 = (payload) => (dispatch, getState, extr
       start_dt: kwargs.startDt,
       end_dt: kwargs.endDt,
       f: kwargs.f,
-      rollup: kwargs.rollup
+      rollup: kwargs.rollup,
+      delivery: 'artifact'
     };
 
     requestParams[sensor[1]] = kwargs.sensorLocations[sensor[0]].map((option) => option.value).join(',');
