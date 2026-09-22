@@ -330,6 +330,9 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     window.addEventListener('resize', resizeMap);
 
     tooltipContainerRef.current = document.createElement('div');
+    // Prevent the tooltip from intercepting pointer events, which would trigger
+    // spurious mouseleave/mousemove cycles on the underlying layer and cause it to flicker.
+    tooltipContainerRef.current.style.pointerEvents = 'none';
     tooltipRootRef.current = createRoot(tooltipContainerRef.current);
     const tooltip = new mapboxgl.Marker({
       element: tooltipContainerRef.current,
