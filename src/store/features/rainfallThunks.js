@@ -64,7 +64,14 @@ const pollRainfallApiV2 = async ({ dispatch, getState, extra, requestId, sensor,
         const refreshedStatus = await extra.results.run('ingest', { buffer: refreshed.data, handle: job.handle, sensor, contextType }, { signal: job.controller.signal });
         const refreshedUrl = refreshedStatus.meta?.artifactUrl;
         if (!refreshedUrl) throw error;
-        artifact = await axios({ url: refreshedUrl, method: 'GET', signal: job.controller.signal, responseType: 'arraybuffer' });
+        try {
+          artifact = await axios({ url: refreshedUrl, method: 'GET', signal: job.controller.signal, responseType: 'arraybuffer' });
+        } catch (refreshedError) {
+          if (job.controller.signal.aborted) throw refreshedError;
+          const inlineUrl = refreshedStatus.meta?.inlineUrl || apiResponse.meta.inlineUrl;
+          if (!inlineUrl) throw refreshedError;
+          artifact = await axios({ url: inlineUrl, method: 'GET', signal: job.controller.signal, responseType: 'arraybuffer' });
+        }
       }
       if (!current()) return;
       apiResponse = await extra.results.run('ingest', { buffer: artifact.data, handle: job.handle, sensor, contextType }, { signal: job.controller.signal });

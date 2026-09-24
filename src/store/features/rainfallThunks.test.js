@@ -102,6 +102,26 @@ describe('binary polling envelopes', () => {
     store.teardown();
   });
 
+  it('falls back to inline artifact streaming when direct S3 delivery is blocked', async () => {
+    const store = makeStore('legacyGauge', 'gauge', '15-minute');
+    const encode = value => new TextEncoder().encode(JSON.stringify(value)).buffer;
+    const completed = { status: 'finished', data: [{ id: '9A', data: [{ ts: '2026-01-01T00:00:00Z', val: 3, src: 'G' }] }], args: {}, messages: [] };
+    axios
+      .mockResolvedValueOnce({ data: encode({ status: 'finished', data: null, meta: { artifactUrl: 'https://example.test/blocked', inlineUrl: '/inline/' } }) })
+      .mockRejectedValueOnce(new Error('cors'))
+      .mockResolvedValueOnce({ data: encode({ status: 'finished', data: null, meta: { artifactUrl: 'https://example.test/fresh-but-blocked', inlineUrl: '/inline/' } }) })
+      .mockRejectedValueOnce(new Error('cors'))
+      .mockResolvedValueOnce({ data: encode(completed) });
+
+    store.dispatch(fetchRainfallDataFromApiV2({ contextType: 'legacyGauge', rainfallDataType: 'historic' }));
+
+    await vi.waitFor(() => expect(store.getState().fetchKwargs.legacyGauge.history[0]?.results?.gauge?.[0]?.total).toBe(3));
+    expect(axios.mock.calls.at(-1)[0]).toMatchObject({
+      url: '/inline/', method: 'GET', responseType: 'arraybuffer'
+    });
+    store.teardown();
+  });
+
   it.each([
     [{ status: 'queued', meta: {} }, 'error'],
     [{ status: 'does not exist', messages: ['Missing job'] }, 'does not exist'],
