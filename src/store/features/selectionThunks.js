@@ -1,4 +1,4 @@
-import { get, includes, intersectionBy, unionBy, xorBy } from 'lodash-es';
+import { get, intersectionBy, unionBy, xorBy } from 'lodash-es';
 
 import {
   getSelectableSensorTypesForContext,
@@ -93,7 +93,7 @@ export const pickSensorByGeographyMiddleware = (payload) => {
       }
 
       const selectedFeatures = selectMapStyleSourceDataFeatures(state, sensorType)
-        .filter((feature) => includes([...sensorIds], feature.properties.id));
+        .filter((feature) => sensorIds.has(feature.properties.id));
 
       const selectedSensorOptions = selectedFeatures.map((feature) => transformFeatureToOption(feature));
 

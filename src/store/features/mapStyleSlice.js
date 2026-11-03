@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { cloneDeep, get, includes } from 'lodash-es';
+import { cloneDeep, get } from 'lodash-es';
 
 import { initialState } from '../initialState';
 import { LAYERS_W_RESULTS } from '../config';
@@ -110,12 +110,12 @@ const mapStyleSlice = createSlice({
     highlightSensor: (state, action) => {
       const { sensorLocationType, selectedOptions } = action.payload || {};
       const features = get(state, ['sources', sensorLocationType, 'data', 'features'], []);
-      const selectedIds = Array.isArray(selectedOptions)
+      const selectedIds = new Set(Array.isArray(selectedOptions)
         ? selectedOptions.map((option) => option.value)
-        : [];
+        : []);
 
       features.forEach((feature) => {
-        feature.properties.selected = includes(selectedIds, feature.id);
+        feature.properties.selected = selectedIds.has(feature.id);
       });
     },
     applyColorStretch: (state, action) => {

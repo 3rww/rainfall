@@ -31,15 +31,17 @@ const isValidOptionValue = (value) => (
   && `${value}`.trim() !== ''
 );
 
-const GeodataPicker = ({ contextType }) => {
+const MAX_PIXEL_CHIPS = 10;
+
+const ActiveGeodataPicker = ({ contextType }) => {
   const dispatch = useAppDispatch();
 
-  const context = useAppSelector(selectContext);
   const pixelFeatures = useAppSelector((state) => selectMapStyleSourceDataFeatures(state, 'pixel'));
   const gaugeFeatures = useAppSelector((state) => selectMapStyleSourceDataFeatures(state, 'gauge'));
   const geographyOpts = useAppSelector(selectGeographyLookupsAsGroupedOptions);
   const selectedPixels = useAppSelector((state) => selectPickedSensors(state, contextType, 'pixel'));
   const selectedGauges = useAppSelector((state) => selectPickedSensors(state, contextType, 'gauge'));
+  const selectedGeographies = useAppSelector((state) => selectPickedSensors(state, contextType, 'geographies'));
 
   const pixelOpts = useMemo(() => pixelFeatures
     .filter((feature) => isValidOptionValue(feature?.properties?.id))
@@ -55,6 +57,7 @@ const GeodataPicker = ({ contextType }) => {
 
   const gaugeCount = selectedGauges.length;
   const pixelCount = selectedPixels.length;
+  const summarizePixels = pixelCount > MAX_PIXEL_CHIPS;
 
   const handleSelectGauge = useCallback((selectedOptions) => {
     dispatch(pickSensorMiddleware({
@@ -105,9 +108,9 @@ const GeodataPicker = ({ contextType }) => {
 
       <Row className="g-0">
         <Col>
-          <Tabs defaultActiveKey="sensor" id="geomPickerTypes">
+          <Tabs defaultActiveKey="sensor" id="geomPickerTypes" mountOnEnter unmountOnExit>
             <Tab eventKey="sensor" title="By Sensor" className="my-4">
-              {context !== CONTEXT_TYPES.legacyGarr ? (
+              {contextType !== CONTEXT_TYPES.legacyGarr ? (
                 <Row className="g-0">
                   <Col md={3}>
                     <small>Rain Gauges</small>
@@ -116,6 +119,7 @@ const GeodataPicker = ({ contextType }) => {
                     <Select
                       instanceId="geom-picker-gauge"
                       inputId="geom-picker-gauge-input"
+                      aria-label="Rain Gauges"
                       isMulti
                       value={selectedGauges}
                       onChange={handleSelectGauge}
@@ -127,36 +131,50 @@ const GeodataPicker = ({ contextType }) => {
                 </Row>
               ) : null}
 
-              {context !== CONTEXT_TYPES.legacyGauge ? (
+              {contextType !== CONTEXT_TYPES.legacyGauge ? (
                 <Row className="g-0">
                   <Col md={3}>
                     <small>Radar Pixels</small>
                   </Col>
                   <Col md={9}>
+                    {/* Skip creating pixel chips for large selections, rather than hiding their DOM. */}
                     <Select
                       instanceId="geom-picker-pixel"
                       inputId="geom-picker-pixel-input"
+                      aria-label="Radar Pixels"
+                      aria-describedby={summarizePixels ? 'geom-picker-pixel-help' : undefined}
+                      classNamePrefix="pixel-select"
                       isMulti
                       value={selectedPixels}
+                      controlShouldRenderValue={!summarizePixels}
+                      placeholder={summarizePixels ? `${pixelCount} pixels selected` : 'Select...'}
+                      hideSelectedOptions={!summarizePixels}
                       onChange={handleSelectPixel}
                       options={pixelOpts}
                       menuPortalTarget={document.body}
                       isClearable
                     />
+                    {summarizePixels && (
+                      <small id="geom-picker-pixel-help" className="text-muted">
+                        Search for a pixel to add or remove it, or clear all selections.
+                      </small>
+                    )}
                   </Col>
                 </Row>
               ) : null}
             </Tab>
 
-            {context !== CONTEXT_TYPES.legacyGauge ? (
+            {contextType !== CONTEXT_TYPES.legacyGauge ? (
               <Tab eventKey="geography" title="By Geography" className="my-4">
                 <Row className="g-0">
                   <Col md={12}>
                     <Select
                       instanceId="geom-picker-geography"
                       inputId="geom-picker-geography-input"
+                      aria-label="Basin, municipality, or watershed"
                       placeholder="Select radar pixels by basin, municipality, or watershed"
                       isMulti
+                      value={selectedGeographies}
                       onChange={handleSelectGeography}
                       options={geographyOpts}
                       menuPortalTarget={document.body}
@@ -171,6 +189,11 @@ const GeodataPicker = ({ contextType }) => {
       </Row>
     </div>
   );
+};
+
+const GeodataPicker = ({ contextType }) => {
+  const context = useAppSelector(selectContext);
+  return context === contextType ? <ActiveGeodataPicker contextType={contextType} /> : null;
 };
 
 export default GeodataPicker;
