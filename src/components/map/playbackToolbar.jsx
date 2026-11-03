@@ -90,8 +90,8 @@ export default function PlaybackToolbar() {
     </div>
     {playbackMode.mode === 'combined' && <div className="burst-key small text-muted mt-1">
       <span className="burst-key-ring" aria-hidden="true" />
-      <span>Full-size ring: {Number(burstThreshold(playbackMode).toPrecision(3))} in. or more.
-        {' '}{playbackMode.playing ? 'Rainfall added per displayed step; may combine intervals.' : 'Rings show rainfall in the selected interval.'}</span>
+      {/* <span>Full-size ring: {Number(burstThreshold(playbackMode).toPrecision(3))} in. or more.
+        {' '}{playbackMode.playing ? 'Rainfall added per displayed step; may combine intervals.' : 'Rings show rainfall in the selected interval.'}</span> */}
     </div>}
     {playbackMode.mode !== 'total' && <div className="row g-2">
       <div className="col playback-timeline">

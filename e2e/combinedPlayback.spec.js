@@ -15,7 +15,7 @@ test('combined rings share the cumulative legend, preserve gauges, restore and c
   await selectScale(page, '10 in.');
   await selectMode(page, 'combined'); await ready(page);
   await expect(page.locator('#legend-scale-dropdown-button')).toHaveText('10 in.');
-  await expect(page.locator('.burst-key')).toContainText('Full-size ring: 1 in.');
+  // await expect(page.locator('.burst-key')).toContainText('Full-size ring: 1 in.');
   expect((await ringState(page)).radius0).toBeCloseTo(0.75 * Math.sqrt(0.125));
   const mapInfo = await page.evaluate(({ source, layers }) => {
     const map = window.__RAINFALL_MAP__;
