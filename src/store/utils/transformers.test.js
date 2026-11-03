@@ -1,11 +1,100 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  joinTabletoGeojson,
   transformDataApiEventsJSON,
   transformRainfallResults
 } from "./transformers";
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
+
+describe("joinTabletoGeojson", () => {
+  const feature = (id) => ({
+    id,
+    geometry: { type: "Point", coordinates: [-80, 40] },
+    properties: { id, label: `Pixel ${id}`, total: "" }
+  });
+  const collection = (features) => ({ type: "FeatureCollection", features });
+
+  it("keeps feature order, merges the first matching row, and leaves inputs unchanged", () => {
+    const geojson = collection([feature("8"), feature("missing"), feature("9")]);
+    const table = [{ id: "9", total: null }, { id: "8", total: 0 }, { id: "8", total: 99 }];
+    const originalGeojson = clone(geojson);
+    const originalTable = clone(table);
+
+    const result = joinTabletoGeojson(geojson, table, undefined, "id");
+
+    expect(result).toEqual(collection([
+      { ...geojson.features[0], properties: { id: "8", label: "Pixel 8", total: 0 } },
+      geojson.features[1],
+      { ...geojson.features[2], properties: { id: "9", label: "Pixel 9", total: null } }
+    ]));
+    expect(result.features[0]).not.toBe(geojson.features[0]);
+    expect(result.features[0].geometry).toBe(geojson.features[0].geometry);
+    expect(result.features[1]).toBe(geojson.features[1]);
+    expect(geojson).toEqual(originalGeojson);
+    expect(table).toEqual(originalTable);
+  });
+
+  it.each([
+    ["properties.id", "sensor.id"],
+    [["properties", "id"], ["sensor", "id"]]
+  ])("supports nested join paths %j and %j when dropping unmatched features", (featurePath, rowPath) => {
+    const geojson = collection([feature("missing"), feature("8"), feature("9")]);
+    const table = [{ sensor: { id: "9" }, total: 2 }, { sensor: { id: "8" }, total: 1 }];
+
+    const result = joinTabletoGeojson(geojson, table, featurePath, rowPath, true);
+
+    expect(result.features.map(({ id, properties }) => [id, properties.total])).toEqual([["8", 1], ["9", 2]]);
+  });
+
+  it("preserves strict key equality, including missing keys and nonmatching NaN", () => {
+    const ids = ["8", 8, "9", false, null, undefined, NaN, -0];
+    const geojson = collection(ids.map(feature));
+    const table = [
+      { id: 8, total: 1 }, { id: "8", total: 2 }, { id: 9, total: 3 },
+      { id: false, total: 4 }, { id: null, total: 5 }, { total: 6 },
+      { id: NaN, total: 7 }, { id: 0, total: 8 }
+    ];
+
+    const result = joinTabletoGeojson(geojson, table, "id", "id");
+
+    expect(result.features.map(f => f.properties.total)).toEqual([2, 1, "", 4, 5, 6, "", 8]);
+    expect(result.features[2]).toBe(geojson.features[2]);
+    expect(result.features[6]).toBe(geojson.features[6]);
+  });
+
+  it("preserves an undefined first match rather than taking a later duplicate", () => {
+    const geojson = collection([feature(undefined)]);
+    const result = joinTabletoGeojson(geojson, [undefined, { total: 5 }], "id", "id", true);
+    expect(result).toEqual(collection([]));
+  });
+
+  it("handles empty tables and empty geometry with either unmatched-feature policy", () => {
+    const geojson = collection([feature("8")]);
+    expect(joinTabletoGeojson(geojson, [], "id", "id")).toEqual(geojson);
+    expect(joinTabletoGeojson(geojson, [], "id", "id", true)).toEqual(collection([]));
+    expect(joinTabletoGeojson(collection([]), [{ id: "8" }], "id", "id")).toEqual(collection([]));
+  });
+
+  it("keeps key reads linear as geometry and result counts grow", () => {
+    let keyReads = 0;
+    const features = Array.from({ length: 1000 }, (_, i) => ({
+      ...feature(String(i)),
+      properties: { get id() { keyReads++; return String(i); } }
+    }));
+    const table = Array.from({ length: 800 }, (_, i) => ({
+      sensor: { get id() { keyReads++; return String(i); } }, total: i
+    }));
+
+    const result = joinTabletoGeojson(collection(features), table, "properties.id", "sensor.id");
+
+    expect(result.features).toHaveLength(1000);
+    expect(result.features[799].properties.total).toBe(799);
+    expect(result.features[800]).toBe(features[800]);
+    expect(keyReads).toBeLessThanOrEqual(2 * (features.length + table.length));
+  });
+});
 
 describe("transformRainfallResults", () => {
   it("keeps canonical non-5-minute data shape and calculates totals", () => {

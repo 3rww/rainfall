@@ -172,12 +172,19 @@ export const joinTabletoGeojson = (gj, table, onGeojsonProp, onTableProp, dropFe
     onTableProp = false
   }
 
+  const rowsByKey = new Map()
+  for (const row of table) {
+    const key = get(row, onTableProp)
+    // Keep the first match, as find did. NaN never matched strict equality.
+    if (!Number.isNaN(key) && !rowsByKey.has(key)) {
+      rowsByKey.set(key, row)
+    }
+  }
+
   let newFeatures = gj.features
     .map(feature => {
 
-      let new_props = table.find(a2 => (
-        get(a2, onTableProp) === get(feature, onGeojsonProp)
-      ))
+      const new_props = rowsByKey.get(get(feature, onGeojsonProp))
 
       if (new_props === undefined) {
         if (dropFeatures) {
