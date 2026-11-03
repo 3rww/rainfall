@@ -8,13 +8,13 @@ import { buildRainfallColorStyleExp } from '../../store/utils/mb';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
 import './legend.css';
-import { selectPlaybackScale } from '../../store/features/playbackSlice';
+import { selectPlaybackScale, playbackScale } from '../../store/features/playbackSlice';
 
 const MapLegend = () => {
   const dispatch = useAppDispatch();
 
   const playback = useAppSelector(state => state.playback);
-  const scale = playback.scales[playback.mode];
+  const scale = playbackScale(playback);
   const bins = useMemo(() => buildRainfallColorStyleExp('total', LEGEND_BREAKS[scale]).legendContent
     .map(bin => [bin[0], bin[1], chroma(bin[1]).luminance() < 0.4 ? '#fff' : '#000']), [scale]);
 

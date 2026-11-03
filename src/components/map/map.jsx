@@ -25,6 +25,7 @@ import MapLegend from './legend';
 import PlaybackToolbar from './playbackToolbar';
 import { applyPlaybackFrame, clearPlaybackFrame, applyPlaybackStyle } from './playbackMap';
 import { playbackFrameApplied } from '../../store/features/playbackSlice';
+import { createIntervalBursts } from './intervalBursts';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
@@ -40,9 +41,11 @@ const ReactMap = ({ activeTab, token, zoom }) => {
   const mapStyle = useAppSelector((state) => state.mapStyle);
   const initMap = useAppSelector((state) => state.initMap);
   const playback = useAppSelector(state => state.playback);
+  const pixelGeometry = useAppSelector(state => state.refData.pixel?.data);
   const mapReady = useAppSelector(state => state.progress.mapLoaded);
   const appliedFrameRef = useRef(null);
   const tooltipFeaturesRef = useRef([]);
+  const burstsRef = useRef(null);
 
   const webmapRef = useRef(null);
   const mapContainerRef = useRef(null);
@@ -62,7 +65,7 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     }
 
     if (features.length > 0) {
-      tooltipRootRef.current.render(<Tooltip features={features} playback={store.getState().playback} />);
+      tooltipRootRef.current.render(<Tooltip features={features} playback={store.getState().playback} burst={burstsRef.current?.summary()} />);
       return;
     }
 
@@ -299,7 +302,15 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     mapboxgl.accessToken = token;
     const webmap = new mapboxgl.Map(mapConfig);
     webmapRef.current = webmap;
-    if (E2E_TEST_MODE) window.__RAINFALL_MAP__ = webmap;
+    burstsRef.current = createIntervalBursts(webmap, { onSettled: () => setTooltip(tooltipFeaturesRef.current) });
+    if (E2E_TEST_MODE) {
+      window.__RAINFALL_MAP__ = webmap;
+      window.__RAINFALL_BURSTS__ = burstsRef.current;
+    }
+    const syncHiddenBursts = () => {
+      if (document.hidden) burstsRef.current?.sync({ ...store.getState().playback, playing: false }, store.getState().refData.pixel?.data);
+    };
+    document.addEventListener('visibilitychange', syncHiddenBursts);
     let didInitializeApp = false;
 
     const initializeApp = (loaded = true, message = 'Map loaded') => {
@@ -477,6 +488,9 @@ const ReactMap = ({ activeTab, token, zoom }) => {
         clearTimeout(fallbackInitTimer);
       }
       cancelTooltipHide();
+      document.removeEventListener('visibilitychange', syncHiddenBursts);
+      burstsRef.current?.dispose();
+      burstsRef.current = null;
       window.removeEventListener('resize', resizeMap);
       if (resizeObserver) {
         resizeObserver.disconnect();
@@ -491,7 +505,7 @@ const ReactMap = ({ activeTab, token, zoom }) => {
         }, 0);
       }
       if (webmapRef.current) {
-        if (E2E_TEST_MODE) delete window.__RAINFALL_MAP__;
+        if (E2E_TEST_MODE) { delete window.__RAINFALL_MAP__; delete window.__RAINFALL_BURSTS__; }
         webmapRef.current.remove();
         webmapRef.current = null;
       }
@@ -518,6 +532,10 @@ const ReactMap = ({ activeTab, token, zoom }) => {
   }, [mapReady, mapStyle, playback.mode, playback.scales, store]);
 
   useEffect(() => {
+    if (mapReady) burstsRef.current?.sync(playback, pixelGeometry);
+  }, [mapReady, playback, pixelGeometry]);
+
+  useEffect(() => {
     const map = webmapRef.current;
     if (!map || !mapReady) return;
     const apply = () => {
@@ -534,6 +552,7 @@ const ReactMap = ({ activeTab, token, zoom }) => {
         return;
       }
       applyPlaybackFrame(map, frame);
+      burstsRef.current?.applyFrame(frame, current, store.getState().refData.pixel?.data);
       appliedFrameRef.current = frame;
       if (current.pending) dispatch(playbackFrameApplied(current.pending.token));
     };
@@ -544,7 +563,7 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     return () => { cancelAnimationFrame(animation); map.off('idle', schedule); };
   }, [mapReady, mapStyle, playback.pending, playback.mode, playback.key, dispatch, store]);
 
-  useEffect(() => { setTooltip(tooltipFeaturesRef.current); }, [playback.frame, playback.mode, setTooltip]);
+  useEffect(() => { setTooltip(tooltipFeaturesRef.current); }, [playback.frame, playback.mode, playback.playing, setTooltip]);
 
   useEffect(() => {
     const map = webmapRef.current;
@@ -555,9 +574,11 @@ const ReactMap = ({ activeTab, token, zoom }) => {
       animation = requestAnimationFrame(() => {
         const current = store.getState().playback;
         applyPlaybackStyle(map, current);
+        burstsRef.current?.restore(current, store.getState().refData.pixel?.data);
         const frame = current.pending?.frame || current.frame;
         if (current.mode !== 'total' && frame) {
           applyPlaybackFrame(map, frame);
+          burstsRef.current?.applyFrame(frame, current, store.getState().refData.pixel?.data);
           appliedFrameRef.current = frame;
           if (current.pending) dispatch(playbackFrameApplied(current.pending.token));
         }

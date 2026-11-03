@@ -1,42 +1,21 @@
 import { test, expect } from '@playwright/test';
-import { registerMockApiRoutes, toColumnarFixtureIfRequested } from './helpers/mockApi';
-import { largeRainfall, rainfallGeometry } from './helpers/largeRainfall';
+import { openResult, state, ready, selectMode, selectScale } from './helpers/playback';
+import { largeRainfall } from './helpers/largeRainfall';
 const benchmark = process.env.RAINFALL_BENCHMARK === '1';
-const contextType = 'legacyGarr';
-async function openResult(page, data, rollup = '5-minute') {
-  const api = await registerMockApiRoutes(page, { rainfallData: (_sensor, requestPayload) => toColumnarFixtureIfRequested(data, requestPayload), pixels: rainfallGeometry(data.length) });
-  await page.goto(benchmark ? '/rainfall/' : '/');
-  await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).last().click();
-  await page.waitForFunction(() => window.__APP_STORE__?.getState().stats.latest?.['latest-15min-calibrated-radar']);
-  await page.evaluate(({ contextType, count, rollup }) => {
-    const store = window.__APP_STORE__;
-    store.dispatch({ type: 'progress/switchTab', payload: contextType });
-    store.dispatch({ type: 'fetchKwargs/pickSensor', payload: { contextType, sensorLocationType: 'pixel', selectedOptions: Array.from({ length: count }, (_, i) => ({ value: String(100 + i), label: String(100 + i) })) } });
-    store.dispatch({ type: 'fetchKwargs/pickInterval', payload: { contextType, rollup } });
-  }, { contextType, count: data.length, rollup });
-  await expect(page.getByRole('combobox', { name: 'Rainfall map view' })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Get Rainfall Data' }).click();
-  await expect(page.getByRole('button', { name: 'View and Download Results' }).first()).toBeVisible({ timeout: 60000 });
-  await page.waitForFunction(() => Boolean(window.__RAINFALL_MAP__.getLayer('pixel-results')));
-  return api;
-}
-const state = page => page.evaluate(() => window.__APP_STORE__.getState().playback);
-const ready = page => expect.poll(async () => (await state(page)).status).toBe('ready');
-
 test('interval and cumulative playback controls, legends, state rendering, and cleanup', async ({ page }, info) => {
   const data = [{ id: '100', data: [null, 0.1, null, 0.2].map((val, i) => ({ ts: new Date(Date.UTC(2025, 8, 30, 12, i * 5)).toISOString(), val })) }];
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   const api = await openResult(page, data);
-  const mode = page.getByRole('combobox', { name: 'Rainfall map view' });
-  await expect(mode).toHaveValue('total');
+  const mode = page.getByRole('button', { name: 'Rainfall map view' });
+  await expect(mode).toHaveText('Total Rainfall');
   await expect(page.getByRole('group', { name: 'Playback controls' })).toHaveCount(0);
   await expect(page.getByRole('slider', { name: 'Rainfall timestep' })).toHaveCount(0);
-  await mode.selectOption('interval'); await ready(page);
+  await selectMode(page, 'interval'); await ready(page);
   await expect(page.getByRole('button', { name: 'Previous timestep' })).toBeDisabled();
   await page.getByRole('button', { name: 'Play playback' }).hover();
   await expect(page.getByRole('tooltip')).toHaveText('Play playback');
   await expect(page.getByRole('button', { name: 'Play playback' }).locator('svg')).toBeVisible();
-  await expect(page.getByLabel('0.5 in.', { exact: true })).toBeChecked();
+  await expect(page.locator('#legend-scale-dropdown-button')).toHaveText('0.5 in.');
   const layout = await page.locator('.playback-toolbar').evaluate(toolbar => {
     const bounds = selector => {
       const r = toolbar.querySelector(selector).getBoundingClientRect();
@@ -52,7 +31,7 @@ test('interval and cumulative playback controls, legends, state rendering, and c
   } else {
     expect(layout.slider.centerY).toBeGreaterThan(layout.controls.centerY);
   }
-  expect(Math.abs(layout.mode.centerY - layout.timestamp.centerY)).toBeLessThan(2);
+  expect(layout.slider.centerY).toBeGreaterThan(layout.timestamp.centerY);
   await page.screenshot({ path: info.outputPath('playback-desktop.png') });
   await page.getByRole('button', { name: 'Next timestep' }).click(); await ready(page);
   expect((await state(page)).frame.values[0].value).toBe(0.1);
@@ -71,14 +50,14 @@ test('interval and cumulative playback controls, legends, state rendering, and c
     const original = source.setData;
     source.setData = function(...args) { window.playbackSourceWrites++; return original.apply(this, args); };
   });
-  await page.getByLabel('10 in.', { exact: true }).check();
-  await mode.selectOption('cumulative'); await ready(page);
+  await selectScale(page, '10 in.');
+  await selectMode(page, 'cumulative'); await ready(page);
   expect((await state(page)).frame.index).toBe(1);
-  await expect(page.getByLabel('5 in.', { exact: true })).toBeChecked();
+  await expect(page.locator('#legend-scale-dropdown-button')).toHaveText('5 in.');
   await page.getByRole('button', { name: 'Next timestep' }).click(); await ready(page);
   expect((await state(page)).frame.values[0].value).toBe(0.1);
-  await mode.selectOption('interval'); await ready(page);
-  await expect(page.getByLabel('10 in.', { exact: true })).toBeChecked();
+  await selectMode(page, 'interval'); await ready(page);
+  await expect(page.locator('#legend-scale-dropdown-button')).toHaveText('10 in.');
   expect((await state(page)).frame.values[0].value).toBeNull();
   expect(await page.evaluate(() => window.__RAINFALL_MAP__.getFeatureState({ source: 'pixel', id: '100' }).rainfallAvailable)).toBe(false);
   const slider = page.getByRole('slider', { name: 'Rainfall timestep' });
@@ -91,9 +70,9 @@ test('interval and cumulative playback controls, legends, state rendering, and c
   await page.getByRole('button', { name: 'Play playback' }).click();
   await expect(page.getByRole('button', { name: 'Pause playback' })).toBeVisible();
   await page.getByRole('button', { name: 'Pause playback' }).click();
-  await mode.selectOption('total');
+  await selectMode(page, 'total');
   await expect.poll(() => page.evaluate(() => window.__RAINFALL_MAP__.getFeatureState({ source: 'pixel', id: '100' }).rainfall)).toBeUndefined();
-  await mode.selectOption('interval'); await ready(page);
+  await selectMode(page, 'interval'); await ready(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(slider).toBeVisible();
   await expect(mode).toBeVisible();
@@ -105,7 +84,7 @@ test('interval and cumulative playback controls, legends, state rendering, and c
 
 test('single frame and total-only results disable transport', async ({ page }) => {
   await openResult(page, [{ id: '100', data: [{ ts: '2025-09-30T12:05:00Z', val: 0 }] }]);
-  await page.getByRole('combobox', { name: 'Rainfall map view' }).selectOption('interval'); await ready(page);
+  await selectMode(page, 'interval'); await ready(page);
   await expect(page.getByRole('button', { name: 'Play playback' })).toBeDisabled();
   await expect(page.getByRole('slider', { name: 'Rainfall timestep' })).toBeDisabled();
   await page.evaluate(() => {
@@ -116,10 +95,11 @@ test('single frame and total-only results disable transport', async ({ page }) =
   });
   await page.getByRole('button', { name: 'Get Rainfall Data' }).click();
   await expect(page.getByText('Choose a timestep interval to enable playback.')).toBeVisible();
-  expect(await page.getByRole('combobox', { name: 'Rainfall map view' }).locator('option[value=interval]').isDisabled()).toBe(true);
+  await page.getByRole('button', { name: 'Rainfall map view' }).click();
+  await expect(page.locator('.playback-mode .dropdown-item').filter({ hasText: 'Rainfall by Interval' })).toBeDisabled();
 });
 
-test('large playback keeps native frames, maintains cadence, seeks and releases resources', async ({ page }, info) => {
+for (const playbackMode of ['cumulative', 'combined']) test(`large playback (${playbackMode}) keeps native frames, maintains cadence, seeks and releases resources`, async ({ page }, info) => {
   test.setTimeout(180000);
   const data = largeRainfall(benchmark ? 165 : 12, benchmark ? 8929 : 1201);
   const api = await openResult(page, data);
@@ -133,7 +113,7 @@ test('large playback keeps native frames, maintains cadence, seeks and releases 
       if (p.frame && p.frame !== last) { last = p.frame; window.playbackMetrics.frames.push({ index: p.frame.index, at: performance.now() }); }
     });
   });
-  await page.getByRole('combobox', { name: 'Rainfall map view' }).selectOption('cumulative'); await ready(page);
+  await selectMode(page, playbackMode); await ready(page);
   expect((await state(page)).timeline).toHaveLength(data[0].data.length);
   await page.getByRole('button', { name: 'Play playback' }).click();
   await expect.poll(async () => (await state(page)).frame.index, { timeout: 15000 }).toBeGreaterThanOrEqual(5);
@@ -169,7 +149,7 @@ test('large playback keeps native frames, maintains cadence, seeks and releases 
     return metrics;
   });
   await expect.poll(async () => (await state(page)).frame).toBeNull();
-  await expect(page.getByRole('combobox', { name: 'Rainfall map view' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Rainfall map view' })).toHaveCount(0);
   metrics.playbackDurationMs = playbackDuration;
   metrics.cleanup = await page.evaluate(() => window.__APP_STORE__.inspectResults());
   metrics.playback = { beforeCleanup, afterCleanup: await page.evaluate(() => window.__APP_STORE__.inspectPlayback()) };
@@ -188,7 +168,7 @@ test('large playback keeps native frames, maintains cadence, seeks and releases 
 
 test('open tooltips update with frames and hiding the tab pauses playback', async ({ page }) => {
   await openResult(page, [{ id: '100', data: [0.1, 0.2, 0.3].map((val, i) => ({ ts: new Date(Date.UTC(2025, 8, 30, 12, i * 5)).toISOString(), val })) }]);
-  await page.getByRole('combobox', { name: 'Rainfall map view' }).selectOption('interval'); await ready(page);
+  await selectMode(page, 'interval'); await ready(page);
   await page.evaluate(() => window.__RAINFALL_MAP__.jumpTo({ center: [-79.998, 40.422], zoom: 14 }));
   await page.waitForFunction(() => window.__RAINFALL_MAP__.isStyleLoaded());
   await page.waitForFunction(() => {
@@ -214,7 +194,7 @@ test('open tooltips update with frames and hiding the tab pauses playback', asyn
 
 test('scrubbing follows the pointer in both directions without shifting the slider', async ({ page }) => {
   await openResult(page, largeRainfall(12, 1201));
-  await page.getByRole('combobox', { name: 'Rainfall map view' }).selectOption('interval'); await ready(page);
+  await selectMode(page, 'interval'); await ready(page);
   const slider = page.getByRole('slider', { name: 'Rainfall timestep' });
   for (const width of [1280, 390]) {
     await page.setViewportSize({ width, height: 900 });

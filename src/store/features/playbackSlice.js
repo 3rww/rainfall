@@ -1,5 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+export const playbackScaleMode = mode => mode === 'combined' ? 'cumulative' : mode;
+export const playbackScale = playback => playback.scales[playbackScaleMode(playback.mode)];
+
 const initialState = {
   key: '', available: false, message: '', mode: 'total', playing: false,
   target: 0, generation: 0, timeline: [], frame: null, pending: null, status: 'idle',
@@ -44,7 +47,7 @@ const slice = createSlice({
       state.mode = 'total'; state.playing = false; state.pending = null; state.frame = null;
       state.status = 'error'; state.message = payload; state.available = false;
     },
-    selectPlaybackScale(state, { payload }) { state.scales[state.mode] = payload; }
+    selectPlaybackScale(state, { payload }) { state.scales[playbackScaleMode(state.mode)] = payload; }
   }
 });
 export const { resetPlayback, changePlaybackMode, seekPlayback, togglePlayback, pausePlayback, advancePlayback, playbackPrepared, playbackFrameReady, playbackFrameApplied, playbackError, selectPlaybackScale } = slice.actions;

@@ -90,15 +90,16 @@ The following table describes the source code.
 `;
 
 const how2 = `
+
 ## 3RWW Data API
 
 The rainfall data is served up from 3RWW's Data **A**pplication **P**rogramming **I**nterface (API). Currently a few functions are documented and available through [${API_URL_ROOT}](${API_URL_ROOT}).
 
-For API usage examples, see [this Jupyter notebook](https://github.com/3rww/notebooks/blob/master/rainfall/Engaging%20Rain%20Gauges.ipynb).
+## Visualization Credits
+
+The **Cumulative + interval bursts** rainfall animation was inspired by [Adam Pearce](https://roadtolarissa.com/) and his [Hurricane How-To](https://roadtolarissa.com/hurricane/), which appeared in [The New York Times’ Hurricane Harvey visualization](https://www.nytimes.com/interactive/2017/08/24/us/hurricane-harvey-texas.html) in August 2017.
 
 ## Project Roadmap
-
-You can view the project roadmap on [Github](https://github.com/3rww/rainfall/projects/1). 
 
 Encounter a bug or want to make a feature request? Submit an [issue](https://github.com/3rww/rainfall/issues) or email [3rww@civicmapper.com](mailto:3rww@civicmapper.com)
 

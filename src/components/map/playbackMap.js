@@ -1,5 +1,6 @@
 import { buildRainfallColorStyleExp } from '../../store/utils/mb';
 import { LEGEND_BREAKS, LAYERS_W_RESULTS } from '../../store/config';
+import { playbackScale } from '../../store/features/playbackSlice';
 
 export function applyPlaybackFrame(map, frame) {
   for (const { source, id, value } of frame.values) {
@@ -17,7 +18,7 @@ export function applyPlaybackStyle(map, playback) {
   const active = playback.mode !== 'total';
   const value = active ? ['feature-state', 'rainfall'] : ['get', 'total'];
   const available = active ? ['boolean', ['feature-state', 'rainfallAvailable'], false] : ['!=', ['coalesce', ['get', 'total'], ''], ''];
-  const { colorExp } = buildRainfallColorStyleExp(value, LEGEND_BREAKS[playback.scales[playback.mode]]);
+  const { colorExp } = buildRainfallColorStyleExp(value, LEGEND_BREAKS[playbackScale(playback)]);
   for (const id of LAYERS_W_RESULTS) {
     const layer = map.getLayer(id);
     if (!layer) continue;

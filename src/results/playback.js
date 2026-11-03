@@ -97,8 +97,9 @@ export function createPlaybackEngine(entries) {
         else high = mid;
       }
       const point = sensor.points[low - 1];
-      const value = mode === 'cumulative' ? point?.sum ?? null : point?.index === index ? point.value : null;
-      values.push({ source: sensor.source, id: sensor.id, value });
+      const intervalValue = point?.index === index ? point.value : null;
+      const value = mode === 'cumulative' || mode === 'combined' ? point?.sum ?? null : intervalValue;
+      values.push({ source: sensor.source, id: sensor.id, value, ...(mode === 'combined' ? { intervalValue } : {}) });
       if (values.length % 4096 === 0) yield { processed: values.length };
     }
     return { index, interval: data.timeline[index], values };

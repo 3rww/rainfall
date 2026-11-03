@@ -18,6 +18,12 @@ describe('worker playback', () => {
     expect(frame(1, 'cumulative')).toEqual([0, null, 0.1]);
     expect(frame(2, 'cumulative')).toEqual([0.2, null, 0.4]);
     expect(frame(0, 'cumulative')).toEqual([null, null, 0.1]);
+    expect(frame(2, 'combined')).toEqual(frame(2, 'cumulative'));
+    expect(finish(e.playbackFrame({ session: 'a', index: 1, mode: 'combined' })).values).toEqual([
+      { source: 'pixel', id: '100', value: 0, intervalValue: 0 },
+      { source: 'pixel', id: '101', value: null, intervalValue: null },
+      { source: 'gauge', id: '100', value: 0.1, intervalValue: null }
+    ]);
     expect(frame(2, 'cumulative')[0]).toBe(summary.data[0].total);
     expect(prepared.sensors).toContainEqual({ source: 'gauge', id: '100' });
     expect(prepared.summary).toEqual({ interval: [0.1, 0, 0.25], cumulative: [0.1, 0.1, 0.35] });
