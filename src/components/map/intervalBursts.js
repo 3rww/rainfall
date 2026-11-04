@@ -2,11 +2,10 @@ import { LEGEND_BREAKS } from '../../store/config';
 import { playbackScale } from '../../store/features/playbackSlice';
 
 // Visual tuning: diameter is relative to a radar cell, amounts to the cumulative legend.
-export const BURST_CELL_DIAMETER_FACTOR = 1.5;
+export const BURST_CELL_DIAMETER_FACTOR = 1.25;
 export const BURST_LEGEND_FRACTION = 0.10;
-export const BURST_OPACITY = 0.25;
-export const BURST_STROKE_WIDTH = 0.75;
-export const BURST_GROWTH_FRACTION = 0.40;
+export const BURST_OPACITY = 0.4;
+export const BURST_STROKE_WIDTH = 1.25;
 export const BURST_DURATION_FACTOR = 2.5;
 export const BURST_INITIAL_DURATION_MS = 250;
 export const BURST_MAX_DURATION_MS = 400;
@@ -19,10 +18,10 @@ export const burstRadiusFactor = (amount, threshold) => amount > 0 && threshold 
   ? BURST_CELL_DIAMETER_FACTOR / 2 * Math.sqrt(Math.min(amount / threshold, 1)) : 0;
 
 export function burstEnvelope(progress) {
-  if (progress <= 0 || progress >= 1) return { growth: 0, opacity: 0 };
-  const growth = 1 - (1 - Math.min(1, progress / BURST_GROWTH_FRACTION)) ** 3;
-  const fade = Math.max(0, (progress - BURST_GROWTH_FRACTION) / (1 - BURST_GROWTH_FRACTION));
-  return { growth, opacity: BURST_OPACITY * (1 - fade) ** 2 };
+  if (progress < 0 || progress >= 1) return { scale: 0, opacity: 0 };
+  // Start at full size, then shrink and fade together; mirrored in webgl/shaders.js.
+  const scale = 1 - progress;
+  return { scale, opacity: BURST_OPACITY * scale ** 2 };
 }
 
 const mercator = ([lng, lat]) => {
@@ -138,7 +137,7 @@ export function createIntervalBursts(map, {
       for (let slot = 0; slot < BURST_SLOTS; slot++) {
         const amount = staticRings ? (slot === 0 ? intervals.get(point.id) : 0) : cohorts[slot]?.amounts.get(point.id);
         const radius = burstRadiusFactor(amount, threshold);
-        state[`radius${slot}`] = radius * (staticRings ? 1 : envelopes[slot]?.growth ?? 0);
+        state[`radius${slot}`] = radius * (staticRings ? 1 : envelopes[slot]?.scale ?? 0);
         state[`opacity${slot}`] = radius > 0 ? (staticRings ? BURST_OPACITY : envelopes[slot]?.opacity ?? 0) : 0;
       }
       const previous = written.get(point.id);

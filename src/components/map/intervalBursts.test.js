@@ -55,10 +55,10 @@ describe('burst geometry and encoding', () => {
     expect(burstRadiusFactor(0.125, 0.5)).toBe(0.375);
     expect(burstRadiusFactor(3, 0.5)).toBe(0.75);
     for (const amount of [null, 0, -1, undefined]) expect(burstRadiusFactor(amount, 0.5)).toBe(0);
-    expect(burstEnvelope(0)).toEqual({ growth: 0, opacity: 0 });
-    expect(burstEnvelope(0.4)).toEqual({ growth: 1, opacity: BURST_OPACITY });
+    expect(burstEnvelope(0)).toEqual({ scale: 1, opacity: BURST_OPACITY });
+    expect(burstEnvelope(0.5)).toEqual({ scale: 0.5, opacity: BURST_OPACITY / 4 });
     expect(burstEnvelope(0.8).opacity).toBeLessThan(BURST_OPACITY / 2);
-    expect(burstEnvelope(1).opacity).toBe(0);
+    expect(burstEnvelope(1)).toEqual({ scale: 0, opacity: 0 });
   });
   it('includes skipped rainfall, excludes gauges, and resets to the selected interval', () => {
     expect(burstAmounts(frame(5, 0.8, 0.1), frame(1, 0.2)).get('100')).toBeCloseTo(0.6);
@@ -70,14 +70,15 @@ describe('burst geometry and encoding', () => {
 });
 
 describe('burst map lifecycle', () => {
-  it.each([1, -1])('animates a paused step in direction %i through growth and fade before settling', direction => {
+  it.each([1, -1])('animates a paused step in direction %i through shrinking and fading before settling', direction => {
     const s = setup();
     s.bursts.applyFrame(frame(3, 0.5), playback({ playing: true }), geometry);
     const p = playback({ generation: 1, step: { from: 3, delta: direction } });
     const selected = frame(3 + direction, 0.6, 0.125);
     s.bursts.applyFrame(selected, p, geometry);
     expect(s.bursts.inspect()).toMatchObject({ animated: true, staticRings: false });
-    s.tick(100); expect(s.states.get('100').radius0).toBeCloseTo(0.375);
+    expect(s.states.get('100')).toMatchObject({ radius0: 0.375, opacity0: BURST_OPACITY });
+    s.tick(100); expect(s.states.get('100').radius0).toBeCloseTo(0.225);
     s.tick(200); expect(s.states.get('100').opacity0).toBeLessThan(BURST_OPACITY / 2);
     s.replaceStyle(); s.bursts.restore(p, geometry); s.bursts.applyFrame(selected, p, geometry);
     expect(s.bursts.inspect().emitted).toBe(2);
@@ -89,10 +90,10 @@ describe('burst map lifecycle', () => {
     const s = setup(), f = frame(0, 0.125), p = playback({ playing: true });
     s.bursts.applyFrame(f, p, geometry);
     s.tick(100);
-    expect(s.states.get('100').radius0).toBe(0.375);
+    expect(s.states.get('100').radius0).toBeCloseTo(0.225);
     const changed = { ...p, scales: { cumulative: 'breaks_005' } };
     s.bursts.sync(changed, geometry);
-    expect(s.states.get('100').radius0).toBe(0.75);
+    expect(s.states.get('100').radius0).toBeCloseTo(0.45);
     s.tick(200);
     const opacity = s.states.get('100').opacity0;
     expect(opacity).toBeLessThan(BURST_OPACITY / 2);
@@ -130,7 +131,7 @@ describe('burst map lifecycle', () => {
     expect(s.bursts.summary()).toMatchObject({ count: 3, startMs: 1000, endMs: 4000 });
     expect(s.bursts.summary().amounts.get('100')).toBeCloseTo(0.3);
     s.tick(200);
-    expect(s.states.get('100').radius0).toBeCloseTo(0.75 * Math.sqrt(0.6));
+    expect(s.states.get('100').radius0).toBeCloseTo(0.75 * Math.sqrt(0.6) * 0.6);
     s.bursts.applyFrame(applied, p, geometry);
     expect(s.bursts.inspect().emitted).toBe(1);
     s.at(201); s.bursts.applyFrame(frame(9, 0.8, 0.2), p, geometry);
@@ -152,7 +153,7 @@ describe('burst map lifecycle', () => {
     s.bursts.applyFrame(frame(1, 0.9, 0.05), seek, geometry);
     expect(s.states.get('100').radius0).toBeCloseTo(0.75 * Math.sqrt(0.1));
     s.at(1000); s.bursts.applyFrame(frame(0, 0.1), playback({ playing: true, generation: 2 }), geometry);
-    s.tick(1100); expect(s.states.get('100').radius0).toBeCloseTo(0.75 * Math.sqrt(0.2));
+    s.tick(1100); expect(s.states.get('100').radius0).toBeCloseTo(0.75 * Math.sqrt(0.2) * 0.6);
     expect(s.map.addSource).toHaveBeenCalledTimes(1);
     expect(s.map.getSource(BURST_SOURCE).setData).not.toHaveBeenCalled();
     s.bursts.sync(playback({ key: 'replacement' }), geometry);

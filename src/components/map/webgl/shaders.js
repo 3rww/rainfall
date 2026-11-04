@@ -1,4 +1,4 @@
-import { BURST_CELL_DIAMETER_FACTOR, BURST_OPACITY, BURST_STROKE_WIDTH, BURST_GROWTH_FRACTION } from '../intervalBursts';
+import { BURST_CELL_DIAMETER_FACTOR, BURST_OPACITY, BURST_STROKE_WIDTH } from '../intervalBursts';
 const decimal = value => Number(value).toFixed(8);
 export const vertexShader = `#version 300 es
 precision highp float;
@@ -47,15 +47,15 @@ void main() {
   }
   float amount = texelFetch(amounts, ivec2(index % textureWidth, index / textureWidth + slot * textureSize(rainfall, 0).y), 0).r;
   strokeSize = ${decimal(BURST_STROKE_WIDTH)};
-  float growth = 1.0;
+  float scale = 1.0;
   alpha = ${decimal(BURST_OPACITY)};
   if (!staticRings) {
     float progress = duration[slot] > 0.0 ? (time - born[slot]) / duration[slot] : 1.0;
-    growth = 1.0 - pow(1.0 - clamp(progress / ${decimal(BURST_GROWTH_FRACTION)}, 0.0, 1.0), 3.0);
-    alpha *= pow(1.0 - clamp((progress - ${decimal(BURST_GROWTH_FRACTION)}) / ${decimal(1 - BURST_GROWTH_FRACTION)}, 0.0, 1.0), 2.0);
-    if (progress <= 0.0 || progress >= 1.0) alpha = 0.0;
+    scale = 1.0 - clamp(progress, 0.0, 1.0);
+    alpha *= scale * scale;
+    if (progress < 0.0 || progress >= 1.0) alpha = 0.0;
   } else if (slot != 0) alpha = 0.0;
-  radius = position.w * worldSize * ${decimal(BURST_CELL_DIAMETER_FACTOR / 2)} * sqrt(clamp(amount / threshold, 0.0, 1.0)) * growth;
+  radius = position.w * worldSize * ${decimal(BURST_CELL_DIAMETER_FACTOR / 2)} * sqrt(clamp(amount / threshold, 0.0, 1.0)) * scale;
   available = amount > 0.0 && radius > 0.0 ? 1.0 : 0.0;
   // Clip empty/expired instances before rasterization, including their AA margin.
   if (available < 0.5 || alpha <= 0.0) {
