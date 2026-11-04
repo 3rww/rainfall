@@ -40,7 +40,7 @@ export default function PlaybackToolbar() {
     { value: 'total', label: 'Total Rainfall' },
     { value: 'interval', label: 'Rainfall by Interval' },
     { value: 'cumulative', label: 'Cumulative Rainfall' },
-    ...(activeResult.resultHandles?.pixel ? [{ value: 'combined', label: 'Cumulative + interval bursts' }] : []),
+    ...(activeResult.resultHandles?.pixel ? [{ value: 'combined', label: 'Cumulative + Rain Drops' }] : []),
   ];
   const currentScaleLabel = scaleOptions.find(opt => opt.value === playbackMode.mode)?.label ?? 'Rainfall map view';
   return <div className="playback-toolbar container-fluid py-2" aria-label="Rainfall playback">

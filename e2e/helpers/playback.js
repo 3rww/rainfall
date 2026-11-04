@@ -24,7 +24,7 @@ export async function openResult(page, data, rollup = '5-minute', { mixed = fals
 }
 export const state = page => page.evaluate(() => ({ ...window.__APP_STORE__.getState().playback, frame: window.__APP_STORE__.playbackRuntime.getCurrentFrame() }));
 export const ready = page => expect.poll(async () => (await state(page)).status).toBe('ready');
-const modeLabels = { total: 'Total Rainfall', interval: 'Rainfall by Interval', cumulative: 'Cumulative Rainfall', combined: 'Cumulative + interval bursts' };
+const modeLabels = { total: 'Total Rainfall', interval: 'Rainfall by Interval', cumulative: 'Cumulative Rainfall', combined: 'Cumulative + Rain Drops' };
 export async function selectMode(page, mode) {
   await page.getByRole('button', { name: 'Rainfall map view' }).click();
   await page.locator('.playback-mode .dropdown-item').getByText(modeLabels[mode], { exact: true }).click();

@@ -97,7 +97,7 @@ The rainfall data is served up from 3RWW's Data **A**pplication **P**rogramming 
 
 ## Visualization Credits
 
-The **Cumulative + interval bursts** rainfall animation was inspired by [Adam Pearce](https://roadtolarissa.com/) and his [Hurricane How-To](https://roadtolarissa.com/hurricane/), which appeared in [The New York Times’ Hurricane Harvey visualization](https://www.nytimes.com/interactive/2017/08/24/us/hurricane-harvey-texas.html) in August 2017.
+The **Cumulative + Rain Drops** rainfall animation was inspired by [Adam Pearce](https://roadtolarissa.com/) and his [Hurricane How-To](https://roadtolarissa.com/hurricane/), which appeared in [The New York Times’ Hurricane Harvey visualization](https://www.nytimes.com/interactive/2017/08/24/us/hurricane-harvey-texas.html) in August 2017.
 
 ## Project Roadmap
 
