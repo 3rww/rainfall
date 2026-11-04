@@ -149,9 +149,8 @@ export const LYR_HOVER_PREFIX = 'HOVER'
 export const LYR_HIGHLIGHT_PREFIX = 'HIGHLIGHT'
 
 // Default Operational Layers + Styles --------------------
-// These are layer definitions per the Mapbox style-spec, with one exception: the INDEX property. 
-// When INDEX is used with the `addLayers` reducer, the layer will be inserted at that position 
-// in the style sheet, so that it renders in the correct order with the basemap elements
+// Mapbox layer definitions with insertion hints consumed by `addLayers`:
+// INDEX sets an absolute position; BEFORE_SYMBOLS keeps overlays beneath basemap labels.
 export const MAP_LAYERS = [
   {
     INDEX: 8,
@@ -166,7 +165,7 @@ export const MAP_LAYERS = [
     }
   },
   {
-    INDEX: 68,
+    BEFORE_SYMBOLS: true,
     'id': `${LYR_HIGHLIGHT_PREFIX}-pixel-fill`,
     'type': 'fill',
     'source': 'pixel',
@@ -183,24 +182,7 @@ export const MAP_LAYERS = [
     }
   },
   {
-    INDEX: 70,
-    'id': `${LYR_HIGHLIGHT_PREFIX}-pixel`,
-    'type': 'line',
-    'source': 'pixel',
-    'layout': {},
-    'paint': {
-      'line-color': '#2196f3',
-      'line-width': 1,
-      'line-opacity': [
-        "case",
-        ['boolean', ['get', 'selected'], false],
-        1,
-        0
-      ]
-    }
-  },
-  {
-    INDEX: 69,
+    BEFORE_SYMBOLS: true,
     'id': `pixel-results`,
     'type': 'fill',
     'source': 'pixel',
@@ -231,7 +213,24 @@ export const MAP_LAYERS = [
     }
   },
   {
-    INDEX: 71,
+    BEFORE_SYMBOLS: true,
+    'id': `${LYR_HIGHLIGHT_PREFIX}-pixel`,
+    'type': 'line',
+    'source': 'pixel',
+    'layout': {},
+    'paint': {
+      'line-color': '#2196f3',
+      'line-width': 1,
+      'line-opacity': [
+        "case",
+        ['boolean', ['get', 'selected'], false],
+        1,
+        0
+      ]
+    }
+  },
+  {
+    BEFORE_SYMBOLS: true,
     'id': `${LYR_HOVER_PREFIX}-pixel`,
     'type': 'fill',
     'source': 'pixel',
@@ -447,13 +446,14 @@ export const symbolBinLookup = {
   'l': 'Linear',
 }
 
-export const RAINFALL_COLOR_ARRAY = ["#fde725", "#5dc962", "#20908d", "#3a528b", "#440154"]
+export const RAINFALL_COLOR_ARRAY = ["#ffffff", "#fde725", "#5dc962", "#20908d", "#3a528b", "#440154"]
 export const RAINFALL_COLOR_MODE = 'lch'
 export const RAINFALL_BREAK_COUNT = 7
 
 
 
 export const BREAKS_005 = [
+  0,
   0.01,
   0.02,
   0.04,
@@ -471,7 +471,44 @@ export const BREAKS_005 = [
   0.50
 ]
 
+export const BREAKS_010 = [
+  0,
+  0.02,
+  0.04,
+  0.08,
+  0.12,
+  0.16,
+  0.20,
+  0.30,
+  0.40,
+  0.50,
+  0.60,
+  0.70,
+  0.80,
+  0.90,
+  1.0
+]
+
+export const BREAKS_020 = [
+  0,
+  0.05,
+  0.10,
+  0.20,
+  0.30,
+  0.40,
+  0.50,
+  0.60,
+  0.80,
+  1.0,
+  1.2,
+  1.4,
+  1.6,
+  1.8,
+  2.0
+]
+
 export const BREAKS_050 = [
+  0,
   0.1,
   0.2,
   0.4,
@@ -489,6 +526,7 @@ export const BREAKS_050 = [
 ]
 
 export const BREAKS_100 = [
+  0,
   0.2,
   0.4,
   0.8,
@@ -510,6 +548,13 @@ export const BREAKS_100 = [
 
 export const LEGEND_BREAKS = {
   "breaks_005": BREAKS_005,
+  "breaks_010": BREAKS_010,
+  "breaks_020": BREAKS_020,
   "breaks_050": BREAKS_050,
   "breaks_100": BREAKS_100
 }
+
+export const LEGEND_SCALE_OPTIONS = Object.entries(LEGEND_BREAKS).map(([value, breaks]) => ({
+  value,
+  label: `${Math.max(...breaks)} in.`
+}))

@@ -31,6 +31,15 @@ const mapStyleSlice = createSlice({
     setStyle: (_state, action) => action.payload,
     addLayers: (state, action) => {
       (action.payload || []).forEach((layerConfig) => {
+        if (layerConfig?.BEFORE_SYMBOLS) {
+          const { BEFORE_SYMBOLS, ...layer } = layerConfig;
+          const layers = state.layers || [];
+          const labelIndex = layers.findIndex((candidate) => candidate.type === 'symbol');
+          layers.splice(labelIndex < 0 ? layers.length : labelIndex, 0, layer);
+          state.layers = layers;
+          return;
+        }
+
         if (layerConfig && Object.prototype.hasOwnProperty.call(layerConfig, 'INDEX')) {
           const { INDEX, ...layer } = layerConfig;
           const layers = [...(state.layers || [])];

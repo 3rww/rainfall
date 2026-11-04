@@ -3,7 +3,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Table, Row, Col, Form } from 'react-bootstrap';
 import chroma from 'chroma-js';
 
-import { LEGEND_BREAKS } from '../../store/config';
+import { LEGEND_BREAKS, LEGEND_SCALE_OPTIONS } from '../../store/config';
 import { applyColorStretch } from '../../store/features/mapStyleSlice';
 import { buildRainfallColorStyleExp } from '../../store/utils/mb';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -48,9 +48,19 @@ const MapLegend = () => {
       </Col>
       <Col sm={2}>
         <Form>
-          <Form.Check size="sm" checked={scale === 'breaks_005'} value="breaks_005" label="0.5 in." name="legendRadios" type="radio" id="legend-radio-1" onChange={handleSelectLegend} />
-          <Form.Check checked={scale === 'breaks_050'} size="sm" value="breaks_050" label="5 in." name="legendRadios" type="radio" id="legend-radio-2" onChange={handleSelectLegend} />
-          <Form.Check size="sm" checked={scale === 'breaks_100'} value="breaks_100" label="10 in." name="legendRadios" type="radio" id="legend-radio-3" onChange={handleSelectLegend} />
+          {LEGEND_SCALE_OPTIONS.map((option, index) => (
+            <Form.Check
+              key={option.value}
+              size="sm"
+              checked={scale === option.value}
+              value={option.value}
+              label={option.label}
+              name="legendRadios"
+              type="radio"
+              id={`legend-radio-${index + 1}`}
+              onChange={handleSelectLegend}
+            />
+          ))}
         </Form>
       </Col>
     </Row>

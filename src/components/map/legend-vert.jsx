@@ -4,7 +4,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import chroma from 'chroma-js';
 
-import { LEGEND_BREAKS } from '../../store/config';
+import { LEGEND_BREAKS, LEGEND_SCALE_OPTIONS } from '../../store/config';
 import { applyColorStretch } from '../../store/features/mapStyleSlice';
 import { buildRainfallColorStyleExp } from '../../store/utils/mb';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -29,13 +29,7 @@ const MapLegendVertical = () => {
     if (playback.mode === 'total') dispatch(applyColorStretch({ breaks: LEGEND_BREAKS[value] }));
   }, [dispatch, playback.mode]);
 
-  const scaleOptions = [
-    { value: 'breaks_005', label: '0.5 in.' },
-    { value: 'breaks_050', label: '5 in.' },
-    { value: 'breaks_100', label: '10 in.' },
-  ];
-
-  const currentScaleLabel = scaleOptions.find(opt => opt.value === scale)?.label ?? 'Select scale';
+  const currentScaleLabel = LEGEND_SCALE_OPTIONS.find(opt => opt.value === scale)?.label ?? 'Select scale';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -63,7 +57,7 @@ const MapLegendVertical = () => {
         title={currentScaleLabel}
         id="legend-scale-dropdown-button"
       >
-        {scaleOptions.map((opt, idx) => (
+        {LEGEND_SCALE_OPTIONS.map((opt, idx) => (
           <Dropdown.Item
             key={opt.value}
             id={`legend-radio-${idx + 1}`}
