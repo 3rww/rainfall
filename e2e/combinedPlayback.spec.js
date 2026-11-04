@@ -128,8 +128,8 @@ test('full radar grid combined playback remains bounded on the ten-second schedu
     const store = window.__APP_STORE__;
     window.gridMetrics = { start: performance.now(), frames: [], maxBursts: 0 };
     let previous;
-    window.stopGridMetrics = store.subscribe(() => {
-      const p = store.getState().playback;
+    window.stopGridMetrics = store.playbackRuntime.subscribePresentation(() => {
+      const p = { frame: store.playbackRuntime.getCurrentFrame() };
       if (p.frame && previous !== p.frame) {
         previous = p.frame;
         window.gridMetrics.frames.push({ at: performance.now(), index: p.frame.index });

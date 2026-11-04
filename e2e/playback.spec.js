@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { openResult, state, ready, selectMode, selectScale } from './helpers/playback';
 import { largeRainfall } from './helpers/largeRainfall';
 const benchmark = process.env.RAINFALL_BENCHMARK === '1';
@@ -99,7 +101,7 @@ test('single frame and total-only results disable transport', async ({ page }) =
   await expect(page.locator('.playback-mode .dropdown-item').filter({ hasText: 'Rainfall by Interval' })).toBeDisabled();
 });
 
-for (const playbackMode of ['cumulative', 'combined']) test(`large playback (${playbackMode}) keeps native frames, maintains cadence, seeks and releases resources`, async ({ page }, info) => {
+for (const playbackMode of ['cumulative', 'combined']) test(`large playback (${playbackMode}) keeps all timesteps, maintains cadence, seeks and releases resources`, async ({ page }, info) => {
   test.setTimeout(180000);
   const data = largeRainfall(benchmark ? 165 : 12, benchmark ? 8929 : 1201);
   const api = await openResult(page, data);
@@ -108,8 +110,8 @@ for (const playbackMode of ['cumulative', 'combined']) test(`large playback (${p
   await page.evaluate(() => {
     window.playbackMetrics = { started: performance.now(), frames: [] };
     let last = null;
-    window.stopPlaybackMetrics = window.__APP_STORE__.subscribe(() => {
-      const p = window.__APP_STORE__.getState().playback;
+    window.stopPlaybackMetrics = window.__APP_STORE__.playbackRuntime.subscribePresentation(() => {
+      const p = { frame: window.__APP_STORE__.playbackRuntime.getCurrentFrame() };
       if (p.frame && p.frame !== last) { last = p.frame; window.playbackMetrics.frames.push({ index: p.frame.index, at: performance.now() }); }
     });
   });
@@ -124,6 +126,7 @@ for (const playbackMode of ['cumulative', 'combined']) test(`large playback (${p
   });
   await ready(page);
   const beforeCleanup = await page.evaluate(() => window.__APP_STORE__.inspectPlayback());
+  expect(beforeCleanup.backend).toBe(process.env.PLAYBACK_RENDERER || 'native');
   expect(beforeCleanup.maxCachedFrames).toBeLessThanOrEqual(3);
   expect(beforeCleanup.sessions).toBe(1);
   const p = await state(page);
@@ -155,6 +158,9 @@ for (const playbackMode of ['cumulative', 'combined']) test(`large playback (${p
   metrics.playback = { beforeCleanup, afterCleanup: await page.evaluate(() => window.__APP_STORE__.inspectPlayback()) };
   expect(metrics.playback.afterCleanup.sessions).toBe(0);
   expect(metrics.playback.afterCleanup.cachedFrames).toBe(0);
+  expect(metrics.playback.afterCleanup.buffers).toBe(0);
+  expect(metrics.playback.afterCleanup.textures).toBe(0);
+  expect(metrics.playback.afterCleanup.programs).toBe(0);
   expect(metrics.cleanup.datasets).toBe(0);
   expect(metrics.cleanup.operations).toBe(0);
   if (benchmark) {
@@ -163,6 +169,10 @@ for (const playbackMode of ['cumulative', 'combined']) test(`large playback (${p
     expect(Math.max(...metrics.cadenceMs.slice(1))).toBeLessThan(300);
   }
   expect(api.rainfallRequests).toHaveLength(1);
+  if (process.env.PLAYBACK_REPORT_DIR) {
+    mkdirSync(process.env.PLAYBACK_REPORT_DIR, { recursive: true });
+    writeFileSync(join(process.env.PLAYBACK_REPORT_DIR, `${info.project.name}-${process.env.PLAYBACK_RENDERER || 'native'}-${playbackMode}-long-series.json`), JSON.stringify(metrics, null, 2));
+  }
   await info.attach('playback-performance.json', { body: JSON.stringify(metrics, null, 2), contentType: 'application/json' });
 });
 

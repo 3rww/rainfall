@@ -1,0 +1,3713 @@
+{
+  "date": "2026-11-03",
+  "workload": {
+    "radar": 2313,
+    "gauges": 33,
+    "timesteps": 101,
+    "warmups": 1,
+    "measuredRuns": 5
+  },
+  "variants": {
+    "original": [
+      {
+        "browser": "chromium",
+        "mode": "combined",
+        "requestedBackend": "native",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7632.6 Safari/537.36",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.93173936561837,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "baseline-validated",
+        "medians": {
+          "displayedTimesteps": 69,
+          "finalFrameMs": 10427.699999999255,
+          "seekMs": 63.399999998509884,
+          "mainThreadCpuMs": null
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 68,
+            "finalFrameMs": 10454.199999999255,
+            "seekMs": 68.40000000223517,
+            "rafGapMs": {
+              "median": 66.70000000000073,
+              "p95": 116.70000000000073,
+              "max": 116.70000000000073
+            },
+            "activeBurstGapMs": {
+              "median": 100.0,
+              "p95": 116.70000000000073,
+              "max": 116.70000000000073
+            },
+            "longTasks": {
+              "count": 133,
+              "totalMs": 9854
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 67,
+            "finalFrameMs": 10417.099999997765,
+            "seekMs": 54.69999999925494,
+            "rafGapMs": {
+              "median": 66.69999999999709,
+              "p95": 116.70000000000073,
+              "max": 116.70000000000437
+            },
+            "activeBurstGapMs": {
+              "median": 100,
+              "p95": 116.70000000000437,
+              "max": 116.70000000000437
+            },
+            "longTasks": {
+              "count": 135,
+              "totalMs": 9940
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 69,
+            "finalFrameMs": 10413.70000000298,
+            "seekMs": 63.399999998509884,
+            "rafGapMs": {
+              "median": 66.60000000000582,
+              "p95": 116.69999999999709,
+              "max": 116.79999999999563
+            },
+            "activeBurstGapMs": {
+              "median": 100.0,
+              "p95": 116.70000000000437,
+              "max": 116.79999999999563
+            },
+            "longTasks": {
+              "count": 130,
+              "totalMs": 9492
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 69,
+            "finalFrameMs": 10427.699999999255,
+            "seekMs": 65.30000000074506,
+            "rafGapMs": {
+              "median": 66.69999999999709,
+              "p95": 116.69999999999709,
+              "max": 116.70000000000437
+            },
+            "activeBurstGapMs": {
+              "median": 100,
+              "p95": 116.70000000000437,
+              "max": 116.70000000000437
+            },
+            "longTasks": {
+              "count": 133,
+              "totalMs": 9799
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 69,
+            "finalFrameMs": 10428.400000002235,
+            "seekMs": 62.099999997764826,
+            "rafGapMs": {
+              "median": 66.60000000000582,
+              "p95": 116.70000000000437,
+              "max": 116.70000000001164
+            },
+            "activeBurstGapMs": {
+              "median": 100,
+              "p95": 116.70000000000437,
+              "max": 116.70000000001164
+            },
+            "longTasks": {
+              "count": 132,
+              "totalMs": 9798
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          }
+        ]
+      },
+      {
+        "browser": "chromium",
+        "mode": "cumulative",
+        "requestedBackend": "native",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7632.6 Safari/537.36",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.93173936561837,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "baseline-validated",
+        "medians": {
+          "displayedTimesteps": 101,
+          "finalFrameMs": 10112.800000000745,
+          "seekMs": 67.60000000149012,
+          "mainThreadCpuMs": null
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10112.800000000745,
+            "seekMs": 60.899999998509884,
+            "rafGapMs": {
+              "median": 49.900000000001455,
+              "p95": 66.59999999999854,
+              "max": 66.70000000000073
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 36,
+              "totalMs": 1871
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10109.60000000149,
+            "seekMs": 68.5,
+            "rafGapMs": {
+              "median": 33.400000000001455,
+              "p95": 50.099999999998545,
+              "max": 66.79999999999563
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 13,
+              "totalMs": 726
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10127.699999999255,
+            "seekMs": 67.60000000149012,
+            "rafGapMs": {
+              "median": 49.900000000001455,
+              "p95": 66.59999999999854,
+              "max": 83.30000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 18,
+              "totalMs": 1012
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10088.39999999851,
+            "seekMs": 61.599999997764826,
+            "rafGapMs": {
+              "median": 49.900000000001455,
+              "p95": 66.60000000000582,
+              "max": 66.80000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 29,
+              "totalMs": 1496
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 100,
+            "finalFrameMs": 10146.099999997765,
+            "seekMs": 69.5,
+            "rafGapMs": {
+              "median": 49.900000000001455,
+              "p95": 50.10000000000582,
+              "max": 66.80000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 28,
+              "totalMs": 1488
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          }
+        ]
+      },
+      {
+        "browser": "chromium",
+        "mode": "interval",
+        "requestedBackend": "native",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7632.6 Safari/537.36",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.93173936561837,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "baseline-validated",
+        "medians": {
+          "displayedTimesteps": 101,
+          "finalFrameMs": 10095.199999999255,
+          "seekMs": 54.899999998509884,
+          "mainThreadCpuMs": null
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10094.900000002235,
+            "seekMs": 52.400000002235174,
+            "rafGapMs": {
+              "median": 33.400000000001455,
+              "p95": 50.099999999998545,
+              "max": 66.69999999999709
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 8,
+              "totalMs": 405
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10110.70000000298,
+            "seekMs": 56.600000001490116,
+            "rafGapMs": {
+              "median": 33.400000000001455,
+              "p95": 50.099999999998545,
+              "max": 66.79999999999927
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 8,
+              "totalMs": 427
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10094.39999999851,
+            "seekMs": 54.899999998509884,
+            "rafGapMs": {
+              "median": 33.400000000001455,
+              "p95": 50.099999999998545,
+              "max": 66.69999999999709
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 4,
+              "totalMs": 225
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10095.20000000298,
+            "seekMs": 54.899999998509884,
+            "rafGapMs": {
+              "median": 33.400000000001455,
+              "p95": 50.099999999998545,
+              "max": 66.69999999999709
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 7,
+              "totalMs": 401
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10095.199999999255,
+            "seekMs": 55.100000001490116,
+            "rafGapMs": {
+              "median": 33.5,
+              "p95": 50.099999999998545,
+              "max": 66.60000000000582
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 5,
+              "totalMs": 260
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          }
+        ]
+      },
+      {
+        "browser": "firefox",
+        "mode": "combined",
+        "requestedBackend": "native",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0.1) Gecko/20100101 Firefox/146.0.1",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.931663340269058,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "NVIDIA GeForce GTX 980, or similar"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "383c84e",
+        "medians": {
+          "displayedTimesteps": 45,
+          "finalFrameMs": 10452,
+          "seekMs": 129,
+          "mainThreadCpuMs": 9694.38305
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": 9641.764235,
+            "displayedTimesteps": 46,
+            "finalFrameMs": 10380,
+            "seekMs": 215,
+            "rafGapMs": {
+              "median": 200.05999999999767,
+              "p95": 216.88000000000102,
+              "max": 217.20000000000073
+            },
+            "activeBurstGapMs": {
+              "median": 200.22000000000116,
+              "p95": 216.91999999999825,
+              "max": 217.20000000000073
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": 9681.17532,
+            "displayedTimesteps": 45,
+            "finalFrameMs": 10452,
+            "seekMs": 204,
+            "rafGapMs": {
+              "median": 199.7199999999939,
+              "p95": 217.13999999999942,
+              "max": 233.44000000000233
+            },
+            "activeBurstGapMs": {
+              "median": 200.41999999999825,
+              "p95": 217.20000000000437,
+              "max": 233.44000000000233
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": 9705.666729,
+            "displayedTimesteps": 41,
+            "finalFrameMs": 10430,
+            "seekMs": 116,
+            "rafGapMs": {
+              "median": 199.6899999999987,
+              "p95": 217.13999999999942,
+              "max": 217.45999999999913
+            },
+            "activeBurstGapMs": {
+              "median": 199.79000000000087,
+              "p95": 217.13999999999942,
+              "max": 217.45999999999913
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": 9694.38305,
+            "displayedTimesteps": 42,
+            "finalFrameMs": 10788,
+            "seekMs": 125,
+            "rafGapMs": {
+              "median": 199.95999999999913,
+              "p95": 217.3000000000029,
+              "max": 217.42000000000553
+            },
+            "activeBurstGapMs": {
+              "median": 200.13999999999942,
+              "p95": 217.36000000000058,
+              "max": 217.42000000000553
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": 9702.433688,
+            "displayedTimesteps": 46,
+            "finalFrameMs": 10668,
+            "seekMs": 129,
+            "rafGapMs": {
+              "median": 200.02000000000407,
+              "p95": 217.17999999999302,
+              "max": 233.88000000000466
+            },
+            "activeBurstGapMs": {
+              "median": 200.1999999999971,
+              "p95": 217.22000000000116,
+              "max": 233.88000000000466
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          }
+        ]
+      },
+      {
+        "browser": "firefox",
+        "mode": "cumulative",
+        "requestedBackend": "native",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0.1) Gecko/20100101 Firefox/146.0.1",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.931663340269058,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "NVIDIA GeForce GTX 980, or similar"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "383c84e",
+        "medians": {
+          "displayedTimesteps": 73,
+          "finalFrameMs": 10298,
+          "seekMs": 120,
+          "mainThreadCpuMs": 9739.162084
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": 9747.371379,
+            "displayedTimesteps": 81,
+            "finalFrameMs": 10244,
+            "seekMs": 129,
+            "rafGapMs": {
+              "median": 100.46000000000095,
+              "p95": 116.84000000000015,
+              "max": 132.8199999999997
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": 9737.243706,
+            "displayedTimesteps": 75,
+            "finalFrameMs": 10324,
+            "seekMs": 130,
+            "rafGapMs": {
+              "median": 100.42000000000189,
+              "p95": 116.83999999999651,
+              "max": 117.54000000000087
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": 9739.162084,
+            "displayedTimesteps": 72,
+            "finalFrameMs": 10284,
+            "seekMs": 115,
+            "rafGapMs": {
+              "median": 100.40000000000146,
+              "p95": 116.81999999999971,
+              "max": 117.52000000000407
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": 9737.089377,
+            "displayedTimesteps": 73,
+            "finalFrameMs": 10298,
+            "seekMs": 118,
+            "rafGapMs": {
+              "median": 100.44999999999709,
+              "p95": 116.81999999999971,
+              "max": 117.59999999999854
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": 9769.362694,
+            "displayedTimesteps": 70,
+            "finalFrameMs": 10417,
+            "seekMs": 120,
+            "rafGapMs": {
+              "median": 100.42999999999302,
+              "p95": 116.72000000000116,
+              "max": 116.90000000000146
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          }
+        ]
+      },
+      {
+        "browser": "firefox",
+        "mode": "interval",
+        "requestedBackend": "native",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0.1) Gecko/20100101 Firefox/146.0.1",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.931663340269058,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "NVIDIA GeForce GTX 980, or similar"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "383c84e",
+        "medians": {
+          "displayedTimesteps": 92,
+          "finalFrameMs": 10266,
+          "seekMs": 114,
+          "mainThreadCpuMs": 9653.298536
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": 9636.102406,
+            "displayedTimesteps": 95,
+            "finalFrameMs": 10218,
+            "seekMs": 102,
+            "rafGapMs": {
+              "median": 99.68000000000029,
+              "p95": 100.58000000000175,
+              "max": 116.12000000000262
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": 9653.298536,
+            "displayedTimesteps": 97,
+            "finalFrameMs": 10221,
+            "seekMs": 116,
+            "rafGapMs": {
+              "median": 99.63999999999942,
+              "p95": 100.70000000000073,
+              "max": 100.86000000000058
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": 9725.116993,
+            "displayedTimesteps": 92,
+            "finalFrameMs": 10304,
+            "seekMs": 122,
+            "rafGapMs": {
+              "median": 99.65999999999622,
+              "p95": 100.66000000000349,
+              "max": 116.65999999999622
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": 9646.509041,
+            "displayedTimesteps": 85,
+            "finalFrameMs": 10269,
+            "seekMs": 109,
+            "rafGapMs": {
+              "median": 99.68999999999869,
+              "p95": 100.74000000000524,
+              "max": 133.70000000000437
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": 9677.119101,
+            "displayedTimesteps": 88,
+            "finalFrameMs": 10266,
+            "seekMs": 114,
+            "rafGapMs": {
+              "median": 99.62000000000262,
+              "p95": 100.59999999999854,
+              "max": 100.81999999999971
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 3,
+              "maxCachedFrames": 3
+            }
+          }
+        ]
+      }
+    ],
+    "runtime-native": [
+      {
+        "browser": "chromium",
+        "mode": "combined",
+        "requestedBackend": "native",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7632.6 Safari/537.36",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.93173936561837,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "runtime-native",
+        "medians": {
+          "displayedTimesteps": 94,
+          "finalFrameMs": 10187.10000000149,
+          "seekMs": 47.900000002235174,
+          "mainThreadCpuMs": null
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 94,
+            "finalFrameMs": 10187.10000000149,
+            "seekMs": 40.599999997764826,
+            "rafGapMs": {
+              "median": 16.700000000000728,
+              "p95": 116.59999999999854,
+              "max": 116.70000000000073
+            },
+            "activeBurstGapMs": {
+              "median": 50.0,
+              "p95": 116.69999999999709,
+              "max": 116.70000000000073
+            },
+            "longTasks": {
+              "count": 64,
+              "totalMs": 5108
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 194,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 2313,
+              "emitted": 189,
+              "staticRings": true,
+              "valueUploads": 194,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 90,
+            "finalFrameMs": 10195.800000000745,
+            "seekMs": 48,
+            "rafGapMs": {
+              "median": 16.700000000004366,
+              "p95": 100.10000000000218,
+              "max": 116.70000000000437
+            },
+            "activeBurstGapMs": {
+              "median": 50.0,
+              "p95": 116.69999999999709,
+              "max": 116.70000000000437
+            },
+            "longTasks": {
+              "count": 81,
+              "totalMs": 5973
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 285,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 2313,
+              "emitted": 278,
+              "staticRings": true,
+              "valueUploads": 285,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 92,
+            "finalFrameMs": 10183.800000000745,
+            "seekMs": 47.900000002235174,
+            "rafGapMs": {
+              "median": 16.700000000004366,
+              "p95": 116.59999999999854,
+              "max": 116.70000000000437
+            },
+            "activeBurstGapMs": {
+              "median": 50.0,
+              "p95": 116.69999999999709,
+              "max": 116.70000000000437
+            },
+            "longTasks": {
+              "count": 74,
+              "totalMs": 5605
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 378,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 2313,
+              "emitted": 369,
+              "staticRings": true,
+              "valueUploads": 378,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 94,
+            "finalFrameMs": 10200.60000000149,
+            "seekMs": 42,
+            "rafGapMs": {
+              "median": 16.700000000004366,
+              "p95": 116.59999999999854,
+              "max": 116.80000000000291
+            },
+            "activeBurstGapMs": {
+              "median": 50.099999999998545,
+              "p95": 116.70000000000437,
+              "max": 116.80000000000291
+            },
+            "longTasks": {
+              "count": 71,
+              "totalMs": 5535
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 473,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 2313,
+              "emitted": 462,
+              "staticRings": true,
+              "valueUploads": 473,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 95,
+            "finalFrameMs": 10183.60000000149,
+            "seekMs": 55.600000001490116,
+            "rafGapMs": {
+              "median": 16.750000000003638,
+              "p95": 116.59999999999854,
+              "max": 116.79999999999563
+            },
+            "activeBurstGapMs": {
+              "median": 66.59999999999854,
+              "p95": 116.69999999999709,
+              "max": 116.79999999999563
+            },
+            "longTasks": {
+              "count": 75,
+              "totalMs": 5765
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 569,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 2313,
+              "emitted": 556,
+              "staticRings": true,
+              "valueUploads": 569,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          }
+        ]
+      },
+      {
+        "browser": "chromium",
+        "mode": "cumulative",
+        "requestedBackend": "native",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7632.6 Safari/537.36",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.93173936561837,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "runtime-native",
+        "medians": {
+          "displayedTimesteps": 101,
+          "finalFrameMs": 10051,
+          "seekMs": 46.30000000074506,
+          "mainThreadCpuMs": null
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10051.699999999255,
+            "seekMs": 43.900000002235174,
+            "rafGapMs": {
+              "median": 16.700000000000728,
+              "p95": 33.39999999999782,
+              "max": 50.10000000000218
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 6,
+              "totalMs": 315
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 205,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 205,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10051,
+            "seekMs": 47.099999997764826,
+            "rafGapMs": {
+              "median": 16.700000000000728,
+              "p95": 33.400000000001455,
+              "max": 50.10000000000582
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 6,
+              "totalMs": 310
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 307,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 307,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10036.70000000298,
+            "seekMs": 44.5,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 33.400000000001455,
+              "max": 50.099999999998545
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 14,
+              "totalMs": 735
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 409,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 409,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10051,
+            "seekMs": 48.100000001490116,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 33.400000000001455,
+              "max": 50
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 3,
+              "totalMs": 154
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 511,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 511,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10036.10000000149,
+            "seekMs": 46.30000000074506,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 33.400000000001455,
+              "max": 50
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 1,
+              "totalMs": 50
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 613,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 613,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          }
+        ]
+      },
+      {
+        "browser": "chromium",
+        "mode": "interval",
+        "requestedBackend": "native",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7632.6 Safari/537.36",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.93173936561837,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "runtime-native",
+        "medians": {
+          "displayedTimesteps": 101,
+          "finalFrameMs": 10049,
+          "seekMs": 47,
+          "mainThreadCpuMs": null
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10033.300000000745,
+            "seekMs": 44.5,
+            "rafGapMs": {
+              "median": 16.700000000000728,
+              "p95": 33.39999999999782,
+              "max": 33.5
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 205,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 205,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10049,
+            "seekMs": 46.899999998509884,
+            "rafGapMs": {
+              "median": 16.700000000000728,
+              "p95": 33.39999999999782,
+              "max": 33.5
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 307,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 307,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10049.10000000149,
+            "seekMs": 47.600000001490116,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 33.400000000001455,
+              "max": 50.099999999998545
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 3,
+              "totalMs": 153
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 409,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 409,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10032.599999997765,
+            "seekMs": 49.30000000074506,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 33.400000000001455,
+              "max": 50.099999999998545
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 3,
+              "totalMs": 153
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 511,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 511,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10049.699999999255,
+            "seekMs": 47,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 33.400000000001455,
+              "max": 33.5
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 613,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 613,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          }
+        ]
+      },
+      {
+        "browser": "firefox",
+        "mode": "combined",
+        "requestedBackend": "native",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0.1) Gecko/20100101 Firefox/146.0.1",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.931663340269058,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "NVIDIA GeForce GTX 980, or similar"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "runtime-index-D_vAvvQT",
+        "medians": {
+          "displayedTimesteps": 51,
+          "finalFrameMs": 10332,
+          "seekMs": 108,
+          "mainThreadCpuMs": 9651.550884
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": 9655.387045,
+            "displayedTimesteps": 64,
+            "finalFrameMs": 10332,
+            "seekMs": 109,
+            "rafGapMs": {
+              "median": 99.81999999999971,
+              "p95": 199.97999999999956,
+              "max": 216.4800000000032
+            },
+            "activeBurstGapMs": {
+              "median": 100,
+              "p95": 216.0600000000013,
+              "max": 216.4800000000032
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 124,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 2313,
+              "emitted": 119,
+              "staticRings": true,
+              "valueUploads": 124,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": 9651.550884,
+            "displayedTimesteps": 51,
+            "finalFrameMs": 10328,
+            "seekMs": 108,
+            "rafGapMs": {
+              "median": 99.79999999999563,
+              "p95": 200.1800000000003,
+              "max": 200.34000000000015
+            },
+            "activeBurstGapMs": {
+              "median": 99.83999999999833,
+              "p95": 200.13999999999942,
+              "max": 200.34000000000015
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 176,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 2313,
+              "emitted": 169,
+              "staticRings": true,
+              "valueUploads": 176,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": 9652.261697,
+            "displayedTimesteps": 51,
+            "finalFrameMs": 10324,
+            "seekMs": 99,
+            "rafGapMs": {
+              "median": 100.02000000000407,
+              "p95": 200.36000000000058,
+              "max": 217
+            },
+            "activeBurstGapMs": {
+              "median": 99.93999999999505,
+              "p95": 200.59999999999854,
+              "max": 217
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 228,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 2313,
+              "emitted": 219,
+              "staticRings": true,
+              "valueUploads": 228,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": 9580.561213,
+            "displayedTimesteps": 50,
+            "finalFrameMs": 10378,
+            "seekMs": 98,
+            "rafGapMs": {
+              "median": 99.67000000000189,
+              "p95": 200.13999999999942,
+              "max": 200.6999999999971
+            },
+            "activeBurstGapMs": {
+              "median": 99.67000000000189,
+              "p95": 200.15999999999622,
+              "max": 200.6999999999971
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 279,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 2313,
+              "emitted": 268,
+              "staticRings": true,
+              "valueUploads": 279,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": 9544.259287,
+            "displayedTimesteps": 49,
+            "finalFrameMs": 10410,
+            "seekMs": 119,
+            "rafGapMs": {
+              "median": 99.90999999999985,
+              "p95": 200.27999999999884,
+              "max": 200.39999999999418
+            },
+            "activeBurstGapMs": {
+              "median": 100.44000000000233,
+              "p95": 200.1999999999971,
+              "max": 200.39999999999418
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 329,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 2313,
+              "emitted": 316,
+              "staticRings": true,
+              "valueUploads": 329,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          }
+        ]
+      },
+      {
+        "browser": "firefox",
+        "mode": "cumulative",
+        "requestedBackend": "native",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0.1) Gecko/20100101 Firefox/146.0.1",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.931663340269058,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "NVIDIA GeForce GTX 980, or similar"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "runtime-index-D_vAvvQT",
+        "medians": {
+          "displayedTimesteps": 101,
+          "finalFrameMs": 10097,
+          "seekMs": 107,
+          "mainThreadCpuMs": 9406.857375
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": 9406.857375,
+            "displayedTimesteps": 100,
+            "finalFrameMs": 10189,
+            "seekMs": 107,
+            "rafGapMs": {
+              "median": 83.3799999999992,
+              "p95": 100.57999999999811,
+              "max": 117.08000000000175
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 201,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 201,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": 9548.221201,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10097,
+            "seekMs": 106,
+            "rafGapMs": {
+              "median": 83.53999999999905,
+              "p95": 100.62000000000262,
+              "max": 116.84000000000015
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 303,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 303,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": 9406.075609,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10105,
+            "seekMs": 105,
+            "rafGapMs": {
+              "median": 83.07999999999811,
+              "p95": 100.66000000000349,
+              "max": 116.91999999999825
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 405,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 405,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": 9473.366134,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10095,
+            "seekMs": 107,
+            "rafGapMs": {
+              "median": 82.75,
+              "p95": 99.90000000000146,
+              "max": 100.57999999999447
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 507,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 507,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": 9268.726586,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10090,
+            "seekMs": 111,
+            "rafGapMs": {
+              "median": 82.55999999999767,
+              "p95": 99.68000000000029,
+              "max": 116.9800000000032
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 609,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 609,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          }
+        ]
+      },
+      {
+        "browser": "firefox",
+        "mode": "interval",
+        "requestedBackend": "native",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0.1) Gecko/20100101 Firefox/146.0.1",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.931663340269058,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "NVIDIA GeForce GTX 980, or similar"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "runtime-index-D_vAvvQT",
+        "medians": {
+          "displayedTimesteps": 101,
+          "finalFrameMs": 10093,
+          "seekMs": 95,
+          "mainThreadCpuMs": 8659.805881
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": 8943.6753,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10087,
+            "seekMs": 103,
+            "rafGapMs": {
+              "median": 82.38000000000102,
+              "p95": 99.54000000000087,
+              "max": 100.39999999999782
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 205,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 205,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": 8659.805881,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10089,
+            "seekMs": 97,
+            "rafGapMs": {
+              "median": 17.18000000000029,
+              "p95": 83.63999999999942,
+              "max": 100.54000000000087
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 307,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 307,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": 8741.059179,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10093,
+            "seekMs": 94,
+            "rafGapMs": {
+              "median": 17.160000000003492,
+              "p95": 83.68000000000029,
+              "max": 100.78000000000611
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 409,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 409,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": 8571.770519,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10096,
+            "seekMs": 93,
+            "rafGapMs": {
+              "median": 17.160000000003492,
+              "p95": 83.68000000000029,
+              "max": 99.72000000000116
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 511,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 511,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": 8512.755112,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10098,
+            "seekMs": 95,
+            "rafGapMs": {
+              "median": 17.160000000003492,
+              "p95": 83.68000000000029,
+              "max": 83.91999999999825
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 613,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "native",
+              "backend": "native",
+              "fallbackReason": null,
+              "contextLost": false,
+              "activeBursts": 0,
+              "animated": false,
+              "points": 0,
+              "emitted": 0,
+              "staticRings": false,
+              "valueUploads": 613,
+              "buffers": 0,
+              "textures": 0,
+              "programs": 0
+            }
+          }
+        ]
+      }
+    ],
+    "custom": [
+      {
+        "browser": "chromium",
+        "mode": "combined",
+        "requestedBackend": "custom",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7632.6 Safari/537.36",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.93173936561837,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "custom-optimized",
+        "medians": {
+          "displayedTimesteps": 101,
+          "finalFrameMs": 10040.800000000745,
+          "seekMs": 19.300000000745058,
+          "mainThreadCpuMs": null
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10049.60000000149,
+            "seekMs": 17.600000001490116,
+            "rafGapMs": {
+              "median": 16.700000000000728,
+              "p95": 33.400000000001455,
+              "max": 50
+            },
+            "activeBurstGapMs": {
+              "median": 33.29999999999927,
+              "p95": 49.89999999999782,
+              "max": 50
+            },
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 205,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 205,
+              "cohortUploads": 213,
+              "draws": 3057,
+              "resourceBuilds": 1,
+              "emitted": 200,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": true,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10034.400000002235,
+            "seekMs": 18.300000000745058,
+            "rafGapMs": {
+              "median": 16.700000000000728,
+              "p95": 33.400000000001455,
+              "max": 50.099999999998545
+            },
+            "activeBurstGapMs": {
+              "median": 33.29999999999927,
+              "p95": 50,
+              "max": 50
+            },
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 307,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 307,
+              "cohortUploads": 319,
+              "draws": 4581,
+              "resourceBuilds": 1,
+              "emitted": 300,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": true,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10043.300000000745,
+            "seekMs": 19.300000000745058,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 49.900000000001455,
+              "max": 50.10000000000582
+            },
+            "activeBurstGapMs": {
+              "median": 33.30000000000291,
+              "p95": 50.099999999998545,
+              "max": 50.10000000000582
+            },
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 409,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 409,
+              "cohortUploads": 425,
+              "draws": 6054,
+              "resourceBuilds": 1,
+              "emitted": 400,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": true,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10040.800000000745,
+            "seekMs": 19.699999999254942,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 33.400000000001455,
+              "max": 50.10000000000582
+            },
+            "activeBurstGapMs": {
+              "median": 33.349999999998545,
+              "p95": 50,
+              "max": 50.10000000000582
+            },
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 511,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 511,
+              "cohortUploads": 531,
+              "draws": 7527,
+              "resourceBuilds": 1,
+              "emitted": 500,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": true,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10008.20000000298,
+            "seekMs": 20.600000001490116,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 49.900000000001455,
+              "max": 50.10000000000582
+            },
+            "activeBurstGapMs": {
+              "median": 33.30000000000291,
+              "p95": 50,
+              "max": 50.10000000000582
+            },
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 613,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 613,
+              "cohortUploads": 637,
+              "draws": 9012,
+              "resourceBuilds": 1,
+              "emitted": 600,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": true,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          }
+        ]
+      },
+      {
+        "browser": "chromium",
+        "mode": "cumulative",
+        "requestedBackend": "custom",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7632.6 Safari/537.36",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.93173936561837,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "custom-optimized",
+        "medians": {
+          "displayedTimesteps": 101,
+          "finalFrameMs": 10008.60000000149,
+          "seekMs": 21.100000001490116,
+          "mainThreadCpuMs": null
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10008.900000002235,
+            "seekMs": 21.100000001490116,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 16.799999999999272,
+              "max": 16.80000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 205,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 205,
+              "cohortUploads": 9,
+              "draws": 2442,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10008.60000000149,
+            "seekMs": 22,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 16.700000000004366,
+              "max": 16.80000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 307,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 307,
+              "cohortUploads": 13,
+              "draws": 3662,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10002.099999997765,
+            "seekMs": 20.900000002235174,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 16.700000000004366,
+              "max": 16.80000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 409,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 409,
+              "cohortUploads": 17,
+              "draws": 4882,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10011.89999999851,
+            "seekMs": 23.099999997764826,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 16.799999999995634,
+              "max": 16.80000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 511,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 511,
+              "cohortUploads": 21,
+              "draws": 6102,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10001.20000000298,
+            "seekMs": 20.300000000745058,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 16.70000000001164,
+              "max": 33.30000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 613,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 613,
+              "cohortUploads": 25,
+              "draws": 7320,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          }
+        ]
+      },
+      {
+        "browser": "chromium",
+        "mode": "interval",
+        "requestedBackend": "custom",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.7632.6 Safari/537.36",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.93173936561837,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "custom-optimized",
+        "medians": {
+          "displayedTimesteps": 101,
+          "finalFrameMs": 10011.89999999851,
+          "seekMs": 18.199999999254942,
+          "mainThreadCpuMs": null
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10014.300000000745,
+            "seekMs": 5,
+            "rafGapMs": {
+              "median": 16.700000000000728,
+              "p95": 16.799999999999272,
+              "max": 16.80000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 205,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 205,
+              "cohortUploads": 9,
+              "draws": 2434,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10001.60000000149,
+            "seekMs": 20.5,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 16.700000000004366,
+              "max": 16.80000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 307,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 307,
+              "cohortUploads": 13,
+              "draws": 3650,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10007.699999999255,
+            "seekMs": 22,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 16.700000000004366,
+              "max": 16.80000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 409,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 409,
+              "cohortUploads": 17,
+              "draws": 4870,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10013.199999999255,
+            "seekMs": 5.400000002235174,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 16.700000000004366,
+              "max": 16.80000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 511,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 511,
+              "cohortUploads": 21,
+              "draws": 6088,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": null,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10011.89999999851,
+            "seekMs": 18.199999999254942,
+            "rafGapMs": {
+              "median": 16.69999999999709,
+              "p95": 16.799999999995634,
+              "max": 33.30000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": {
+              "count": 0,
+              "totalMs": 0
+            },
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 613,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 613,
+              "cohortUploads": 25,
+              "draws": 7306,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          }
+        ]
+      },
+      {
+        "browser": "firefox",
+        "mode": "combined",
+        "requestedBackend": "custom",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0.1) Gecko/20100101 Firefox/146.0.1",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.931663340269058,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "NVIDIA GeForce GTX 980, or similar"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "custom-optimized",
+        "medians": {
+          "displayedTimesteps": 101,
+          "finalFrameMs": 10010,
+          "seekMs": 7,
+          "mainThreadCpuMs": 1434.116526
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": 1576.787364,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10009,
+            "seekMs": 7,
+            "rafGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.18000000000029,
+              "max": 34.159999999999854
+            },
+            "activeBurstGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.18000000000029,
+              "max": 34.159999999999854
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 205,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 205,
+              "cohortUploads": 208,
+              "draws": 3624,
+              "resourceBuilds": 1,
+              "emitted": 200,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": true,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": 1419.281446,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10010,
+            "seekMs": 23,
+            "rafGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.160000000003492,
+              "max": 17.220000000001164
+            },
+            "activeBurstGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.18000000000029,
+              "max": 17.220000000001164
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 307,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 307,
+              "cohortUploads": 312,
+              "draws": 5436,
+              "resourceBuilds": 1,
+              "emitted": 300,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": true,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": 1347.140974,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10012,
+            "seekMs": 7,
+            "rafGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.18000000000029,
+              "max": 17.260000000002037
+            },
+            "activeBurstGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.160000000003492,
+              "max": 17.260000000002037
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 409,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 409,
+              "cohortUploads": 416,
+              "draws": 7248,
+              "resourceBuilds": 1,
+              "emitted": 400,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": true,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": 1434.116526,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10012,
+            "seekMs": 7,
+            "rafGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.139999999999418,
+              "max": 17.31999999999971
+            },
+            "activeBurstGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.139999999999418,
+              "max": 17.220000000001164
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 511,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 511,
+              "cohortUploads": 520,
+              "draws": 9060,
+              "resourceBuilds": 1,
+              "emitted": 500,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": true,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": 1459.700403,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10010,
+            "seekMs": 24,
+            "rafGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.179999999993015,
+              "max": 17.260000000002037
+            },
+            "activeBurstGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.160000000003492,
+              "max": 17.200000000004366
+            },
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 613,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 613,
+              "cohortUploads": 625,
+              "draws": 10875,
+              "resourceBuilds": 1,
+              "emitted": 600,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": true,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          }
+        ]
+      },
+      {
+        "browser": "firefox",
+        "mode": "cumulative",
+        "requestedBackend": "custom",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0.1) Gecko/20100101 Firefox/146.0.1",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.931663340269058,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "NVIDIA GeForce GTX 980, or similar"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "custom-optimized",
+        "medians": {
+          "displayedTimesteps": 101,
+          "finalFrameMs": 10010,
+          "seekMs": 9,
+          "mainThreadCpuMs": 1209.864659
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": 1341.534233,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10018,
+            "seekMs": 17,
+            "rafGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.18000000000029,
+              "max": 33.140000000003056
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 205,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 205,
+              "cohortUploads": 8,
+              "draws": 2422,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": 1385.687577,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10008,
+            "seekMs": 9,
+            "rafGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.18000000000029,
+              "max": 17.279999999998836
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 307,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 307,
+              "cohortUploads": 11,
+              "draws": 3628,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": 1209.864659,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10011,
+            "seekMs": 9,
+            "rafGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.160000000003492,
+              "max": 17.24000000000524
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 409,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 409,
+              "cohortUploads": 14,
+              "draws": 4836,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": 1073.078855,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10010,
+            "seekMs": 9,
+            "rafGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.18000000000029,
+              "max": 17.279999999998836
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 511,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 511,
+              "cohortUploads": 17,
+              "draws": 6042,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": 1135.998894,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10010,
+            "seekMs": 20,
+            "rafGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.18000000000029,
+              "max": 17.279999999998836
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 613,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 613,
+              "cohortUploads": 20,
+              "draws": 7250,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          }
+        ]
+      },
+      {
+        "browser": "firefox",
+        "mode": "interval",
+        "requestedBackend": "custom",
+        "environment": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0.1) Gecko/20100101 Firefox/146.0.1",
+          "dpr": 1,
+          "camera": {
+            "center": [
+              -80.02499999999998,
+              40.42578518131981
+            ],
+            "zoom": 8.931663340269058,
+            "pitch": 0,
+            "bearing": 0
+          },
+          "gpu": "NVIDIA GeForce GTX 980, or similar"
+        },
+        "viewport": {
+          "width": 1280,
+          "height": 720
+        },
+        "revision": "custom-optimized",
+        "medians": {
+          "displayedTimesteps": 101,
+          "finalFrameMs": 10009,
+          "seekMs": 15,
+          "mainThreadCpuMs": 1233.700233
+        },
+        "runs": [
+          {
+            "run": 1,
+            "mainThreadCpuMs": 1233.700233,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10009,
+            "seekMs": 21,
+            "rafGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.159999999999854,
+              "max": 17.31999999999971
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 205,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 205,
+              "cohortUploads": 7,
+              "draws": 2422,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 2,
+            "mainThreadCpuMs": 1241.457936,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10009,
+            "seekMs": 15,
+            "rafGapMs": {
+              "median": 17.05999999999767,
+              "p95": 17.18000000000029,
+              "max": 17.280000000002474
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 307,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 307,
+              "cohortUploads": 11,
+              "draws": 3630,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 3,
+            "mainThreadCpuMs": 1134.285848,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10008,
+            "seekMs": 7,
+            "rafGapMs": {
+              "median": 17.040000000000873,
+              "p95": 17.19999999999709,
+              "max": 17.31999999999971
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 409,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 409,
+              "cohortUploads": 14,
+              "draws": 4836,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 4,
+            "mainThreadCpuMs": 1145.79773,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10010,
+            "seekMs": 8,
+            "rafGapMs": {
+              "median": 17.049999999999272,
+              "p95": 17.18000000000029,
+              "max": 17.25999999999476
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 511,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 511,
+              "cohortUploads": 17,
+              "draws": 6044,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          },
+          {
+            "run": 5,
+            "mainThreadCpuMs": 1396.23084,
+            "displayedTimesteps": 101,
+            "finalFrameMs": 10010,
+            "seekMs": 18,
+            "rafGapMs": {
+              "median": 17.049999999999272,
+              "p95": 17.18000000000029,
+              "max": 17.30000000000291
+            },
+            "activeBurstGapMs": null,
+            "longTasks": null,
+            "diagnostics": {
+              "sessions": 1,
+              "cachedFrames": 2,
+              "maxCachedFrames": 3,
+              "appliedFrames": 613,
+              "pendingIndex": null,
+              "appliedIndex": 50,
+              "requestedBackend": "custom",
+              "backend": "custom",
+              "fallbackReason": null,
+              "contextLost": false,
+              "geometryBuilds": 1,
+              "valueUploads": 613,
+              "cohortUploads": 20,
+              "draws": 7254,
+              "resourceBuilds": 1,
+              "emitted": 0,
+              "activeBursts": 0,
+              "animated": false,
+              "staticRings": false,
+              "points": 2313,
+              "buffers": 5,
+              "textures": 2,
+              "programs": 1
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "acceptance": {
+    "passed": true,
+    "checks": [
+      {
+        "browser": "chromium",
+        "mode": "interval",
+        "complete": true,
+        "fiveMeasuredRuns": true,
+        "noFallback": true,
+        "noFewerTimesteps": true,
+        "seekNotSlower": true,
+        "allFinalFramesWithin10500ms": true,
+        "passed": true
+      },
+      {
+        "browser": "chromium",
+        "mode": "cumulative",
+        "complete": true,
+        "fiveMeasuredRuns": true,
+        "noFallback": true,
+        "noFewerTimesteps": true,
+        "seekNotSlower": true,
+        "allFinalFramesWithin10500ms": true,
+        "passed": true
+      },
+      {
+        "browser": "chromium",
+        "mode": "combined",
+        "complete": true,
+        "fiveMeasuredRuns": true,
+        "noFallback": true,
+        "noFewerTimesteps": true,
+        "seekNotSlower": true,
+        "allFinalFramesWithin10500ms": true,
+        "passed": true
+      },
+      {
+        "browser": "firefox",
+        "mode": "interval",
+        "complete": true,
+        "fiveMeasuredRuns": true,
+        "noFallback": true,
+        "noFewerTimesteps": true,
+        "seekNotSlower": true,
+        "allFinalFramesWithin10500ms": true,
+        "cpuReductionAtLeast50Percent": true,
+        "passed": true
+      },
+      {
+        "browser": "firefox",
+        "mode": "cumulative",
+        "complete": true,
+        "fiveMeasuredRuns": true,
+        "noFallback": true,
+        "noFewerTimesteps": true,
+        "seekNotSlower": true,
+        "allFinalFramesWithin10500ms": true,
+        "cpuReductionAtLeast50Percent": true,
+        "passed": true
+      },
+      {
+        "browser": "firefox",
+        "mode": "combined",
+        "complete": true,
+        "fiveMeasuredRuns": true,
+        "noFallback": true,
+        "noFewerTimesteps": true,
+        "seekNotSlower": true,
+        "allFinalFramesWithin10500ms": true,
+        "cpuReductionAtLeast50Percent": true,
+        "passed": true
+      }
+    ]
+  }
+}

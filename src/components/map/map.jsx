@@ -23,9 +23,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { Tooltip } from './tooltip';
 import MapLegend from './legend';
 import PlaybackToolbar from './playbackToolbar';
-import { applyPlaybackFrame, clearPlaybackFrame, applyPlaybackStyle } from './playbackMap';
-import { playbackFrameApplied } from '../../store/features/playbackSlice';
-import { createIntervalBursts } from './intervalBursts';
+import { createPlaybackRenderer } from './playbackRenderer';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
@@ -40,10 +38,8 @@ const ReactMap = ({ activeTab, token, zoom }) => {
   const store = useStore();
   const mapStyle = useAppSelector((state) => state.mapStyle);
   const initMap = useAppSelector((state) => state.initMap);
-  const playback = useAppSelector(state => state.playback);
   const pixelGeometry = useAppSelector(state => state.refData.pixel?.data);
   const mapReady = useAppSelector(state => state.progress.mapLoaded);
-  const appliedFrameRef = useRef(null);
   const tooltipFeaturesRef = useRef([]);
   const burstsRef = useRef(null);
 
@@ -65,7 +61,7 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     }
 
     if (features.length > 0) {
-      tooltipRootRef.current.render(<Tooltip features={features} playback={store.getState().playback} burst={burstsRef.current?.summary()} />);
+      tooltipRootRef.current.render(<Tooltip features={features} playback={store.getState().playback} frame={store.playbackRuntime.getCurrentFrame()} readout={store.playbackRuntime.getReadout} burst={burstsRef.current?.summary()} />);
       return;
     }
 
@@ -302,15 +298,13 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     mapboxgl.accessToken = token;
     const webmap = new mapboxgl.Map(mapConfig);
     webmapRef.current = webmap;
-    burstsRef.current = createIntervalBursts(webmap, { onSettled: () => setTooltip(tooltipFeaturesRef.current) });
+    burstsRef.current = createPlaybackRenderer(webmap, store, { onSettled: () => store.playbackRuntime.refreshReadout() });
+    const detachRenderer = store.playbackRuntime.attachRenderer(burstsRef.current);
+    const unsubscribeTooltip = store.playbackRuntime.subscribe(() => { if (tooltipFeaturesRef.current.length) setTooltip(tooltipFeaturesRef.current); });
     if (E2E_TEST_MODE) {
       window.__RAINFALL_MAP__ = webmap;
       window.__RAINFALL_BURSTS__ = burstsRef.current;
     }
-    const syncHiddenBursts = () => {
-      if (document.hidden) burstsRef.current?.sync({ ...store.getState().playback, playing: false }, store.getState().refData.pixel?.data);
-    };
-    document.addEventListener('visibilitychange', syncHiddenBursts);
     let didInitializeApp = false;
 
     const initializeApp = (loaded = true, message = 'Map loaded') => {
@@ -488,8 +482,8 @@ const ReactMap = ({ activeTab, token, zoom }) => {
         clearTimeout(fallbackInitTimer);
       }
       cancelTooltipHide();
-      document.removeEventListener('visibilitychange', syncHiddenBursts);
-      burstsRef.current?.dispose();
+      unsubscribeTooltip();
+      detachRenderer();
       burstsRef.current = null;
       window.removeEventListener('resize', resizeMap);
       if (resizeObserver) {
@@ -523,70 +517,8 @@ const ReactMap = ({ activeTab, token, zoom }) => {
   }, [mapStyle, updateMapStyle]);
 
   useEffect(() => {
-    const map = webmapRef.current;
-    if (!mapReady || !map) return;
-    const style = () => applyPlaybackStyle(map, store.getState().playback);
-    if (map.isStyleLoaded()) style();
-    else map.once('idle', style);
-    return () => map.off('idle', style);
-  }, [mapReady, mapStyle, playback.mode, playback.scales, store]);
-
-  useEffect(() => {
-    if (mapReady) burstsRef.current?.sync(playback, pixelGeometry);
-  }, [mapReady, playback, pixelGeometry]);
-
-  useEffect(() => {
-    const map = webmapRef.current;
-    if (!map || !mapReady) return;
-    const apply = () => {
-      const current = store.getState().playback;
-      if (current.mode === 'total') {
-        clearPlaybackFrame(map, appliedFrameRef.current);
-        appliedFrameRef.current = null;
-        return;
-      }
-      const frame = current.pending?.frame || current.frame;
-      if (!frame) {
-        clearPlaybackFrame(map, appliedFrameRef.current);
-        appliedFrameRef.current = null;
-        return;
-      }
-      applyPlaybackFrame(map, frame);
-      burstsRef.current?.applyFrame(frame, current, store.getState().refData.pixel?.data);
-      appliedFrameRef.current = frame;
-      if (current.pending) dispatch(playbackFrameApplied(current.pending.token));
-    };
-    let animation;
-    const schedule = () => { animation = requestAnimationFrame(apply); };
-    if (map.isStyleLoaded()) schedule();
-    else map.once('idle', schedule);
-    return () => { cancelAnimationFrame(animation); map.off('idle', schedule); };
-  }, [mapReady, mapStyle, playback.pending, playback.mode, playback.key, dispatch, store]);
-
-  useEffect(() => { setTooltip(tooltipFeaturesRef.current); }, [playback.frame, playback.mode, playback.playing, setTooltip]);
-
-  useEffect(() => {
-    const map = webmapRef.current;
-    if (!map) return;
-    let animation;
-    const restore = () => {
-      cancelAnimationFrame(animation);
-      animation = requestAnimationFrame(() => {
-        const current = store.getState().playback;
-        applyPlaybackStyle(map, current);
-        burstsRef.current?.restore(current, store.getState().refData.pixel?.data);
-        const frame = current.pending?.frame || current.frame;
-        if (current.mode !== 'total' && frame) {
-          applyPlaybackFrame(map, frame);
-          burstsRef.current?.applyFrame(frame, current, store.getState().refData.pixel?.data);
-          appliedFrameRef.current = frame;
-          if (current.pending) dispatch(playbackFrameApplied(current.pending.token));
-        }
-      });
-    };
-    map.on('style.load', restore);
-    return () => { cancelAnimationFrame(animation); map.off('style.load', restore); };
-  }, [store, dispatch]);
+    if (mapReady) burstsRef.current?.refresh();
+  }, [mapReady, mapStyle, pixelGeometry]);
 
   return (
     <div className="map-and-legend-container">

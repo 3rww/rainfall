@@ -185,7 +185,9 @@ export const registerMockApiRoutes = async (page, options = {}) => {
     }
 
     if (path.startsWith("/fonts/")) {
-      return emptyResponse(route, "application/x-protobuf");
+      // A valid empty Fontstack message. A zero-byte response leaves glyphs undefined
+      // and aborts gauge tiles (including their circle layers) in Mapbox 3.18.
+      return route.fulfill({ status: 200, headers: corsHeaders, contentType: "application/x-protobuf", body: Buffer.from([0x0a, 0x00]) });
     }
 
     if (path === "/v2/rainfall-events/") {
@@ -218,7 +220,7 @@ export const registerMockApiRoutes = async (page, options = {}) => {
     }
 
     if (path === "/gauges/") {
-      return jsonResponse(route, MOCK_GAUGES);
+      return jsonResponse(route, options.gauges || MOCK_GAUGES);
     }
 
     if (path === "/pixels/") {

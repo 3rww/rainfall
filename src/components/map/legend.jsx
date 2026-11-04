@@ -1,3 +1,4 @@
+import { shallowEqual } from 'react-redux';
 import React, { useCallback, useMemo } from 'react';
 import { Table, Row, Col, Form } from 'react-bootstrap';
 import chroma from 'chroma-js';
@@ -13,7 +14,7 @@ import { selectPlaybackScale, playbackScale } from '../../store/features/playbac
 const MapLegend = () => {
   const dispatch = useAppDispatch();
 
-  const playback = useAppSelector(state => state.playback);
+  const playback = useAppSelector(state => ({ mode: state.playback.mode, scales: state.playback.scales }), shallowEqual);
   const scale = playbackScale(playback);
   const bins = useMemo(() => buildRainfallColorStyleExp('total', LEGEND_BREAKS[scale]).legendContent
     .map(bin => [bin[0], bin[1], chroma(bin[1]).luminance() < 0.4 ? '#fff' : '#000']), [scale]);

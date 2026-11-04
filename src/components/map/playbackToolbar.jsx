@@ -1,4 +1,4 @@
-import React, { useEffect, lazy, Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Button, ButtonGroup, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -30,15 +30,10 @@ export default function PlaybackToolbar() {
   const dispatch = useAppDispatch();
   const playbackMode = useAppSelector(state => state.playback);
   const activeResult = useAppSelector(activePlaybackResult);
-  useEffect(() => {
-    const pause = () => { if (document.hidden) dispatch(pausePlayback()); };
-    document.addEventListener('visibilitychange', pause);
-    return () => document.removeEventListener('visibilitychange', pause);
-  }, [dispatch]);
   if (!activeResult) return null;
   const enabled = playbackMode.timeline.length > 1;
   const index = playbackMode.target;
-  const interval = playbackMode.frame?.interval;
+  const interval = playbackMode.interval;
   const daily = activeResult.fetchKwargs.rollup.toLowerCase() === 'daily';
   const timestamp = interval ? (daily ? dateFormatter.format(interval.startMs) + ' (Eastern)' : timestampFormatter.format(interval.endMs)) : '';
   const scaleOptions = [
@@ -76,13 +71,13 @@ export default function PlaybackToolbar() {
         <div className="col-auto">
           <ButtonGroup size="sm" aria-label="Playback controls">
             <PlaybackButton id="playback-previous" label="Previous timestep" icon={faBackwardStep} disabled={!enabled || index === 0} onClick={() => dispatch(seekPlayback(index - 1))} />
-            <PlaybackButton id="playback-toggle" label={playbackMode.playing ? 'Pause playback' : 'Play playback'} icon={playbackMode.playing ? faPause : faPlay} disabled={!enabled || !playbackMode.frame} onClick={() => dispatch(togglePlayback())} />
+            <PlaybackButton id="playback-toggle" label={playbackMode.playing ? 'Pause playback' : 'Play playback'} icon={playbackMode.playing ? faPause : faPlay} disabled={!enabled || playbackMode.appliedIndex === null} onClick={() => dispatch(togglePlayback())} />
             <PlaybackButton id="playback-next" label="Next timestep" icon={faForwardStep} disabled={!enabled || index === playbackMode.timeline.length - 1} onClick={() => dispatch(seekPlayback(index + 1))} />
           </ButtonGroup>
         </div>
         <div className="col-auto ">
           <span className="playback-label small text-muted text-center" title={interval?.label}>
-            {interval ? <><time dateTime={new Date(daily ? interval.startMs : interval.endMs).toISOString()}>{timestamp}</time> · {playbackMode.frame.index + 1}/{playbackMode.timeline.length}</> : 'Preparing playback…'}
+            {interval ? <><time dateTime={new Date(daily ? interval.startMs : interval.endMs).toISOString()}>{timestamp}</time> · {playbackMode.appliedIndex + 1}/{playbackMode.timeline.length}</> : 'Preparing playback…'}
             {/* {p.frame && p.status === 'loading' ? ' · Loading…' : ''} */}
           </span>
         </div>

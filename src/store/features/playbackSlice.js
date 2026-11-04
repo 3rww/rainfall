@@ -5,7 +5,7 @@ export const playbackScale = playback => playback.scales[playbackScaleMode(playb
 
 const initialState = {
   key: '', available: false, message: '', mode: 'total', playing: false,
-  target: 0, generation: 0, timeline: [], frame: null, pending: null, status: 'idle',
+  target: 0, generation: 0, timeline: [], appliedIndex: null, interval: null, status: 'idle',
   summary: { interval: [], cumulative: [] },
   scales: { total: 'breaks_050', interval: 'breaks_005', cumulative: 'breaks_050' }
 };
@@ -15,42 +15,36 @@ const slice = createSlice({
     resetPlayback(state, { payload }) { return { ...initialState, scales: state.scales, generation: state.generation + 1, ...payload }; },
     changePlaybackMode(state, { payload }) {
       if (payload !== 'total' && !state.available) return;
-      state.target = state.mode === 'total' ? 0 : state.frame?.index ?? 0;
-      state.mode = payload; state.playing = false; state.pending = null; state.frame = null;
+      state.target = state.mode === 'total' ? 0 : state.appliedIndex ?? 0;
+      state.mode = payload; state.playing = false; state.appliedIndex = null; state.interval = null;
       state.generation++; state.status = payload === 'total' ? 'idle' : 'loading';
     },
     seekPlayback(state, { payload }) {
       state.target = Math.max(0, Math.min(payload, state.timeline.length - 1));
-      state.playing = false; state.generation++; state.pending = null; state.status = 'loading';
+      state.playing = false; state.generation++; state.status = 'loading';
     },
     togglePlayback(state) {
       if (state.timeline.length < 2 || state.mode === 'total') return;
       state.playing = !state.playing;
-      if (state.playing && state.frame?.index === state.timeline.length - 1) { state.target = 0; state.generation++; }
+      if (state.playing && state.appliedIndex === state.timeline.length - 1) { state.target = 0; state.generation++; }
     },
     pausePlayback(state) { state.playing = false; },
-    advancePlayback(state, { payload }) {
-      if (!state.playing || !state.frame || state.pending) return;
-      state.target = Math.min(Math.max(state.frame.index + 1, payload ?? 0), state.timeline.length - 1);
-      state.status = 'loading';
-    },
     playbackPrepared(state, { payload }) { if (payload.key === state.key) { state.timeline = payload.timeline; state.summary = payload.summary; } },
-    playbackFrameReady(state, { payload }) {
-      if (payload.key === state.key && payload.generation === state.generation && payload.mode === state.mode && payload.frame.index === state.target) state.pending = payload;
-    },
-    playbackFrameApplied(state, { payload }) {
-      if (state.pending?.token !== payload) return;
-      state.frame = state.pending.frame; state.pending = null; state.status = 'ready';
-      if (state.frame.index === state.timeline.length - 1) state.playing = false;
+    playbackProgress(state, { payload }) {
+      if (payload.key !== state.key || payload.generation !== state.generation) return;
+      state.appliedIndex = payload.index; state.interval = payload.interval; state.status = payload.status;
+      // During a seek the slider already represents the requested target.
+      if (payload.index !== null && state.status === 'ready') state.target = payload.index;
+      state.playing = payload.playing;
     },
     playbackError(state, { payload }) {
-      state.mode = 'total'; state.playing = false; state.pending = null; state.frame = null;
+      state.mode = 'total'; state.playing = false; state.appliedIndex = null; state.interval = null;
       state.status = 'error'; state.message = payload; state.available = false;
     },
     selectPlaybackScale(state, { payload }) { state.scales[playbackScaleMode(state.mode)] = payload; }
   }
 });
-export const { resetPlayback, changePlaybackMode, seekPlayback, togglePlayback, pausePlayback, advancePlayback, playbackPrepared, playbackFrameReady, playbackFrameApplied, playbackError, selectPlaybackScale } = slice.actions;
+export const { resetPlayback, changePlaybackMode, seekPlayback, togglePlayback, pausePlayback, playbackPrepared, playbackProgress, playbackError, selectPlaybackScale } = slice.actions;
 export default slice.reducer;
 
 export function activePlaybackResult(state) {

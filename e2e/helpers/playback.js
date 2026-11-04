@@ -2,10 +2,11 @@ import { expect } from '@playwright/test';
 import { registerMockApiRoutes, toColumnarFixtureIfRequested } from './mockApi';
 import { rainfallGeometry } from './largeRainfall';
 const benchmark = process.env.RAINFALL_BENCHMARK === '1';
-export async function openResult(page, data, rollup = '5-minute', { mixed = false, geometry } = {}) {
+export async function openResult(page, data, rollup = '5-minute', { mixed = false, geometry, backend = process.env.PLAYBACK_RENDERER || 'native' } = {}) {
   const contextType = mixed ? 'legacyRealtime' : 'legacyGarr';
   const api = await registerMockApiRoutes(page, { rainfallData: (sensor, requestPayload) => toColumnarFixtureIfRequested(sensor === 'gauge' ? [{ id: '8', data: data[0].data }] : data, requestPayload), pixels: geometry || rainfallGeometry(data.length) });
-  await page.goto(benchmark ? '/rainfall/' : '/');
+  const query = backend ? `?playbackRenderer=${backend}` : '';
+  await page.goto(`${benchmark ? '/rainfall/' : '/'}${query}`);
   await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).last().click();
   await page.waitForFunction(() => window.__APP_STORE__?.getState().stats.latest?.['latest-15min-calibrated-radar']);
   await page.evaluate(({ contextType, count, rollup, mixed }) => {
@@ -21,7 +22,7 @@ export async function openResult(page, data, rollup = '5-minute', { mixed = fals
   await page.waitForFunction(() => Boolean(window.__RAINFALL_MAP__.getLayer('pixel-results')));
   return api;
 }
-export const state = page => page.evaluate(() => window.__APP_STORE__.getState().playback);
+export const state = page => page.evaluate(() => ({ ...window.__APP_STORE__.getState().playback, frame: window.__APP_STORE__.playbackRuntime.getCurrentFrame() }));
 export const ready = page => expect.poll(async () => (await state(page)).status).toBe('ready');
 const modeLabels = { total: 'Total Rainfall', interval: 'Rainfall by Interval', cumulative: 'Cumulative Rainfall', combined: 'Cumulative + interval bursts' };
 export async function selectMode(page, mode) {

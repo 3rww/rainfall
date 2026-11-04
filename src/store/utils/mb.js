@@ -39,6 +39,14 @@ export const minmaxTableAttr = (table, attr) => {
   }
 
 
+// Both Mapbox expressions and WebGL uniforms use these exact, rounded RGB stops.
+export const rainfallColorStops = (breaks = BREAKS_050, chromaScaleObj, colors = RAINFALL_COLOR_ARRAY, mode = RAINFALL_COLOR_MODE) => {
+  const colorFx = chromaScaleObj === undefined
+    ? chroma.scale(colors).mode(mode).domain([0, Math.max(...breaks)])
+    : chromaScaleObj.domain([0, Math.max(...breaks)]).classes(breaks);
+  return breaks.map(brk => [brk, colorFx(brk).hex('rgb')]);
+};
+
 export const buildRainfallColorStyleExp = (attr, breaks, chromaScaleObj, colors, mode, method) => {
 
     if (breaks === undefined) {
@@ -57,13 +65,6 @@ export const buildRainfallColorStyleExp = (attr, breaks, chromaScaleObj, colors,
       mode = RAINFALL_COLOR_MODE
     }
   
-    let colorFx
-    if (chromaScaleObj === undefined) {
-      colorFx = chroma.scale(colors).mode(mode).domain([0, Math.max(...breaks)])
-    } else {
-      colorFx = chromaScaleObj.domain([0, Math.max(...breaks)]).classes(breaks)
-    }
-  
     if (method === undefined) {
       method = 'linear'
     }
@@ -76,18 +77,9 @@ export const buildRainfallColorStyleExp = (attr, breaks, chromaScaleObj, colors,
       [method],
       numericAttrExpression
     ]
-    let legendContent = []
-  
-    breaks.forEach(brk => {
-      var clr = colorFx(brk).hex('rgb')
+    const legendContent = rainfallColorStops(breaks, chromaScaleObj, colors, mode);
+    for (const [brk, clr] of legendContent) colorExp.push(brk, clr);
 
-      colorExp.push(brk)
-      colorExp.push(clr)
-
-      legendContent.push([brk, clr])
-
-    })
-  
     return {
       colorExp: ["case", ["==", valueExpression, null], "rgba(0,0,0,0)", colorExp],
       legendContent: legendContent

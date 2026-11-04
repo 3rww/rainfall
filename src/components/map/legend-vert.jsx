@@ -1,3 +1,4 @@
+import { shallowEqual } from 'react-redux';
 import React, { useCallback, useMemo } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
@@ -14,7 +15,7 @@ import { selectPlaybackScale, playbackScale } from '../../store/features/playbac
 const MapLegendVertical = () => {
   const dispatch = useAppDispatch();
 
-  const playback = useAppSelector(state => state.playback);
+  const playback = useAppSelector(state => ({ mode: state.playback.mode, scales: state.playback.scales }), shallowEqual);
   const scale = playbackScale(playback);
   const bins = useMemo(
     () => buildRainfallColorStyleExp('total', LEGEND_BREAKS[scale])

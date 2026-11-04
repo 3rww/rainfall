@@ -16,6 +16,7 @@ export function createAppStore({ results = createResultsClient(), preloadedState
     devTools: true
   });
   const disposePlayback = registerPlaybackController(store, results);
+  store.playbackRuntime = disposePlayback.runtime;
   results.onFailure(message => store.dispatch(workerFailed(message)));
   store.inspectPlayback = async () => ({ ...await results.run('inspectPlayback', {}), ...disposePlayback.inspect() });
   store.inspectResults = () => results.inspect();
