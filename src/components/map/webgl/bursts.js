@@ -34,14 +34,14 @@ export function createBurstCohorts(count, indexes, now = () => performance.now()
     if (next === frame) return;
     const previous = frame && next.index > frame.index ? frame : null; frame = next;
     if (config.mode !== 'combined') return;
-    if (!config.playing) { settle(); return; }
+    if (!config.playing && (!config.step || document.hidden)) { settle(); return; }
     const time = now() - epoch, values = burstAmounts(frame, previous);
     const duration = lastApplied === null ? BURST_INITIAL_DURATION_MS : Math.min(BURST_MAX_DURATION_MS, Math.max(1, time - lastApplied) * BURST_DURATION_FACTOR);
     write(values, slot); born[slot] = time; durations[slot] = [...values.values()].some(value => value > 0) ? duration : 0;
     slot = (slot + 1) % BURST_SLOTS; lastApplied = time; staticRings = false; emitted++;
     summary = previous && frame.index - previous.index > 1 ? { index: frame.index, count: frame.index - previous.index,
       amounts: values, startMs: config.timeline[previous.index + 1].startMs, endMs: frame.interval.endMs } : null;
-    finishing = frame.index === config.timeline.length - 1;
+    finishing = !config.playing || frame.index === config.timeline.length - 1;
   }
   function tick() {
     const time = now() - epoch;

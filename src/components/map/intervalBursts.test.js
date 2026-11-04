@@ -70,6 +70,21 @@ describe('burst geometry and encoding', () => {
 });
 
 describe('burst map lifecycle', () => {
+  it.each([1, -1])('animates a paused step in direction %i through growth and fade before settling', direction => {
+    const s = setup();
+    s.bursts.applyFrame(frame(3, 0.5), playback({ playing: true }), geometry);
+    const p = playback({ generation: 1, step: { from: 3, delta: direction } });
+    const selected = frame(3 + direction, 0.6, 0.125);
+    s.bursts.applyFrame(selected, p, geometry);
+    expect(s.bursts.inspect()).toMatchObject({ animated: true, staticRings: false });
+    s.tick(100); expect(s.states.get('100').radius0).toBeCloseTo(0.375);
+    s.tick(200); expect(s.states.get('100').opacity0).toBeLessThan(BURST_OPACITY / 2);
+    s.replaceStyle(); s.bursts.restore(p, geometry); s.bursts.applyFrame(selected, p, geometry);
+    expect(s.bursts.inspect().emitted).toBe(2);
+    s.tick(251); expect(s.bursts.inspect()).toMatchObject({ animated: false, staticRings: true });
+    expect(s.states.get('100').radius0).toBeCloseTo(0.375);
+    expect(s.settled).toHaveBeenCalledOnce();
+  });
   it('rescales and restores a running burst without resetting its age or emitting again', () => {
     const s = setup(), f = frame(0, 0.125), p = playback({ playing: true });
     s.bursts.applyFrame(f, p, geometry);

@@ -72,7 +72,7 @@ test('combined rings share the cumulative legend, preserve gauges, restore and c
   await expect.poll(() => page.evaluate(() => window.__RAINFALL_BURSTS__.inspect().animated)).toBe(false);
   expect((await ringState(page)).radius0).toBeCloseTo(0.75 * Math.sqrt(0.4));
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.locator('.burst-key')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Playback speed', exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath('combined-mobile.png') });
   await page.evaluate(() => {
@@ -112,7 +112,7 @@ test('combined playback animates, pauses on hidden tabs and credits its inspirat
   await expect(page.getByRole('link', { name: 'The New York Times’ Hurricane Harvey visualization' })).toHaveAttribute('href', 'https://www.nytimes.com/interactive/2017/08/24/us/hurricane-harvey-texas.html');
 });
 
-test('full radar grid combined playback remains bounded on the ten-second schedule', async ({ page }, info) => {
+test('full radar grid combined playback remains bounded at six intervals per second', async ({ page }, info) => {
   test.skip(process.env.RAINFALL_BENCHMARK !== '1', 'Production benchmark only');
   test.setTimeout(180000);
   const geometry = JSON.parse(fs.readFileSync('public/static/data/pixels.geojson', 'utf8'));
@@ -138,10 +138,10 @@ test('full radar grid combined playback remains bounded on the ten-second schedu
     });
     store.dispatch({ type: 'playback/togglePlayback' });
   });
-  await page.waitForFunction(() => !window.__APP_STORE__.getState().playback.playing, null, { timeout: 15000 });
+  await page.waitForFunction(() => !window.__APP_STORE__.getState().playback.playing, null, { timeout: 22000 });
   const metrics = await page.evaluate(() => { window.stopGridMetrics(); return window.gridMetrics; });
   expect(metrics.frames.at(-1).index).toBe(100);
-  expect(metrics.frames.at(-1).at - metrics.start).toBeLessThan(10500);
+  expect(metrics.frames.at(-1).at - metrics.start).toBeLessThan(100 * 1000 / 6 + 500);
   expect(metrics.maxBursts).toBeLessThanOrEqual(4);
   expect((await page.evaluate(() => window.__APP_STORE__.inspectPlayback())).maxCachedFrames).toBeLessThanOrEqual(3);
   expect(api.rainfallRequests).toHaveLength(1);

@@ -34,6 +34,7 @@ test('interval and cumulative playback controls, legends, state rendering, and c
     expect(layout.slider.centerY).toBeGreaterThan(layout.controls.centerY);
   }
   expect(layout.slider.centerY).toBeGreaterThan(layout.timestamp.centerY);
+  expect(Math.abs(layout.timestamp.right - layout.slider.right)).toBeLessThan(2);
   await page.screenshot({ path: info.outputPath('playback-desktop.png') });
   await page.getByRole('button', { name: 'Next timestep' }).click(); await ready(page);
   expect((await state(page)).frame.values[0].value).toBe(0.1);
@@ -116,6 +117,8 @@ for (const playbackMode of ['cumulative', 'combined']) test(`large playback (${p
     });
   });
   await selectMode(page, playbackMode); await ready(page);
+  await page.getByRole('button', { name: 'Playback speed', exact: true }).click();
+  await page.locator('.playback-speed .dropdown-item').getByText('10×', { exact: true }).click();
   expect((await state(page)).timeline).toHaveLength(data[0].data.length);
   await page.getByRole('button', { name: 'Play playback' }).click();
   await expect.poll(async () => (await state(page)).frame.index, { timeout: 15000 }).toBeGreaterThanOrEqual(5);
@@ -137,10 +140,12 @@ for (const playbackMode of ['cumulative', 'combined']) test(`large playback (${p
     window.__APP_STORE__.dispatch({ type: 'playback/togglePlayback' });
     return performance.now();
   });
-  await page.waitForFunction(() => !window.__APP_STORE__.getState().playback.playing, null, { timeout: 12000 });
+  const scheduledDuration = (data[0].data.length - 1) * 1000 / 60;
+  await page.waitForFunction(() => !window.__APP_STORE__.getState().playback.playing, null, { timeout: scheduledDuration + 5000 });
   expect((await state(page)).frame.index).toBe(data[0].data.length - 1);
   const playbackDuration = await page.evaluate(started => window.playbackMetrics.frames.at(-1).at - started, playbackStarted);
-  expect(playbackDuration).toBeLessThan(10500);
+  expect(playbackDuration).toBeGreaterThanOrEqual(scheduledDuration - 50);
+  expect(playbackDuration).toBeLessThan(scheduledDuration + 500);
   const metrics = await page.evaluate(() => {
     const metrics = window.playbackMetrics;
     metrics.prepareMs = metrics.frames[0].at - metrics.started;
@@ -224,4 +229,58 @@ test('scrubbing follows the pointer in both directions without shifting the slid
     await page.mouse.up(); await ready(page);
     expect((await state(page)).frame.index).toBe(Number(await slider.inputValue()));
   }
+});
+
+for (const backend of ['custom', 'native']) test(`${backend} speed dropdown, repeat toggle and animated frame stepping`, async ({ page }) => {
+  const data = [{ id: '100', data: Array.from({ length: 12 }, (_, i) => ({ ts: new Date(Date.UTC(2025, 8, 30, 12, i * 5)).toISOString(), val: 0.125 })) }];
+  await openResult(page, data, '5-minute', { backend });
+  await selectMode(page, 'combined'); await ready(page);
+  expect(await page.evaluate(() => window.__APP_STORE__.playbackRuntime.inspect().backend)).toBe(backend);
+  const speed = page.getByRole('button', { name: 'Playback speed', exact: true });
+  await expect(speed).toHaveText('1×');
+  await speed.click();
+  await expect(page.locator('.playback-speed .dropdown-item')).toHaveText(['0.5×', '1×', '2×', '5×', '10×']);
+  await page.locator('.playback-speed .dropdown-item').getByText('2×', { exact: true }).click();
+  expect((await state(page)).speed).toBe(2);
+  const repeat = page.getByRole('button', { name: 'Repeat playback', exact: true });
+  await expect(repeat).toHaveAttribute('aria-pressed', 'false');
+  await repeat.click(); await expect(repeat).toHaveAttribute('aria-pressed', 'true');
+  expect((await state(page)).playing).toBe(false);
+  await page.evaluate(() => {
+    const runtime = window.__APP_STORE__.playbackRuntime;
+    window.controlFrames = [];
+    window.stopControlFrames = runtime.subscribePresentation(frame => window.controlFrames.push({ index: frame.index, ...runtime.inspect() }));
+  });
+  await page.getByRole('button', { name: 'Play playback' }).click();
+  await page.waitForFunction(() => window.controlFrames.some((frame, i, frames) => frame.index === 0 && frames[i - 1]?.index === 11));
+  expect((await state(page)).playing).toBe(true);
+  await repeat.click();
+  await expect(repeat).toHaveAttribute('aria-pressed', 'false');
+  await expect.poll(async () => (await state(page)).playing).toBe(false);
+  expect((await state(page)).appliedIndex).toBe(11);
+  await expect(page.getByRole('button', { name: 'Next timestep' })).toBeDisabled();
+  for (const [label, index] of [['Previous timestep', 10], ['Next timestep', 11]]) {
+    await page.getByRole('button', { name: label }).click(); await ready(page);
+    expect((await state(page)).appliedIndex).toBe(index);
+    expect(await page.evaluate(() => window.controlFrames.at(-1).animated)).toBe(true);
+    await expect.poll(() => page.evaluate(() => window.__APP_STORE__.playbackRuntime.inspect().animated)).toBe(false);
+    expect((await state(page)).appliedIndex).toBe(index);
+    expect((await state(page)).playing).toBe(false);
+  }
+  await speed.click();
+  await page.locator('.playback-speed .dropdown-item').getByText('0.5×', { exact: true }).click();
+  await page.getByRole('button', { name: 'Play playback' }).click();
+  await page.waitForFunction(() => window.__APP_STORE__.playbackRuntime.getCurrentFrame()?.index >= 3);
+  const previous = page.getByRole('button', { name: 'Previous timestep' });
+  await previous.evaluate(button => button.addEventListener('click', () => {
+    window.stepBase = window.__APP_STORE__.playbackRuntime.getCurrentFrame().index;
+  }, { once: true, capture: true }));
+  await previous.click(); await ready(page);
+  expect((await state(page)).appliedIndex).toBe(await page.evaluate(() => window.stepBase - 1));
+  expect((await state(page)).playing).toBe(false);
+  expect(await page.evaluate(() => window.controlFrames.at(-1).animated)).toBe(true);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(speed).toBeVisible(); await expect(repeat).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.evaluate(() => window.stopControlFrames());
 });

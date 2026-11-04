@@ -79,5 +79,5 @@ for (const mode of ['interval', 'cumulative', 'combined']) test(`renderer benchm
   const report = { revision: process.env.PLAYBACK_REVISION || 'working', backend, browserName, mode, environment, viewport: page.viewportSize(), runs };
   await info.attach(`${mode}.json`, { body: JSON.stringify(report), contentType: 'application/json' });
   if (process.env.PLAYBACK_REPORT_DIR) { fs.mkdirSync(process.env.PLAYBACK_REPORT_DIR, { recursive: true }); fs.writeFileSync(`${process.env.PLAYBACK_REPORT_DIR}/${browserName}-${backend}-${mode}.json`, JSON.stringify(report, null, 2)); }
-  for (const run of runs) { if (backend === 'custom') expect(run.diagnostics.backend).toBe('custom'); expect(run.frames.at(-1).index).toBe(100); expect(run.frames.at(-1).at).toBeLessThan(10500); expect(run.diagnostics.maxCachedFrames).toBeLessThanOrEqual(3); }
+  for (const run of runs) { if (backend === 'custom') expect(run.diagnostics.backend).toBe('custom'); expect(run.frames.at(-1).index).toBe(100); expect(run.frames.at(-1).at).toBeLessThan(100 * 1000 / 6 + 500); expect(run.diagnostics.maxCachedFrames).toBeLessThanOrEqual(3); }
 });

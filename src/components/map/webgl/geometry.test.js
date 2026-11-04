@@ -48,4 +48,21 @@ describe('GPU burst cohort state', () => {
     bursts.apply(frame(6,0.5,0),{...config,generation:3,playing:false}); expect(bursts.amounts[0]).toBe(0);
     bursts.apply(frame(7,0.5,0),{...config,generation:4}); expect(bursts.tick().active).toBe(false);
   });
+  it.each([1, -1])('plays a complete paused step burst in direction %i, then settles without re-emitting', direction => {
+    let time = 0; const bursts = createBurstCohorts(2, indexes, () => time);
+    bursts.apply(frame(3, 0.5), config);
+    const step = { ...config, playing: false, generation: 2, step: { from: 3, delta: direction } };
+    const selected = frame(3 + direction, 0.6, 0.125);
+    bursts.apply(selected, step);
+    expect(bursts.inspect()).toMatchObject({ activeBursts: 1, staticRings: false });
+    expect(bursts.amounts[0]).toBeCloseTo(0.125);
+    time = 100; bursts.tick();
+    const emitted = bursts.inspect().emitted;
+    bursts.update({ ...step, speed: 10 }); bursts.apply(selected, step);
+    expect(bursts.inspect()).toMatchObject({ emitted, animated: true });
+    time = 249; expect(bursts.tick().active).toBe(true);
+    time = 251; expect(bursts.tick().settled).toBe(true);
+    expect(bursts.inspect()).toMatchObject({ animated: false, staticRings: true });
+    bursts.apply(selected, step); expect(bursts.inspect().emitted).toBe(emitted);
+  });
 });

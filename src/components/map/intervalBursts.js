@@ -198,7 +198,7 @@ export function createIntervalBursts(map, {
     const previous = frame && nextFrame.index > frame.index ? frame : null;
     frame = nextFrame;
     if (!points) points = buildBurstPoints(geometry, new Set(frame.values.filter(v => v.source === 'pixel').map(v => v.id)));
-    if (!playing) { settle(); return; }
+    if (!playing && (!next.step || hidden())) { settle(); return; }
     const time = now();
     const amounts = burstAmounts(frame, previous);
     const duration = lastAppliedAt === null ? BURST_INITIAL_DURATION_MS
@@ -210,7 +210,7 @@ export function createIntervalBursts(map, {
       index: frame.index, count: frame.index - previous.index, amounts,
       startMs: next.timeline[previous.index + 1].startMs, endMs: frame.interval.endMs
     } : null;
-    finishing = frame.index === next.timeline.length - 1;
+    finishing = !playing || frame.index === next.timeline.length - 1;
     render(time);
     if (animation === null && (cohorts.some(Boolean) || finishing)) animation = requestFrame(tick);
   }

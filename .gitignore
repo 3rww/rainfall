@@ -28,3 +28,5 @@ pnpm-debug.log
 .env.local
 .env.development
 .env.production
+
+/docs

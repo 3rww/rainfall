@@ -8,15 +8,19 @@ is available in the timestamp tooltip. The toolbar switches the active rainfall 
 Query total, Interval, Cumulative, and Cumulative + interval bursts views. Playback uses the query's returned
 resolution; Total-only queries must be rerun with a timestep interval.
 
-Playback starts paused and stops at the end. Short results use 100 ms per
-transition; longer results divide a ten-second playback schedule by the number
-of transitions. An elapsed-time clock accounts for rendering time and skips
-overdue frames on large results. Every timestep remains available when scrubbing,
-and cumulative frames still include all preceding observations. The final frame
-is scheduled within ten seconds; worker and browser rendering stalls can delay
-its actual appearance. The slider follows the selected timestep immediately,
+Playback starts paused at 1×: six intervals per second (about 167 ms per
+transition), independent of the result length. The Bootstrap speed dropdown offers
+0.5×, 1×, 2×, 5×, and 10× (3, 6, 12, 30, and 60 intervals per second).
+Changing speed while playing continues from the displayed interval. An
+elapsed-time clock accounts for rendering time and skips overdue frames when
+necessary. Every timestep remains available when scrubbing, and cumulative
+frames still include all preceding observations. Worker and browser rendering
+stalls can delay the final frame. The slider follows the selected timestep immediately,
 while the timestamp describes the frame actually displayed on the map.
-Play at the end restarts it. Scrubbing, stepping, changing modes, and hiding the
+Playback stops at the end unless the Repeat toggle is on. Repeat holds the last
+frame for one interval at the selected speed, then restarts from the first frame.
+Play at the end also restarts it. Speed and repeat preferences persist across
+result changes for the session; repeat starts off. Scrubbing, stepping, changing modes, and hiding the
 browser tab pause playback. A different result, context, or result revision
 restores Query total. Total, Interval, and Cumulative remember their 0.5-, 5-, or
 10-inch legend preset for the session (defaults: 5, 0.5, and 5 inches respectively).
@@ -39,8 +43,12 @@ While playing, each burst represents the increase since the previous applied
 frame, including any skipped intervals. This is an amount in inches, not an
 instantaneous rainfall rate. The tooltip shows cumulative and selected-interval
 rainfall and, when intervals were skipped, the burst amount and its time window.
-Paused or scrubbed frames show static rings for the selected interval. The final
-bursts finish before settling to static rings; manually pausing settles immediately.
+Paused or scrubbed frames show static rings for the selected interval. Previous
+and Next pause playback and move exactly one interval from the displayed frame,
+clamping at the ends even when Repeat is on. In Combined mode each step plays
+the selected interval's full 250 ms burst before settling to static rings,
+independent of playback speed and direction. The final bursts also finish before
+settling to static rings; manually pausing continuous playback settles immediately.
 
 Visual constants live at the top of `src/components/map/intervalBursts.js`:
 
@@ -75,7 +83,7 @@ presentation can be in flight. The worker retains its sparse sensor indexes and
 prefix sums; its frame-response format is unchanged. There is no dense
 sensor-by-timestep matrix.
 
-Redux holds controls, availability, timeline/summary metadata, legend presets,
+Redux holds controls (including speed, repeat, and step commands), availability, timeline/summary metadata, legend presets,
 and a lightweight progress snapshot (`appliedIndex`, `interval`, `status`).
 Per-sensor values and pending frames never enter Redux actions or state.
 Automatic progress is published at most every 100 ms, on a timer outside the
@@ -182,6 +190,13 @@ as well as tooltip refresh, source restoration, no source writes during playback
 keyboard controls, responsive layout, and no additional rainfall requests.
 
 ### Reproducing the renderer comparison
+
+The original renderer comparison and the results below used the former
+ten-second schedule. Its aggregation script preserves that historical gate.
+Current playback uses the selected interval rate: the 101-frame benchmark takes
+about 16.7 seconds at 1×, and the long-series benchmark selects 10× (60 intervals
+per second). Reproduce the historical CPU comparison using the recorded revisions;
+timings from the two schedules are not directly comparable.
 
 Use an isolated production output directory for each revision. Preserve the
 original build before refactoring, using the same environment as below. The

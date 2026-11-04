@@ -2,9 +2,9 @@ import React, { lazy, Suspense } from 'react';
 import { Button, ButtonGroup, Form, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBackwardStep, faForwardStep, faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
+import { faBackwardStep, faForwardStep, faPlay, faPause, faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { activePlaybackResult, changePlaybackMode, seekPlayback, togglePlayback, pausePlayback, playbackScaleMode } from '../../store/features/playbackSlice';
+import { activePlaybackResult, changePlaybackMode, seekPlayback, stepPlayback, togglePlayback, pausePlayback, selectPlaybackSpeed, togglePlaybackRepeat, PLAYBACK_SPEEDS, playbackScaleMode } from '../../store/features/playbackSlice';
 import { burstThreshold } from './intervalBursts';
 const PlaybackSparkline = lazy(() => import('./playbackSparkline'));
 
@@ -16,10 +16,10 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   timeZone: 'America/New_York', month: 'short', day: 'numeric', year: 'numeric'
 });
 
-function PlaybackButton({ label, icon, disabled, onClick, id }) {
+function PlaybackButton({ label, icon, disabled, onClick, id, pressed }) {
   return <OverlayTrigger placement="top" overlay={<Tooltip id={id}>{label}</Tooltip>}>
     <span className="playback-button" tabIndex={disabled ? 0 : undefined}>
-      <Button variant="outline-primary" size="sm" aria-label={label} disabled={disabled} onClick={onClick} style={disabled ? { pointerEvents: 'none' } : undefined}>
+      <Button variant="outline-primary" size="sm" aria-label={label} aria-pressed={pressed} active={pressed} disabled={disabled} onClick={onClick} style={disabled ? { pointerEvents: 'none' } : undefined}>
         <FontAwesomeIcon icon={icon} fixedWidth aria-hidden="true" />
       </Button>
     </span>
@@ -70,24 +70,37 @@ export default function PlaybackToolbar() {
       {playbackMode.mode !== 'total' ? <>
         <div className="col-auto">
           <ButtonGroup size="sm" aria-label="Playback controls">
-            <PlaybackButton id="playback-previous" label="Previous timestep" icon={faBackwardStep} disabled={!enabled || index === 0} onClick={() => dispatch(seekPlayback(index - 1))} />
+            <PlaybackButton id="playback-previous" label="Previous timestep" icon={faBackwardStep} disabled={!enabled || playbackMode.appliedIndex === null || (!playbackMode.playing && index === 0)} onClick={() => dispatch(stepPlayback(-1))} />
             <PlaybackButton id="playback-toggle" label={playbackMode.playing ? 'Pause playback' : 'Play playback'} icon={playbackMode.playing ? faPause : faPlay} disabled={!enabled || playbackMode.appliedIndex === null} onClick={() => dispatch(togglePlayback())} />
-            <PlaybackButton id="playback-next" label="Next timestep" icon={faForwardStep} disabled={!enabled || index === playbackMode.timeline.length - 1} onClick={() => dispatch(seekPlayback(index + 1))} />
+            <PlaybackButton id="playback-next" label="Next timestep" icon={faForwardStep} disabled={!enabled || playbackMode.appliedIndex === null || (!playbackMode.playing && index === playbackMode.timeline.length - 1)} onClick={() => dispatch(stepPlayback(1))} />
+            <PlaybackButton id="playback-repeat" label="Repeat playback" icon={faRepeat} pressed={playbackMode.repeat} disabled={!enabled} onClick={() => dispatch(togglePlaybackRepeat())} />
           </ButtonGroup>
         </div>
-        <div className="col-auto ">
-          <span className="playback-label small text-muted text-center" title={interval?.label}>
+        <div className="col-auto">
+          <Dropdown className="playback-speed">
+            <Dropdown.Toggle size="sm" variant="outline-primary" aria-label="Playback speed" disabled={!enabled}>
+              {playbackMode.speed}×
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              {PLAYBACK_SPEEDS.map(speed => <Dropdown.Item as="button" type="button" key={speed} active={playbackMode.speed === speed} onClick={() => dispatch(selectPlaybackSpeed(speed))}>
+                <span className="small">{speed}×</span>
+              </Dropdown.Item>)}
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
+        <div className="col-auto ms-auto text-end">
+          <span className="playback-label small text-muted" title={interval?.label}>
             {interval ? <><time dateTime={new Date(daily ? interval.startMs : interval.endMs).toISOString()}>{timestamp}</time> · {playbackMode.appliedIndex + 1}/{playbackMode.timeline.length}</> : 'Preparing playback…'}
             {/* {p.frame && p.status === 'loading' ? ' · Loading…' : ''} */}
           </span>
         </div>
       </> : playbackMode.message && <span className="col small">{playbackMode.message}</span>}
     </div>
-    {playbackMode.mode === 'combined' && <div className="burst-key small text-muted mt-1">
-      <span className="burst-key-ring" aria-hidden="true" />
-      {/* <span>Full-size ring: {Number(burstThreshold(playbackMode).toPrecision(3))} in. or more.
-        {' '}{playbackMode.playing ? 'Rainfall added per displayed step; may combine intervals.' : 'Rings show rainfall in the selected interval.'}</span> */}
-    </div>}
+    {/* {playbackMode.mode === 'combined' && <div className="burst-key small text-muted mt-1">
+       <span className="burst-key-ring" aria-hidden="true" />
+      <span>Full-size ring: {Number(burstThreshold(playbackMode).toPrecision(3))} in. or more.
+        {' '}{playbackMode.playing ? 'Rainfall added per displayed step; may combine intervals.' : 'Rings show rainfall in the selected interval.'}</span>
+    </div>} */}
     {playbackMode.mode !== 'total' && <div className="row g-2">
       <div className="col playback-timeline">
         <Suspense fallback={null}>

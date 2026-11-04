@@ -1,4 +1,4 @@
-import { activePlaybackResult, playbackAvailability, resetPlayback, playbackPrepared, playbackProgress, playbackError, pausePlayback, playbackScale } from './features/playbackSlice';
+import { activePlaybackResult, playbackAvailability, resetPlayback, playbackPrepared, playbackProgress, playbackError, pausePlayback, playbackScale, restartPlayback, PLAYBACK_FRAMES_PER_SECOND } from './features/playbackSlice';
 
 export const sensorKey = (source, id) => JSON.stringify([source, String(id)]);
 
@@ -67,9 +67,15 @@ export function registerPlaybackController(store, results) {
   function arm() {
     clearTimeout(timer); timer = null;
     if (!clock || !current || pending || !renderer) return;
-    const due = clock.started + (current.index + 1 - clock.index) * clock.interval;
+    const atEnd = current.index === prepared.timeline.length - 1;
+    const due = atEnd ? performance.now() + clock.interval : clock.started + (current.index + 1 - clock.index) * clock.interval;
     timer = setTimeout(() => {
       if (!clock) return;
+      if (atEnd) {
+        if (store.getState().playback.repeat) store.dispatch(restartPlayback());
+        else { clock = null; updateRenderer(); publish(true); }
+        return;
+      }
       const target = Math.min(prepared.timeline.length - 1, Math.max(current.index + 1, clock.index + Math.floor((performance.now() - clock.started) / clock.interval)));
       deliver(target);
     }, Math.max(0, due - performance.now()));
@@ -101,7 +107,7 @@ export function registerPlaybackController(store, results) {
       }
       pending = null;
       if (clock && frame.index === prepared.timeline.length - 1) {
-        clock = null; updateRenderer();
+        if (!store.getState().playback.repeat) { clock = null; updateRenderer(); }
         // Completion is immediate, but still outside the rendering callback (Promise continuation).
         publish(true);
       } else publish(!clock);
@@ -146,14 +152,16 @@ export function registerPlaybackController(store, results) {
     }
     const p = state.playback;
     // Progress and target snapshots are output only; they cannot reschedule playback.
-    const next = JSON.stringify([p.key, p.mode, p.generation, p.playing, playbackScale(p)]);
+    const next = JSON.stringify([p.key, p.mode, p.generation, p.playing, p.speed, p.repeat, p.step, playbackScale(p)]);
     if (next === controlKey) return;
     const previous = settings;
     controlKey = next; settings = p;
     const reset = !previous || previous.key !== p.key || previous.mode !== p.mode || previous.generation !== p.generation;
-    const transport = reset || previous.playing !== p.playing;
+    const transport = reset || previous.playing !== p.playing || (p.playing && previous.speed !== p.speed);
     const canceledPresentation = transport && pending && current;
-    const target = previous && previous.mode !== p.mode && previous.mode !== 'total' ? current?.index ?? p.target : p.target;
+    const target = p.step && reset
+      ? Math.max(0, Math.min((p.step.from ?? current?.index ?? p.appliedIndex ?? 0) + p.step.delta, p.timeline.length - 1))
+      : previous && previous.mode !== p.mode && previous.mode !== 'total' ? current?.index ?? p.target : p.target;
     if (transport) { cancel(); clock = null; }
     if (reset) {
       cache.clear();
@@ -163,7 +171,7 @@ export function registerPlaybackController(store, results) {
       cleanup(); updateRenderer(); publish(true); return;
     }
     if (p.playing && !clock) clock = { started: performance.now(), index: current?.index ?? p.target,
-      interval: Math.min(100, 10000 / Math.max(1, p.timeline.length - 1)) };
+      interval: 1000 / (PLAYBACK_FRAMES_PER_SECOND * p.speed) };
     updateRenderer();
     if (canceledPresentation && !reset) {
       pack(current);
