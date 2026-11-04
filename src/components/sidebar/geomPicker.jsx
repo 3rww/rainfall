@@ -171,8 +171,8 @@ const ActiveGeodataPicker = ({ contextType }) => {
                     <Select
                       instanceId="geom-picker-geography"
                       inputId="geom-picker-geography-input"
-                      aria-label="Basin, municipality, or watershed"
-                      placeholder="Select radar pixels by basin, municipality, or watershed"
+                      aria-label="Basin, municipality, watershed, or region"
+                      placeholder="Select radar pixels by basin, municipality, watershed, or region"
                       isMulti
                       value={selectedGeographies}
                       onChange={handleSelectGeography}

@@ -11,25 +11,25 @@ const lookup = {
   }
 };
 
-async function openPicker(page) {
-  await registerMockApiRoutes(page, { pixels: rainfallGeometry(pixelIds.length) });
+async function openPicker(page, { pixelCount = pixelIds.length, context = 'Calibrated Radar Rainfall' } = {}) {
+  await registerMockApiRoutes(page, { pixels: rainfallGeometry(pixelCount) });
   await page.route('**/static/data/geography-lookup.json', route => route.fulfill({ json: lookup }));
   await page.goto('/');
   await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).last().click();
   await page.waitForFunction(() => window.__APP_STORE__?.getState().refData.lookups?.basin?.['North Basin']);
-  await page.getByRole('button', { name: 'Calibrated Radar Rainfall', exact: true }).click();
+  await page.getByRole('button', { name: context, exact: true }).click();
   await page.getByRole('tab', { name: 'By Geography', exact: true }).click();
   await expect(page.locator('#geom-picker-pixel-input')).toHaveCount(0);
 }
 
-async function pickBasin(page, name) {
-  await page.getByRole('combobox', { name: 'Basin, municipality, or watershed' }).fill(name);
+async function pickGeography(page, name) {
+  await page.getByRole('combobox', { name: 'Basin, municipality, watershed, or region' }).fill(name);
   await page.getByRole('option', { name, exact: true }).click();
 }
 
 const selection = page => page.evaluate(() => {
   const state = window.__APP_STORE__.getState();
-  const { pixel, gauge, geographies } = state.fetchKwargs.legacyGarr.active.sensorLocations;
+  const { pixel, gauge, geographies } = state.fetchKwargs[state.progress.tab].active.sensorLocations;
   return {
     pixels: pixel.map(option => option.value),
     gauges: gauge.map(option => option.value),
@@ -40,8 +40,8 @@ const selection = page => page.evaluate(() => {
 
 test('large overlapping basins keep selection and highlights when inactive pickers unmount', async ({ page }) => {
   await openPicker(page);
-  await pickBasin(page, 'North Basin');
-  await pickBasin(page, 'South Basin');
+  await pickGeography(page, 'North Basin');
+  await pickGeography(page, 'South Basin');
   await expect.poll(() => selection(page)).toEqual({
     pixels: pixelIds, gauges: [], geographies: ['North Basin', 'South Basin'], highlighted: pixelIds
   });
@@ -71,7 +71,7 @@ test('large overlapping basins keep selection and highlights when inactive picke
 
 test('pixel summary preserves keyboard add/remove, small selection chips, and clear-all', async ({ page }) => {
   await openPicker(page);
-  await pickBasin(page, 'Small Basin');
+  await pickGeography(page, 'Small Basin');
   await page.getByRole('tab', { name: 'By Sensor', exact: true }).click();
   await expect(page.locator('.pixel-select__multi-value')).toHaveCount(10);
   const input = page.getByRole('combobox', { name: 'Radar Pixels', exact: true });
@@ -100,3 +100,39 @@ test('pixel summary preserves keyboard add/remove, small selection chips, and cl
   await expect(page.locator('.pixel-select__multi-value')).toHaveCount(0);
   await expect(page.getByText('11 pixels selected', { exact: true })).toHaveCount(0);
 });
+
+for (const context of ['Calibrated Radar Rainfall', 'Real-Time Rainfall']) {
+  test(`regional geographies select basin or county pixels in ${context}`, async ({ page }) => {
+    const countyPixelIds = [...pixelIds, '1100'];
+    await openPicker(page, { pixelCount: countyPixelIds.length, context });
+    await page.getByRole('combobox', { name: 'Basin, municipality, watershed, or region' }).click();
+    await expect(page.getByRole('listbox')).toContainText('Regions');
+    await expect(page.getByRole('option')).toHaveText([
+      'North Basin', 'South Basin', 'Small Basin', 'ALCOSAN service area', 'Allegheny County'
+    ]);
+
+    await pickGeography(page, 'ALCOSAN service area');
+    await expect.poll(() => selection(page)).toEqual({
+      pixels: pixelIds, gauges: [], geographies: ['ALCOSAN service area'], highlighted: pixelIds
+    });
+
+    await pickGeography(page, 'Allegheny County');
+    await expect.poll(() => selection(page)).toEqual({
+      pixels: countyPixelIds, gauges: [], geographies: ['ALCOSAN service area', 'Allegheny County'], highlighted: countyPixelIds
+    });
+
+    await page.getByRole('button', { name: 'Remove Allegheny County', exact: true }).click();
+    await expect.poll(() => selection(page)).toEqual({
+      pixels: pixelIds, gauges: [], geographies: ['ALCOSAN service area'], highlighted: pixelIds
+    });
+
+    await pickGeography(page, 'Small Basin');
+    await page.getByRole('button', { name: 'Remove ALCOSAN service area', exact: true }).click();
+    const gauges = context === 'Real-Time Rainfall' ? ['8'] : [];
+    await expect.poll(() => selection(page)).toEqual({
+      pixels: pixelIds.slice(0, 10), gauges, geographies: ['Small Basin'], highlighted: pixelIds.slice(0, 10)
+    });
+    await page.getByRole('button', { name: 'Remove Small Basin', exact: true }).click();
+    await expect.poll(() => selection(page)).toEqual({ pixels: [], gauges: [], geographies: [], highlighted: [] });
+  });
+}

@@ -56,7 +56,7 @@ Querying the rainfall data requires selecting the "when" and the "where".
 * Next, select the gauges or radar pixels. You can do this by 
   * clicking on the map;
   * under "Where" in the "By Sensor" tab: selecting or typing (If you know the name or ID of the sensor) in the dropdown menus.
-  * under "Where" in the "By Geography" tab: selecting an ALCOSAN Planning Basin, Municipality, or Watershed, which will in turn select all coincident pixels for you
+  * under "Where" in the "By Geography" tab: selecting an ALCOSAN Planning Basin, Municipality, or Watershed, which will in turn select all coincident pixels for you. The Regions group at the bottom also offers the ALCOSAN service area (all basin pixels) and Allegheny County (all radar pixels).
 * Then, optionally select the interval: 15-minute (default), hourly, daily, or sum total. The historic tabs also offer 5-minute observations from their separate archive. Hourly, daily, and total results aggregate the 15-minute archive. Note that if a daily interval is selected, the start and end selections will begin at midnight and the start and end hour will be ignored.
 * Finally, Press "Get Rainfall Data" button to get the data.
 

@@ -236,7 +236,23 @@ export const selectMapStyleSourceDataIDs = (state, name) => {
 //   }
 // }
 
+const REGIONAL_GEOGRAPHIES = {
+  alcosan: { value: 'region.alcosan', label: 'ALCOSAN service area' },
+  alleghenyCounty: { value: 'region.allegheny-county', label: 'Allegheny County' }
+}
+
 export const selectSensorGeographyLookup = (state, lookupPath) => {
+  if (lookupPath === REGIONAL_GEOGRAPHIES.alcosan.value) {
+    const basins = Object.entries(state.refData.lookups || {})
+      .filter(([type]) => type.toLowerCase() === 'basin')
+      .flatMap(([, lookups]) => Object.values(lookups))
+    return { pixel: [...new Set(basins.flatMap(basin => basin.pixel || []).map(String))] }
+  }
+
+  if (lookupPath === REGIONAL_GEOGRAPHIES.alleghenyCounty.value) {
+    return { pixel: selectMapStyleSourceDataFeatures(state, 'pixel').map(feature => feature.properties.id) }
+  }
+
   return get(state.refData.lookups, lookupPath, EMPTY_OBJECT)
 }
 
@@ -252,6 +268,7 @@ export const selectGeographyLookupsAsGroupedOptions = createSelector(
         label: g
       }))
     }))
+    .concat({ label: 'Regions', options: Object.values(REGIONAL_GEOGRAPHIES) })
 )
 
 // ----------------------------------------------
