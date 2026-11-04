@@ -1,5 +1,6 @@
 import { shallowEqual } from 'react-redux';
 import React, { useCallback, useMemo } from 'react';
+import Card from 'react-bootstrap/Card';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import chroma from 'chroma-js';
@@ -32,43 +33,50 @@ const MapLegendVertical = () => {
   const currentScaleLabel = LEGEND_SCALE_OPTIONS.find(opt => opt.value === scale)?.label ?? 'Select scale';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <span className="form-check-label lh-1 text-left m-1">
-        {playback.mode === 'total' ? 'Total Rainfall' : playback.mode === 'interval' ? 'Interval Rainfall' : 'Cumulative Rainfall'} (inches)
-      </span>
+    <Card as="section" className="map-legend-card shadow-sm" aria-labelledby="map-legend-title">
+      <Card.Header as="h2" id="map-legend-title" className="map-legend-title text-center mb-0 p-2">
+        {playback.mode === 'total' ? 'Total Rainfall' : playback.mode === 'interval' ? 'Interval Rainfall' : 'Cumulative Rainfall'}
+        <span className="d-block fw-normal mt-1">(inches)</span>
+      </Card.Header>
 
-      <div className="legend-vert" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly' }}>
-        {bins.map((bin, binIndex) => (
-          <div
-            key={binIndex}
-            className="text-center legend-label"
-            style={{ backgroundColor: `${bin[1]}` }}
-          >
-            <span style={{ color: `${bin[2]}` }}>
-              {bin[0]}
-            </span>
-          </div>
-        ))}
-      </div>
+      <Card.Body className="map-legend-body p-2">
+        <div className="legend-vert">
+          {bins.map((bin, binIndex) => (
+            <div
+              key={binIndex}
+              className="text-center legend-label"
+              style={{ backgroundColor: `${bin[1]}` }}
+            >
+              <span style={{ color: `${bin[2]}` }}>
+                {bin[0]}
+              </span>
+            </div>
+          ))}
+        </div>
+      </Card.Body>
 
-      <DropdownButton
-        variant="secondary"
-        size="sm"
-        title={currentScaleLabel}
-        id="legend-scale-dropdown-button"
-      >
-        {LEGEND_SCALE_OPTIONS.map((opt, idx) => (
-          <Dropdown.Item
-            key={opt.value}
-            id={`legend-radio-${idx + 1}`}
-            active={scale === opt.value}
-            onClick={() => handleSelectLegend(opt.value)}
-          >
-            <span className="small">{opt.label}</span>
-          </Dropdown.Item>
-        ))}
-      </DropdownButton>
-    </div>
+      <Card.Footer className="p-2">
+        <DropdownButton
+          className="legend-scale-dropdown"
+          variant="secondary"
+          size="sm"
+          title={currentScaleLabel}
+          id="legend-scale-dropdown-button"
+          aria-label={`Rainfall color scale: ${currentScaleLabel}`}
+        >
+          {LEGEND_SCALE_OPTIONS.map((opt, idx) => (
+            <Dropdown.Item
+              key={opt.value}
+              id={`legend-radio-${idx + 1}`}
+              active={scale === opt.value}
+              onClick={() => handleSelectLegend(opt.value)}
+            >
+              <span className="small">{opt.label}</span>
+            </Dropdown.Item>
+          ))}
+        </DropdownButton>
+      </Card.Footer>
+    </Card>
   );
 };
 

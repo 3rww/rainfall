@@ -5,21 +5,33 @@
     min-height: 320px;
 }
 
-.map {
+.map-viewport {
+    position: relative;
+    display: flex;
     flex: 1 1 auto;
     min-height: 240px;
 }
 
-.legend-container {
-    flex: 0 0 auto;
-    min-height: 80px;
+.map {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.map-viewport > .map-legend-card {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+    width: 6.5rem;
+    max-width: calc(100% - 20px);
+    max-height: calc(100% - 20px);
 }
 
 @media (min-width: 576px) { 
     .map-and-legend-container {
         min-height: 0;
     }    
-    .map {
+    .map-viewport {
         min-height: 0;
     }    
 }

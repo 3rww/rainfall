@@ -9,3 +9,27 @@
 .legend-label {
   font-size: 0.65rem;
 }
+
+.map-legend-title {
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+.map-legend-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.legend-vert {
+  overflow-y: auto;
+}
+
+.legend-vert .legend-label {
+  padding: 0.125rem 0.25rem;
+  line-height: 1.4;
+}
+
+.legend-scale-dropdown .dropdown-toggle {
+  width: 100%;
+}

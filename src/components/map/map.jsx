@@ -21,7 +21,7 @@ import { transformFeatureToOption } from '../../store/utils/transformers';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
 import { Tooltip } from './tooltip';
-import MapLegend from './legend';
+import MapLegendVertical from './legend-vert';
 import PlaybackToolbar from './playbackToolbar';
 import { createPlaybackRenderer } from './playbackRenderer';
 
@@ -522,11 +522,11 @@ const ReactMap = ({ activeTab, token, zoom }) => {
 
   return (
     <div className="map-and-legend-container">
-      <div className="map" id={MAPID} ref={mapContainerRef}></div>
+      <div className="map-viewport">
+        <div className="map" id={MAPID} ref={mapContainerRef}></div>
+        <MapLegendVertical />
+      </div>
       <PlaybackToolbar />
-      {/* <div className="legend-container container-fluid">
-        <MapLegend />
-      </div> */}
     </div>
   );
 };
