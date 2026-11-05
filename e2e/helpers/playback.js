@@ -2,9 +2,9 @@ import { expect } from '@playwright/test';
 import { registerMockApiRoutes, toColumnarFixtureIfRequested } from './mockApi';
 import { rainfallGeometry } from './largeRainfall';
 const benchmark = process.env.RAINFALL_BENCHMARK === '1';
-export async function openResult(page, data, rollup = '5-minute', { mixed = false, geometry, backend = process.env.PLAYBACK_RENDERER || 'native' } = {}) {
+export async function openResult(page, data, rollup = '5-minute', { mixed = false, geometry, style, backend = process.env.PLAYBACK_RENDERER || 'native' } = {}) {
   const contextType = mixed ? 'legacyRealtime' : 'legacyGarr';
-  const api = await registerMockApiRoutes(page, { rainfallData: (sensor, requestPayload) => toColumnarFixtureIfRequested(sensor === 'gauge' ? [{ id: '8', data: data[0].data }] : data, requestPayload), pixels: geometry || rainfallGeometry(data.length) });
+  const api = await registerMockApiRoutes(page, { rainfallData: (sensor, requestPayload) => toColumnarFixtureIfRequested(sensor === 'gauge' ? [{ id: '8', data: data[0].data }] : data, requestPayload), pixels: geometry || rainfallGeometry(data.length), style });
   const query = backend ? `?playbackRenderer=${backend}` : '';
   await page.goto(`${benchmark ? '/rainfall/' : '/'}${query}`);
   await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).last().click();

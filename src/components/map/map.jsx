@@ -290,6 +290,8 @@ const ReactMap = ({ activeTab, token, zoom }) => {
     const mapConfig = {
       container: MAPID,
       style: basemapStyleUrl,
+      // Basemap styles can default to globe, which disables the WebGL rainfall renderer.
+      projection: 'mercator',
       center: [initMap.longitude, initMap.latitude],
       zoom,
       attributionControl: false

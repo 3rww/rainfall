@@ -151,13 +151,14 @@ for(const pitch of [0,45]) test(`static burst and gauge canvas patches match nat
   for(const patch of patches.custom)expect(new Set(patch).size).toBeGreaterThan(15);
 });
 
-test('custom is the default and wet frames retain bounded cohorts that pause as static rings', async ({ page }) => {
+test('custom stays the default with a globe basemap and wet frames retain bounded cohorts', async ({ page }) => {
   const wet = [{ id: '100', data: Array.from({ length: 101 }, (_, i) => ({
     ts: new Date(Date.UTC(2025, 8, 30, 12, i * 5)).toISOString(), val: 0.1
   })) }];
-  await openResult(page, wet, '5-minute', { backend: '' });
+  await openResult(page, wet, '5-minute', { backend: '', style: { projection: { name: 'globe' } } });
   expect(new URL(page.url()).searchParams.has('playbackRenderer')).toBe(false);
   await selectMode(page, 'combined'); await ready(page);
+  expect(await page.evaluate(() => window.__RAINFALL_MAP__.getProjection().name)).toBe('mercator');
   await page.getByRole('button', { name: 'Play playback' }).click();
   await page.waitForFunction(() => window.__APP_STORE__.playbackRuntime.inspect().activeBursts >= 2);
   expect(await page.evaluate(() => window.__APP_STORE__.playbackRuntime.inspect().activeBursts)).toBeLessThanOrEqual(4);

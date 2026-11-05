@@ -173,7 +173,7 @@ export const registerMockApiRoutes = async (page, options = {}) => {
     const path = requestUrl.pathname;
 
     if (path === "/style.json") {
-      return jsonResponse(route, MOCK_STYLE);
+      return jsonResponse(route, { ...MOCK_STYLE, ...options.style });
     }
 
     if (path === "/sprite.json") {

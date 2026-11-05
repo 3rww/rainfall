@@ -4,11 +4,11 @@ import { playbackScale } from '../../store/features/playbackSlice';
 // Visual tuning: diameter is relative to a radar cell, amounts to the cumulative legend.
 export const BURST_CELL_DIAMETER_FACTOR = 1.25;
 export const BURST_LEGEND_FRACTION = 0.10;
-export const BURST_OPACITY = 0.4;
-export const BURST_STROKE_WIDTH = 1.25;
-export const BURST_DURATION_FACTOR = 2.5;
+export const BURST_OPACITY = 0.2;
+export const BURST_STROKE_WIDTH = 2;
+export const BURST_DURATION_FACTOR = 10;
 export const BURST_INITIAL_DURATION_MS = 250;
-export const BURST_MAX_DURATION_MS = 400;
+export const BURST_MAX_DURATION_MS = 4000;
 export const BURST_SLOTS = 4;
 export const BURST_SOURCE = 'rainfall-interval-bursts';
 export const BURST_LAYERS = Array.from({ length: BURST_SLOTS }, (_, i) => `${BURST_SOURCE}-${i}`);
