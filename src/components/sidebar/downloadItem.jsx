@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { formatDateTime } from '../../store/utils/dateTime';
 import { modalOpened, modalClosed, resultKey } from '../../store/features/resultsPresentationSlice';
 import DownloadModal from './downloadModal';
+import ShareQueryButton from './shareQueryButton';
 
 import './downloadItem.css';
 
@@ -94,7 +95,7 @@ const DownloadsItem = ({ fetchHistoryItem, contextType }) => {
 
       {hasResults ? (
         <Row>
-          <Col>
+          <Col className="d-flex flex-wrap align-items-start gap-2">
             <Button
               variant="outline-primary"
               size="sm"
@@ -102,6 +103,7 @@ const DownloadsItem = ({ fetchHistoryItem, contextType }) => {
             >
               View and Download Results
             </Button>
+            <ShareQueryButton key={fetchHistoryItem.requestId} contextType={contextType} query={fetchKwargs} />
           </Col>
         </Row>
       ) : null}

@@ -206,7 +206,7 @@ rendered before timing starts. Each mode uses 101 intervals and one warmup plus
 five measured playbacks, with the same viewport, camera, data, and browser.
 
 ```sh
-VITE_E2E_TEST=true VITE_ENABLE_SHARE_STATE=false \
+VITE_E2E_TEST=true \
 VITE_MAPBOX_TOKEN=test-token VITE_MAPBOX_STYLE_BASEMAP=http://mock.api/style.json \
 VITE_API_URL_ROOT=http://mock.api/ \
 npx vite build --outDir /tmp/rainfall-runtime-build

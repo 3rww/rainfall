@@ -142,6 +142,28 @@ const buildAxiosReferenceMock = ({ onEventsRequest }) => {
 describe("appInitThunks", () => {
   beforeEach(() => {
     vi.mocked(axios).mockReset();
+    window.history.replaceState(null, '', '/');
+  });
+
+  it('hydrates after defaults and catalogs without fetching rainfall or rewriting the URL', async () => {
+    const query = { v: 2, c: 'legacyGauge', rollup: '5-minute', g: ['8', 'inactive'], p: [],
+      startDt: '2025-07-01T00:00:00.000Z', endDt: '2025-07-01T00:05:00.000Z' };
+    const hash = `#s=${Buffer.from(JSON.stringify(query)).toString('base64url')}`;
+    window.history.replaceState(null, '', `/${hash}`);
+    buildAxiosReferenceMock({ onEventsRequest: () => Promise.resolve({ data: [] }) });
+    const actions = [];
+    const store = buildStore({ actionSink: actions });
+    await store.dispatch(initDataFetch());
+    const state = store.getState();
+    expect(state.progress.tab).toBe('legacyGauge');
+    expect(state.fetchKwargs.legacyGauge.active).toMatchObject({
+      startDt: query.startDt, endDt: query.endDt, rollup: '5-minute',
+      sensorLocations: { pixel: [], geographies: [], gauge: [{ value: '8' }, { value: 'inactive' }] }
+    });
+    expect(state.progress.queryImportNotice.variant).toBe('warning');
+    expect(actions.some(action => action.type === 'fetchKwargs/requestRainfallData')).toBe(false);
+    expect(window.location.hash).toBe(hash);
+    window.history.replaceState(null, '', '/');
   });
 
   it("initDataFetch resolves startup without waiting for all rainfall event pages", async () => {

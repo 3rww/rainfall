@@ -43,7 +43,6 @@ export const API_URL_ROOT = withTrailingSlash(import.meta.env.VITE_API_URL_ROOT 
 // Mapbox constants -------------------------------------
 export const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 export const MAPBOX_STYLE_BASEMAP = normalizeMapboxStyleUrl(import.meta.env.VITE_MAPBOX_STYLE_BASEMAP);
-export const ENABLE_SHARE_STATE = parseBooleanEnvFlag(import.meta.env.VITE_ENABLE_SHARE_STATE, false);
 export const ENABLE_DEBUG_LOGS = parseBooleanEnvFlag(import.meta.env.VITE_ENABLE_DEBUG_LOGS, false);
 
 // Service URLs -----------------------------------------

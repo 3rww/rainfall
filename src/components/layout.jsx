@@ -1,6 +1,7 @@
 import React from 'react';
-import { Row, Col, Container, TabContent, TabPane } from 'react-bootstrap';
-import { useAppSelector } from "../store/hooks";
+import { Alert, Row, Col, Container, TabContent, TabPane } from 'react-bootstrap';
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { setQueryImportNotice } from '../store/features/progressSlice';
 
 import ReactMap from './map/map';
 import RainfallDownloader from './sidebar/downloader'
@@ -15,8 +16,10 @@ import './layout.css'
 * Layout Component. Everything on the page under the Nav: Controls and Map.
 */
 const Layout = () => {
+  const dispatch = useAppDispatch();
   const initMap = useAppSelector((state) => state.initMap);
   const tab = useAppSelector((state) => state.progress.tab);
+  const importNotice = useAppSelector((state) => state.progress.queryImportNotice);
 
   return (
     <div className="layout-root">
@@ -42,6 +45,17 @@ const Layout = () => {
 
         <Col sm={5} className="sidebar-column">
           <Container className="sidebar mt-3">
+            {importNotice && (
+              <Alert
+                variant={importNotice.variant}
+                className="small"
+                role="status"
+                dismissible
+                onClose={() => dispatch(setQueryImportNotice(null))}
+              >
+                {importNotice.message}
+              </Alert>
+            )}
             {/* <TabContainer
               defaultActiveKey={CONTEXT_TYPES.legacyRealtime}
               id="rainfall-data-type-tabs"

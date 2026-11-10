@@ -3,7 +3,6 @@ import axios from 'axios';
 import {
   BREAKS_050,
   CONTEXT_TYPES,
-  ENABLE_SHARE_STATE,
   EVENTS_API_URL,
   GLOBAL_CONFIG_URL,
   MAP_LAYERS,
@@ -26,8 +25,7 @@ import {
   transformRainfallPixelsToMapboxSourceObject
 } from '../utils/transformers';
 import {
-  hydrateShareStateToRedux,
-  startShareStateSync
+  hydrateShareStateToRedux
 } from '../urlShareState';
 import { pickRainfallDateTimeRange } from './fetchKwargsSlice';
 import { setGlobalConfig } from './globalConfigSlice';
@@ -259,7 +257,7 @@ const applyDefaultDateRanges = ({ dispatch, getState }) => {
   });
 };
 
-export const initDataFetch = (payload = {}) => async (dispatch, getState) => {
+export const initDataFetch = () => async (dispatch, getState) => {
   dispatch(startThinking('Loading reference data and map layers'));
   dispatch(setFetching(true));
   let shouldLoadRainfallEvents = false;
@@ -273,14 +271,7 @@ export const initDataFetch = (payload = {}) => async (dispatch, getState) => {
 
     applyDefaultDateRanges({ dispatch, getState });
 
-    if (ENABLE_SHARE_STATE) {
-      await hydrateShareStateToRedux({ dispatch, getState });
-
-      const subscribe = payload?.subscribe;
-      if (typeof subscribe === 'function') {
-        startShareStateSync({ subscribe, getState });
-      }
-    }
+    await hydrateShareStateToRedux({ dispatch, getState });
   } finally {
     dispatch(setFetching(false));
     dispatch(stopThinking('Initial data load complete.'));

@@ -81,55 +81,65 @@ Use Vite-prefixed environment keys:
 * `VITE_MAPBOX_STYLE_BASEMAP`
 * `VITE_RAINFALL_MIN_DATE`
 * `VITE_API_REQUEST_INTERVAL_MS`
-* `VITE_ENABLE_SHARE_STATE` (default `false`; set `true` to enable `#s=...` share-state sync)
 
-### Shareable URL State (`#s=...`)
+### Sharing rainfall queries (`#s=...`)
 
-The app can preserve the active rainfall context and selected sensors in the URL hash.
+**Share**, beside **View and Download Results** on each result card, copies a link
+from that result's saved query. Later form edits do not change the link. The
+button becomes available after the compressed URL is prepared. A successful copy
+shows “Link copied.”; if clipboard access fails, a selectable URL appears.
+Sharing does not select the card, change the map, open results, or alter the address bar.
+Generated links use the current origin and deployment base path.
 
-Format:
+SewerAtlas sensor lists use this same contract to open rainfall in a new tab.
+Opening either link prefills the form after reference data and defaults load.
+Review the selection and click **Get Rainfall Data** to fetch observations. Links
+share query settings, not observations, chart settings, or playback state.
 
-* URL: `https://.../rainfall#s=<token>`
-* Token codec: `base64url(deflate(utf8(json)))`
-* JSON payload (canonical):
+The URL is `https://3rww.github.io/rainfall/#s=<token>`. The token is
+**base64url(deflate(UTF-8 JSON))**, without padding, using the zlib-wrapped
+`deflate` format of the browser Compression Streams API (not raw DEFLATE).
 
 ```json
 {
-  "v": 1,
+  "v": 2,
   "c": "legacyRealtime",
-  "g": ["1", "2"],
-  "p": ["1201", "1202"]
+  "g": ["008"],
+  "p": ["100", "101"],
+  "startDt": "2025-11-02T05:00:00.000Z",
+  "endDt": "2025-11-02T06:00:00.000Z",
+  "rollup": "Hourly"
 }
 ```
 
-Where:
+* `c`: `legacyRealtime` supports gauges and pixels together; `legacyGauge` is
+  historic gauges only; `legacyGarr` is historic calibrated radar pixels only.
+* `g` and `p`: arrays of string sensor IDs. At least one sensor is required.
+  IDs with no map location remain selected with an explanatory notice.
+* `startDt` and `endDt`: explicit UTC ISO timestamps. Exact instants are retained,
+  including milliseconds and repeated DST hours. Existing form range rules apply;
+  imports never clamp dates. API ranges include the start and exclude the end.
+* `rollup`: `15-minute`, `Hourly`, `Daily`, or `Total` in any context;
+  historic contexts also support `5-minute`.
 
-* `v`: schema version
-* `c`: context/tab (`legacyRealtime`, `legacyGauge`, `legacyGarr`)
-* `g`: selected gauge IDs (strings)
-* `p`: selected pixel IDs (strings)
+When browser compression is unavailable, writers use uncompressed base64url UTF-8
+JSON. The reader accepts either encoding of version 2. Reading compressed links
+requires browser decompression support. Compression reduces length but does not
+remove browser URL limits; selections are never truncated. API query-size limits
+still apply when the user submits.
 
-Runtime behavior:
+Invalid, unsupported, or unavailable queries leave the default form and display
+a small, dismissible explanation. There is no automatic URL synchronization or
+feature flag. Older schemas, `#query`, and `?state=` are not supported.
 
-* Feature flag: `VITE_ENABLE_SHARE_STATE=false` by default.
-* When enabled, on startup the app reads `#s` and hydrates Redux.
-* When enabled, after startup the app syncs URL hash state from Redux using `history.replaceState`.
-* When enabled, legacy `?state=<json>` links are read once and migrated to `#s=...`.
+The URL-state module owns validation, codecs, link construction, and startup
+hydration. Matching fixtures in `src/store/fixtures/rainfallShareState.json` and
+SewerAtlas's `src/services/rainfall/fixtures/rainfallShareState.json` verify the
+contract. Update both fixture copies together when changing it. Run `npm test`
+and `npm run test:e2e -- e2e/urlShareState.spec.js` to check sharing and hydration.
 
-Implementation note:
-
-* Compression uses browser-native `CompressionStream`/`DecompressionStream` with `"deflate"` where available. `base64url` by itself does not compress; DEFLATE is what reduces payload size.
-
-External app pseudocode:
-
-```text
-payload = {"v":1,"c":"legacyRealtime","g":["1"],"p":["1201","1202"]}
-json = JSON.stringify(payload)
-bytes = UTF8(json)
-compressed = DEFLATE(bytes)
-token = BASE64URL(compressed)
-url = "https://.../rainfall#s=" + token
-```
+Release rainfall's version-2 reader before SewerAtlas's producer. No backend
+short-link service, database migration, or API change is needed for this contract.
 
 ### Deployment Notes
 

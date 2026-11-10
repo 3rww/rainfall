@@ -317,7 +317,7 @@ const ReactMap = ({ activeTab, token, zoom }) => {
       dispatch(setInitialStyleLoaded(true));
       dispatch(mapLoaded(loaded));
       dispatch(stopThinking(message));
-      dispatch(initDataFetch({ subscribe: store.subscribe }));
+      dispatch(initDataFetch());
     };
 
     const resizeMap = () => {

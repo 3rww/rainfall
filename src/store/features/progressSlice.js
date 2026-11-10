@@ -5,6 +5,9 @@ const progressSlice = createSlice({
   name: 'progress',
   initialState: initialState.progress,
   reducers: {
+    setQueryImportNotice: (state, action) => {
+      state.queryImportNotice = action.payload;
+    },
     switchTab: (state, action) => {
       state.tab = action.payload;
     },
@@ -35,6 +38,7 @@ const progressSlice = createSlice({
 });
 
 export const {
+  setQueryImportNotice,
   switchTab,
   setFetching,
   startThinking,

@@ -33,7 +33,6 @@ export default defineConfig({
     env: {
       ...process.env,
       VITE_E2E_TEST: "true",
-      VITE_ENABLE_SHARE_STATE: "false",
       VITE_MAPBOX_TOKEN: process.env.VITE_MAPBOX_TOKEN || "test-token",
       VITE_MAPBOX_STYLE_BASEMAP: "http://mock.api/style.json",
       VITE_API_URL_ROOT: "http://mock.api/"

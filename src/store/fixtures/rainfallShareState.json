@@ -1,0 +1,122 @@
+[
+  {
+    "name": "historicRadar/5",
+    "source": "historicRadar",
+    "resolution": "5",
+    "payload": {
+      "v": 2,
+      "c": "legacyGarr",
+      "g": [],
+      "p": [
+        "008",
+        "100",
+        "é"
+      ],
+      "startDt": "2025-11-02T05:00:00.000Z",
+      "endDt": "2025-11-02T06:00:00.000Z",
+      "rollup": "5-minute"
+    },
+    "compressed": "eJyrVipTsjLSUUpWslLKSU1PTK50TywqUtJRSleyio7VUSoAUkoGBhZAEUMDAyB5eKUSULi4JLGoxKUEqMnIwMhU19BQ18AoxMDUysAAiPQMDAyigEpT81IwlJihKinKz8kpBdqhZKqbm5lXWpKqVAsA3B0lzw",
+    "fallback": "eyJ2IjoyLCJjIjoibGVnYWN5R2FyciIsImciOltdLCJwIjpbIjAwOCIsIjEwMCIsIsOpIl0sInN0YXJ0RHQiOiIyMDI1LTExLTAyVDA1OjAwOjAwLjAwMFoiLCJlbmREdCI6IjIwMjUtMTEtMDJUMDY6MDA6MDAuMDAwWiIsInJvbGx1cCI6IjUtbWludXRlIn0"
+  },
+  {
+    "name": "historicRadar/15",
+    "source": "historicRadar",
+    "resolution": "15",
+    "payload": {
+      "v": 2,
+      "c": "legacyGarr",
+      "g": [],
+      "p": [
+        "008",
+        "100",
+        "é"
+      ],
+      "startDt": "2025-11-02T05:00:00.000Z",
+      "endDt": "2025-11-02T06:00:00.000Z",
+      "rollup": "15-minute"
+    },
+    "compressed": "eJyrVipTsjLSUUpWslLKSU1PTK50TywqUtJRSleyio7VUSoAUkoGBhZAEUMDAyB5eKUSULi4JLGoxKUEqMnIwMhU19BQ18AoxMDUysAAiPQMDAyigEpT81IwlJihKinKz8kpBdqhZGiqm5uZV1qSqlQLAACDJgA",
+    "fallback": "eyJ2IjoyLCJjIjoibGVnYWN5R2FyciIsImciOltdLCJwIjpbIjAwOCIsIjEwMCIsIsOpIl0sInN0YXJ0RHQiOiIyMDI1LTExLTAyVDA1OjAwOjAwLjAwMFoiLCJlbmREdCI6IjIwMjUtMTEtMDJUMDY6MDA6MDAuMDAwWiIsInJvbGx1cCI6IjE1LW1pbnV0ZSJ9"
+  },
+  {
+    "name": "historicGauge/5",
+    "source": "historicGauge",
+    "resolution": "5",
+    "payload": {
+      "v": 2,
+      "c": "legacyGauge",
+      "g": [
+        "008",
+        "100",
+        "é"
+      ],
+      "p": [],
+      "startDt": "2025-11-02T05:00:00.000Z",
+      "endDt": "2025-11-02T06:00:00.000Z",
+      "rollup": "5-minute"
+    },
+    "compressed": "eJyrVipTsjLSUUpWslLKSU1PTK50TyxNT1XSUUpXsopWMjCwADINDQyA5OGVSrE6SgVAYSBVXJJYVOJSAtRlZGBkqmtoqGtgFGJgamVgAER6BgYGUUAdqXkpGErMUJUU5efklALNVDLVzc3MKy1JVaoFAA1RJiw",
+    "fallback": "eyJ2IjoyLCJjIjoibGVnYWN5R2F1Z2UiLCJnIjpbIjAwOCIsIjEwMCIsIsOpIl0sInAiOltdLCJzdGFydER0IjoiMjAyNS0xMS0wMlQwNTowMDowMC4wMDBaIiwiZW5kRHQiOiIyMDI1LTExLTAyVDA2OjAwOjAwLjAwMFoiLCJyb2xsdXAiOiI1LW1pbnV0ZSJ9"
+  },
+  {
+    "name": "historicGauge/15",
+    "source": "historicGauge",
+    "resolution": "15",
+    "payload": {
+      "v": 2,
+      "c": "legacyGauge",
+      "g": [
+        "008",
+        "100",
+        "é"
+      ],
+      "p": [],
+      "startDt": "2025-11-02T05:00:00.000Z",
+      "endDt": "2025-11-02T06:00:00.000Z",
+      "rollup": "15-minute"
+    },
+    "compressed": "eJyrVipTsjLSUUpWslLKSU1PTK50TyxNT1XSUUpXsopWMjCwADINDQyA5OGVSrE6SgVAYSBVXJJYVOJSAtRlZGBkqmtoqGtgFGJgamVgAER6BgYGUUAdqXkpGErMUJUU5efklALNVDI01c3NzCstSVWqBQAyBSZd",
+    "fallback": "eyJ2IjoyLCJjIjoibGVnYWN5R2F1Z2UiLCJnIjpbIjAwOCIsIjEwMCIsIsOpIl0sInAiOltdLCJzdGFydER0IjoiMjAyNS0xMS0wMlQwNTowMDowMC4wMDBaIiwiZW5kRHQiOiIyMDI1LTExLTAyVDA2OjAwOjAwLjAwMFoiLCJyb2xsdXAiOiIxNS1taW51dGUifQ"
+  },
+  {
+    "name": "realtimeRadar/15",
+    "source": "realtimeRadar",
+    "resolution": "15",
+    "payload": {
+      "v": 2,
+      "c": "legacyRealtime",
+      "g": [],
+      "p": [
+        "008",
+        "100",
+        "é"
+      ],
+      "startDt": "2025-11-02T05:00:00.000Z",
+      "endDt": "2025-11-02T06:00:00.000Z",
+      "rollup": "15-minute"
+    },
+    "compressed": "eJxljUEKwjAURO8y60QmgYhk7QmKK8VFqJ9SSFupP4KIB_IcXsy_FWGYgeEN88QdOTr0yKgylP7RSak6TgKHAfl0drhagNxZE0jzzxtW37SsulcbRsbkQ_CMB6ZMmjYkj4bKfPlDtr_IutTa7AMh-WmcmwpeX-6QJ6c",
+    "fallback": "eyJ2IjoyLCJjIjoibGVnYWN5UmVhbHRpbWUiLCJnIjpbXSwicCI6WyIwMDgiLCIxMDAiLCLDqSJdLCJzdGFydER0IjoiMjAyNS0xMS0wMlQwNTowMDowMC4wMDBaIiwiZW5kRHQiOiIyMDI1LTExLTAyVDA2OjAwOjAwLjAwMFoiLCJyb2xsdXAiOiIxNS1taW51dGUifQ"
+  },
+  {
+    "name": "realtimeGauge/15",
+    "source": "realtimeGauge",
+    "resolution": "15",
+    "payload": {
+      "v": 2,
+      "c": "legacyRealtime",
+      "g": [
+        "008",
+        "100",
+        "é"
+      ],
+      "p": [],
+      "startDt": "2025-11-02T05:00:00.000Z",
+      "endDt": "2025-11-02T06:00:00.000Z",
+      "rollup": "15-minute"
+    },
+    "compressed": "eJxlTEEKAjEQ-0vOraSFivTsCxZPioeyDstCd1fWqSDig3yHH3OuIoQkhCRP3JGjQ4-MKkPpH52UquMkcBiQTyB3ZgNp_Hnj7HC12OSmZdW92jAyJh-CZzwwZdKwIXm0hcyXv8r2t7IutTb7REh-GuemgtcX638npw",
+    "fallback": "eyJ2IjoyLCJjIjoibGVnYWN5UmVhbHRpbWUiLCJnIjpbIjAwOCIsIjEwMCIsIsOpIl0sInAiOltdLCJzdGFydER0IjoiMjAyNS0xMS0wMlQwNTowMDowMC4wMDBaIiwiZW5kRHQiOiIyMDI1LTExLTAyVDA2OjAwOjAwLjAwMFoiLCJyb2xsdXAiOiIxNS1taW51dGUifQ"
+  }
+]
