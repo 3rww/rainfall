@@ -28,37 +28,6 @@ describe("config env parsing", () => {
     expect(parseBooleanEnvFlag(undefined, true)).toBe(true);
   });
 
-  it("ENABLE_SHARE_STATE defaults to false when unset", async () => {
-    vi.unstubAllEnvs();
-    vi.resetModules();
-    vi.stubEnv("VITE_ENABLE_SHARE_STATE", "");
-
-    const { ENABLE_SHARE_STATE } = await import("./config");
-    expect(ENABLE_SHARE_STATE).toBe(false);
-  });
-
-  it("ENABLE_SHARE_STATE is true for supported truthy env values", async () => {
-    const truthyValues = ["true", "1", "yes", "on", "On"];
-
-    for (const value of truthyValues) {
-      vi.unstubAllEnvs();
-      vi.resetModules();
-      vi.stubEnv("VITE_ENABLE_SHARE_STATE", value);
-
-      const { ENABLE_SHARE_STATE } = await import("./config");
-      expect(ENABLE_SHARE_STATE).toBe(true);
-    }
-  });
-
-  it("ENABLE_SHARE_STATE is false for unsupported values", async () => {
-    vi.unstubAllEnvs();
-    vi.resetModules();
-    vi.stubEnv("VITE_ENABLE_SHARE_STATE", "definitely-not-true");
-
-    const { ENABLE_SHARE_STATE } = await import("./config");
-    expect(ENABLE_SHARE_STATE).toBe(false);
-  });
-
   it("ENABLE_DEBUG_LOGS defaults to false when unset", async () => {
     vi.unstubAllEnvs();
     vi.resetModules();

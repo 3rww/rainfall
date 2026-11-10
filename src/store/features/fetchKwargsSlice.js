@@ -72,6 +72,13 @@ const fetchKwargsSlice = createSlice({
   name: 'fetchKwargs',
   initialState: initialState.fetchKwargs,
   reducers: {
+    importRainfallQuery: (state, { payload }) => {
+      const { contextType, startDt, endDt, rollup, sensorLocations } = payload;
+      Object.assign(state[contextType].active, {
+        startDt, endDt, rollup,
+        sensorLocations
+      });
+    },
     pickRainfallDateTimeRange: (state, action) => {
       const { contextType, startDt, endDt } = action.payload;
       if (!state[contextType]) {
@@ -211,6 +218,7 @@ const fetchKwargsSlice = createSlice({
 });
 
 export const {
+  importRainfallQuery,
   pickRainfallDateTimeRange,
   pickSensor,
   pickInterval,
