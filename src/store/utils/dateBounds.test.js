@@ -17,25 +17,27 @@ describe("resolveAvailableBounds", () => {
   const now = "2026-02-11T12:00:00Z";
   const rainfallMinDate = "2000-04-01T00:00:00Z";
 
-  it("uses latest realtime-radar/gauge key for legacyRealtime", () => {
+  it("uses observed intersection of realtime radar and gauge", () => {
     const bounds = resolveAvailableBounds({
       contextType: CONTEXT_TYPES.legacyRealtime,
       rollup: "15-minute",
       latest: {
         "realtime-radar": "2026-02-10T10:00:00Z",
-        "realtime-gauge": "2026-02-11T10:00:00Z"
+        "realtime-gauge": "2026-02-11T10:00:00Z",
+        "earliest-realtime-radar": "2025-02-03T05:00:00Z",
+        "earliest-realtime-gauge": "2020-01-01T05:00:00Z"
       },
       rainfallMinDate,
       now
     });
 
-    expect(bounds.max.toISOString()).toBe(toDateTime("2026-02-11T10:00:00Z").toISOString());
+    expect(bounds.max.toISOString()).toBe(toDateTime("2026-02-10T10:00:00Z").toISOString());
     expect(bounds.min.toISOString()).toBe(
-      toDateTime("2026-02-11T10:00:00Z").subtract(1, "year").startOf("month").toISOString()
+      toDateTime("2025-02-03T05:00:00Z").toISOString()
     );
   });
 
-  it("falls back to now for legacyRealtime max when realtime keys are missing", () => {
+  it("marks realtime unavailable when observed bounds are missing", () => {
     const bounds = resolveAvailableBounds({
       contextType: CONTEXT_TYPES.legacyRealtime,
       rollup: "15-minute",
@@ -44,8 +46,7 @@ describe("resolveAvailableBounds", () => {
       now
     });
 
-    expect(bounds.max.toISOString()).toBe(toDateTime(now).toISOString());
-    expect(bounds.min.toISOString()).toBe(toDateTime(now).subtract(1, "year").startOf("month").toISOString());
+    expect(bounds).toEqual({ min: null, max: null, available: false });
   });
 
   it("uses parquet bounds even when the configured minimum is later", () => {

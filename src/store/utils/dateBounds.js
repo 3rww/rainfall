@@ -140,11 +140,15 @@ export const resolveAvailableBounds = ({
   let max = nowMoment.clone();
 
   if (contextType === CONTEXT_TYPES.legacyRealtime) {
-    max = latestMoment(
-      latestValues["realtime-radar"],
-      latestValues["realtime-gauge"]
-    ) || nowMoment.clone();
-    min = max.clone().subtract(1, "year").startOf("month");
+    // The realtime view combines radar and gauge: use their observed intersection.
+    const minima = ['radar', 'gauge'].map((sensor) => toValidMoment(latestValues[`earliest-realtime-${sensor}`]));
+    const maxima = ['radar', 'gauge'].map((sensor) => toValidMoment(latestValues[`latest-realtime-${sensor}`] || latestValues[`realtime-${sensor}`]));
+    if ([...minima, ...maxima].some((v) => !v)) {
+      return { min: null, max: null, available: false };
+    }
+    min = latestMoment(...minima);
+    max = maxima.reduce((earliest, v) => v.isBefore(earliest) ? v : earliest);
+    if (min.isAfter(max)) return { min: null, max: null, available: false };
   }
 
   if (min.isAfter(max)) {

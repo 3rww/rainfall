@@ -12,7 +12,7 @@ const payload = { v: 2, c: 'legacyGarr', g: [], p: ['100'], rollup: '15-minute',
 const raw = value => Buffer.from(JSON.stringify(value)).toString('base64url');
 function fixture() {
   const state = structuredClone(initialState);
-  state.stats.latest = { 'realtime-radar': '2026-01-01T00:00:00Z', 'realtime-gauge': '2026-01-01T00:00:00Z' };
+  state.stats.latest = { 'earliest-realtime-radar': '2025-01-01T00:00:00Z', 'earliest-realtime-gauge': '2025-01-01T00:00:00Z', 'realtime-radar': '2026-01-01T00:00:00Z', 'realtime-gauge': '2026-01-01T00:00:00Z' };
   for (const sensor of ['radar', 'gauge']) for (const resolution of ['5', '15']) {
     state.stats.latest[`earliest-${resolution}min-calibrated-${sensor}`] = '2025-01-01T00:00:00Z';
     state.stats.latest[`latest-${resolution}min-calibrated-${sensor}`] = '2026-01-01T00:00:00Z';
